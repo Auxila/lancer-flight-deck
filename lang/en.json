@@ -1,0 +1,680 @@
+{
+  "LFD": {
+    "Title": "Flight Deck",
+    "Theme": {
+      "Base": "Base",
+      "GMS": "GMS: General Massive Systems"
+    },
+    "Settings": {
+      "Enabled": {
+        "Name": "Show Flight Deck",
+        "Hint": "Dock the cockpit HUD for your mech. This setting is yours alone; other players choose for themselves. Alt+C also turns it on and collapses it."
+      },
+      "DockSide": {
+        "Name": "Dock side",
+        "Hint": "Left sits beside the scene controls. Right sits beside the chat notifications.",
+        "Left": "Left",
+        "Right": "Right"
+      },
+      "Theme": {
+        "Name": "Cockpit theme",
+        "Hint": "Match your frame's manufacturer, or pick one. Manufacturers without a theme yet use GMS.",
+        "Auto": "Match frame manufacturer"
+      },
+      "Opacity": {
+        "Name": "Panel opacity",
+        "Hint": "How solid the panel looks while the mouse is elsewhere. It becomes fully solid on hover."
+      },
+      "ReduceMotion": {
+        "Name": "Reduce motion",
+        "Hint": "Stops flashing, shaking and scanline effects. Auto follows your operating system setting.",
+        "Auto": "Follow system setting",
+        "On": "Always reduce",
+        "Off": "Full motion"
+      },
+      "Boot": {
+        "Name": "Cold boot sequence",
+        "Hint": "A two-second, skippable boot screen when your mech first links, when combat starts, and after a Shut Down ends."
+      },
+      "Audio": {
+        "Name": "Cockpit audio",
+        "Hint": "Short synthesized cues for Danger Zone, stress and structure hits, Lock On, Exposed and meltdowns. Only you hear them, through Foundry's Interface volume."
+      },
+      "Volume": {
+        "Name": "Cockpit audio volume",
+        "Hint": "Scales the cues on top of Foundry's Interface volume slider."
+      },
+      "DangerHum": {
+        "Name": "Danger Zone afterglow",
+        "Hint": "After the spool-up, a low reactor hum that fades away over about twelve seconds."
+      },
+      "Offer": {
+        "Name": "Offer Flight Deck to players",
+        "Hint": "Ask each player once, when they first log in with a mech, whether they want the panel. They can change it any time."
+      },
+      "Scale": {
+        "Name": "Panel size",
+        "Hint": "Scales the whole panel evenly. You can also drag the grip in its bottom corner (double-click it to reset)."
+      },
+      "PlayerLockOn": {
+        "Name": "Players can Lock On tokens they do not own",
+        "Hint": "Lock On is the one condition players put on enemies. With this on, the active GM applies a player's Lock On to the token they target. All other conditions only ever apply to tokens the player owns."
+      },
+      "TokenFx": {
+        "Name": "Condition effects on tokens",
+        "Hint": "Show Flight Deck's condition visuals on tokens (Lock On reticle, Slowed web, Immobile chains, Stunned sparks, Prone tip-over and more). Drawn on your screen only, so this is your choice alone."
+      },
+      "TokenFxOpacity": {
+        "Name": "Condition effect strength",
+        "Hint": "How strongly Flight Deck's token overlays show."
+      },
+      "ArtFx": {
+        "Name": "Condition effects on token art (Token Magic FX)",
+        "Hint": "Exposed burns red-hot, Shredded trails white smoke, Jammed and Impaired crackle with electricity. These filters are saved on the token, so everyone sees them; the GM's client applies them. Turning this off removes them."
+      },
+      "JammedSource": {
+        "Name": "Jammed effect",
+        "Hint": "Flight Deck's Jammed crawls with bright electricity and keeps the token art visible. Lancer QoL's version tints the token near-black blue. With Flight Deck chosen, Flight Deck removes QoL's Jammed filter where both would stack.",
+        "FlightDeck": "Flight Deck electricity (recommended)",
+        "Qol": "Lancer QoL"
+      },
+      "SpendActions": {
+        "Name": "HUD menus spend actions",
+        "Hint": "When an action from a HUD menu goes through (an attack that isn't cancelled, a card that posts), mark its slot spent on the mech's action tracker. LANCER resets the tracker at the start of each turn.",
+        "Combat": "Only in an active combat",
+        "Always": "Always",
+        "Never": "Never"
+      },
+      "NpcDeck": {
+        "Name": "NPC Deck (GM)",
+        "Hint": "A board of every NPC in the fight, for GMs: health, heat, conditions, activations, who's targeting each, and their features one click away. Alt+N collapses it."
+      },
+      "NpcDeckSide": {
+        "Name": "NPC Deck side",
+        "Hint": "Which side of the screen the NPC Deck docks on."
+      },
+      "NpcDeckScale": {
+        "Name": "NPC Deck size",
+        "Hint": "Scale the whole NPC Deck. You can also drag its corner grip."
+      }
+    },
+    "Keybinding": {
+      "Toggle": {
+        "Name": "Toggle Flight Deck",
+        "Hint": "Turns the panel on if it is off; otherwise collapses or expands it."
+      },
+      "Menu": {
+        "Hint": "Open or close this Flight Deck HUD menu.",
+        "invade": "HUD: Invade",
+        "move": "HUD: Movement",
+        "quick": "HUD: Quick actions",
+        "full": "HUD: Full actions",
+        "reaction": "HUD: Reactions",
+        "core": "HUD: Frame & core",
+        "systems": "HUD: Systems available"
+      },
+      "NpcDeck": {
+        "Name": "NPC Deck",
+        "Hint": "GM: show the NPC Deck, then collapse or expand it."
+      }
+    },
+    "Offer": {
+      "Title": "Flight Deck",
+      "Body": "Flight Deck is a cockpit HUD for your mech: heat and Danger Zone, your next Overcharge cost, structure and stress odds, and warning lights, with short optional sound cues. Turn it on? You can change this any time in Configure Settings, or with Alt+C.",
+      "Yes": "Turn it on",
+      "No": "Not now"
+    },
+    "Header": {
+      "Standby": "Standby",
+      "StandbyHint": "Select your mech's token, or set your character in Player Configuration.",
+      "NoFrame": "No frame installed",
+      "NoPilot": "No pilot linked",
+      "Pilot": "Pilot",
+      "OpenSheet": "Open mech sheet",
+      "Mute": "Mute cockpit audio",
+      "Unmute": "Unmute cockpit audio",
+      "Collapse": "Collapse (Alt+C)",
+      "Expand": "Expand Flight Deck (Alt+C)",
+      "LinkOk": "Link nominal",
+      "LinkJammed": "Link jammed",
+      "Activation": "Activation"
+    },
+    "Hull": {
+      "Title": "Hull",
+      "HP": "Hit points",
+      "Armor": "Armor",
+      "Overshield": "OS",
+      "Burn": "Burn"
+    },
+    "Stat": {
+      "Evasion": "Eva",
+      "EDef": "E-Def",
+      "Speed": "Spd",
+      "Sensors": "Sens",
+      "Save": "Save",
+      "Tech": "Tech",
+      "Hull": "HULL",
+      "Engineering": "ENGINEERING"
+    },
+    "Heat": {
+      "Title": "Reactor heat",
+      "Gauge": "Heat",
+      "DangerAt": "Danger Zone at {at}",
+      "InDanger": "Danger Zone",
+      "OverCap": "Over Heat Cap: stress check",
+      "NoCap": "No Heat Cap (no frame installed)",
+      "NextOvercharge": "Next Overcharge",
+      "Ladder": "Overcharge ladder",
+      "OcRange": "Heat after: {range}",
+      "OcOverCap": "{pct} over cap"
+    },
+    "Integrity": {
+      "Title": "Integrity",
+      "Structure": "Structure",
+      "Stress": "Stress",
+      "NextCheck": "Next check {dice}",
+      "Loss": "Loss {pct}",
+      "TipHeader": "Next check: {dice}, lowest die counts",
+      "CheckNote": "+{pct} more if the {stat} check fails",
+      "NextHitLethal": "Next structure loss destroys the mech",
+      "NextOverheatLethal": "Next stress loss destroys the mech",
+      "LethalTipStructure": "One structure left: the next structure damage destroys the mech, no roll.",
+      "LethalTipStress": "One stress left: the next stress damage ends the mech, no roll.",
+      "FrameLost": "Mech destroyed",
+      "ReactorLost": "Reactor lost"
+    },
+    "Bands": {
+      "glancing": "Glancing Blow",
+      "trauma": "System Trauma",
+      "direct": "Direct Hit",
+      "crushing": "Crushing Hit",
+      "shunt": "Emergency Shunt",
+      "destabilized": "Destabilized Power Plant",
+      "meltdown": "Meltdown",
+      "irreversible": "Irreversible Meltdown"
+    },
+    "Caution": {
+      "Title": "Master caution panel",
+      "On": "on",
+      "Off": "off"
+    },
+    "Tile": {
+      "exposed": "Exposed",
+      "shredded": "Shredded",
+      "stunned": "Stunned",
+      "meltdown": "Meltdown",
+      "lockon": "Lock On",
+      "jammed": "Jammed",
+      "impaired": "Impaired",
+      "dangerzone": "Danger Zone",
+      "slowed": "Slowed",
+      "immobilized": "Immobile",
+      "engaged": "Engaged",
+      "prone": "Prone",
+      "burn": "Burn",
+      "overshield": "Overshield",
+      "Hidden": "Hidden",
+      "Invisible": "Invisible",
+      "HiddenInvisible": "Hid + Invis",
+      "shutdown": "Shut Down"
+    },
+    "Action": {
+      "Title": "Actions",
+      "Bus": "Action economy",
+      "Ready": "available",
+      "Spent": "spent",
+      "Move": "Move",
+      "Quick": "Quick",
+      "Full": "Full",
+      "Reaction": "React",
+      "Core": "Core",
+      "Overcharge": "Overcharge",
+      "Stabilize": "Stabilize",
+      "CorePower": "Core Power",
+      "CoreSpent": "Spent",
+      "NoCore": "No frame",
+      "Invade": "Invade",
+      "HintOpen": "Click: open menu",
+      "HintToggle": "Click: open menu · Right-click: mark spent / available"
+    },
+    "Boot": {
+      "Skip": "Click to skip"
+    },
+    "Banner": {
+      "CoreOnline": "Core online",
+      "SignalLost": "Signal lost"
+    },
+    "Error": {
+      "NotOwner": "Flight Deck: you don't own this mech.",
+      "NoFrame": "Flight Deck: this mech has no frame installed.",
+      "Overcharge": "Flight Deck: the Overcharge flow failed. See the console (F12).",
+      "Stabilize": "Flight Deck: the Stabilize flow failed. See the console (F12).",
+      "Core": "Flight Deck: the Core Power flow failed. See the console (F12).",
+      "Action": "Flight Deck: that action failed. See the console (F12)."
+    },
+    "Move": {
+      "Hint": "Drag to move. Drop at a screen edge to dock.",
+      "Dock": "Dock the panel",
+      "DockHere": "Dock here"
+    },
+    "Resize": {
+      "Label": "Panel size",
+      "Hint": "Drag to resize · double-click to reset · arrow keys adjust"
+    },
+    "Edit": {
+      "Hint": "Type a value, or +n / -n to adjust. Enter applies, Esc cancels.",
+      "Invalid": "Flight Deck: enter a number, or +n / -n.",
+      "Minus": "Subtract {n}",
+      "Plus": "Add {n}"
+    },
+    "Apply": {
+      "NoSelection": "Select your token to apply conditions.",
+      "ToSelected": "Apply to",
+      "Many": "{n} tokens",
+      "HintToggle": "Click: toggle {condition} on {target}",
+      "HintCounter": "{condition} on {target}: click +1 · right-click −1 · Shift+click clears",
+      "HintHidden": "{target}: click toggles Hidden · right-click toggles Invisible",
+      "HintMeltdown": "{target}: click starts or clears a meltdown countdown · right-click ticks it down",
+      "Failed": "Flight Deck: could not apply to {name} ({reason}).",
+      "NotAllowed": "the GM has turned off Lock On for tokens you do not own",
+      "NoGM": "no GM is connected to apply it",
+      "NoTarget": "Target a token (T) to Lock On.",
+      "LockOnTo": "Lock On →",
+      "None": "none",
+      "NotOwned": "you can only apply this condition to tokens you own",
+      "ConditionsHint": "Conditions apply to your selected token(s), or to the mech on this panel when nothing is selected.",
+      "LockOnHint": "Lock On applies to your target(s) (press T over a token), or to your selection when nothing is targeted."
+    },
+    "Meltdown": {
+      "Title": "Reactor meltdown",
+      "Body": "Start a countdown on the selected mech. The panel shows it as T-n; right-click the tile to tick it down at the end of each turn.",
+      "Turns": "Turns until meltdown",
+      "Start": "Start countdown"
+    },
+    "Check": {
+      "SentToPlayer": "Flight Deck: the {kind} check prompt went to {players}, who owns {name}.",
+      "AutomationOff": "Flight Deck: LANCER's structure automation is off, so no {kind} check was started."
+    },
+    "Systems": {
+      "Title": "Systems available",
+      "Button": "Systems available",
+      "ButtonHint": "Your mech's systems: hover for the rules, click to post to chat",
+      "CountLabel": "{ready} of {total} ready",
+      "None": "No systems installed.",
+      "NoneShort": "None",
+      "System": "System",
+      "SP": "{sp} SP",
+      "Uses": "Uses {uses}",
+      "Heat": "Heat {n}",
+      "Trigger": "Trigger:",
+      "ClickHint": "Click to post its full text to chat",
+      "State": {
+        "destroyed": "Destroyed",
+        "cascading": "Cascading",
+        "spent": "No uses"
+      }
+    },
+    "Hud": {
+      "Menu": {
+        "invade": "Invade",
+        "move": "Movement",
+        "quick": "Quick actions",
+        "full": "Full actions",
+        "reaction": "Reactions",
+        "core": "Frame & core",
+        "systems": "Systems available"
+      },
+      "Section": {
+        "basic": "Basic",
+        "quickTech": "Quick tech",
+        "fullTech": "Full tech",
+        "techGear": {
+          "quick": "Tech systems",
+          "full": "Full tech systems"
+        },
+        "gear": {
+          "quick": "Systems & gear",
+          "full": "Systems & gear",
+          "reaction": "Your reactions"
+        },
+        "invadeBasic": "Basic invade",
+        "invadeGear": "Invade options",
+        "moveMode": "Movement mode",
+        "moveActions": "Extra movement",
+        "moveTracker": "Tracker",
+        "core": "Core system",
+        "traits": "Frame traits",
+        "protocol": "Protocols",
+        "free": "Free actions",
+        "systems": "Installed systems",
+        "weapons": "Mounted weapons"
+      },
+      "Econ": {
+        "quick": "{n}/{max} quick",
+        "full": "{n}/{max} full",
+        "reaction": "{n}/{max} reaction",
+        "core": "{n}/{max} core power",
+        "move": "{n}/{max} spaces"
+      },
+      "Spent": {
+        "quick": "No quick actions left this turn.",
+        "full": "No full action left this turn.",
+        "reaction": "Reaction already used this round.",
+        "invade": "No quick action left for an invade.",
+        "move": "No movement left this turn."
+      },
+      "Readout": {
+        "Tech": "Tech atk",
+        "Sensors": "Sensors",
+        "Target": "Target",
+        "Speed": "Speed",
+        "Mode": "Mode",
+        "Attacks": "Attacks",
+        "Status": "Status",
+        "edef": "E-Def",
+        "evasion": "Evasion"
+      },
+      "NoTarget": "None",
+      "Targets": "{name} +{n}",
+      "NoToken": "No token on this scene",
+      "ShutDown": "Shut down",
+      "State": {
+        "destroyed": "Destroyed",
+        "spent": "No uses",
+        "unloaded": "Reload",
+        "cascading": "Cascading",
+        "used": "Used"
+      },
+      "TechAttack": "Tech attack",
+      "Init": "Init:",
+      "Mount": "{mount} mount",
+      "OnAttack": "On attack:",
+      "OnHit": "On hit:",
+      "OnCrit": "On crit:",
+      "NeedsTarget": "Target a token first.",
+      "Hint": {
+        "chat": "Click: post to chat",
+        "basicAttack": "Click: roll the attack",
+        "weapons": "Click: choose a weapon",
+        "invade": "Click: roll the invade",
+        "lockon": "Click: Lock On your targets",
+        "scan": "Click: scan your target",
+        "selfStatus": "Click: apply to your mech and post",
+        "meltdown": "Click: start the countdown",
+        "stabilize": "Click: stabilize",
+        "overcharge": "Click: overcharge",
+        "view": "Click: open the Invade menu",
+        "Activate": "Click: activate",
+        "Tech": "Click: roll the tech attack",
+        "attack": "Click: roll the attack",
+        "core": "Click: activate core power",
+        "moveMode": "Click: set your token's movement",
+        "tracker": "Click: reset"
+      },
+      "MoveMode": "Movement mode",
+      "ResetMove": "Reset movement",
+      "ResetMoveShort": "Reset",
+      "ResetMoveHint": "Set remaining movement back to your Speed.",
+      "Tracker": "Action tracker",
+      "CorePower": "Core power",
+      "CorePassive": "Core passive",
+      "Trait": "Frame trait",
+      "ProtocolReady": "Protocol ready",
+      "ProtocolSpent": "Protocol used",
+      "Activation": {
+        "quick": "Quick action",
+        "full": "Full action",
+        "reaction": "Reaction",
+        "free": "Free action",
+        "protocol": "Protocol"
+      },
+      "WeaponNote": {
+        "skirmish": "One weapon, plus an Auxiliary on the same mount.",
+        "barrage": "Two weapons, or one Superheavy.",
+        "overwatch": "Skirmish a hostile as it starts moving in your Threat."
+      },
+      "NoWeapons": "No weapons mounted.",
+      "Footer": {
+        "actions": "Hover ▸ detail · Click ▸ execute · Esc ▸ close",
+        "systems": "Hover ▸ rules · Click ▸ post full text to chat",
+        "weapons": "Click ▸ roll attack · Esc ▸ back"
+      },
+      "Empty": "Nothing here for this mech.",
+      "Back": "Back",
+      "Close": "Close",
+      "Sent": "Sent",
+      "Ready": "ready",
+      "Kind": {
+        "system": "System",
+        "weapon": "Weapon",
+        "mod": "Weapon mod",
+        "trait": "Frame trait",
+        "core": "Core system",
+        "talent": "Talent",
+        "corebonus": "Core bonus"
+      },
+      "MoveModeText": "Sets how your token's next move is measured and drawn on the ruler.",
+      "MoveModes": {
+        "walk": "Standard movement.",
+        "climb": "Climbing costs double movement.",
+        "crawl": "Crawling costs double movement.",
+        "jump": "Jumping costs double movement.",
+        "teleport": "For abilities that teleport you: the move isn't blocked by anything in between.",
+        "blink": "For movement that teleports you: the move isn't blocked by anything in between.",
+        "ignore": "Moves without terrain costs.",
+        "fly": "Flying."
+      },
+      "UsedRound": "Already used this round. Each reaction can be taken once per round.",
+      "OneTarget": "This targets one character: target just one token.",
+      "OneTargetHint": "Target exactly one token first."
+    },
+    "Basic": {
+      "skirmish": {
+        "Name": "Skirmish",
+        "Short": "Skirmish",
+        "Text": "Attack with one weapon. If it isn't Superheavy, you may also fire one Auxiliary weapon on the same mount, at the same or a different target, without bonus damage."
+      },
+      "boost": {
+        "Name": "Boost",
+        "Short": "Boost",
+        "Text": "Move up to your Speed again. It's extra movement on top of your standard move, and anything that triggers on a Boost triggers."
+      },
+      "grapple": {
+        "Name": "Grapple",
+        "Short": "Grapple",
+        "Text": "Make a melee attack against an adjacent character. On a hit you're grappling: you're both Engaged, neither of you can Boost or take reactions, and the larger side drags the smaller when it moves. Either side breaks free with a contested Hull check."
+      },
+      "ram": {
+        "Name": "Ram",
+        "Short": "Ram",
+        "Text": "Make a melee attack against an adjacent character your Size or smaller. On a hit, knock them Prone and push them 1 space directly away from you."
+      },
+      "hide": {
+        "Name": "Hide",
+        "Short": "Hide",
+        "Text": "If no hostile has line of sight to you, or you're in cover from all of them, you become Hidden. It ends when you attack, lose that cover, or someone finds you with Search."
+      },
+      "search": {
+        "Name": "Search",
+        "Short": "Search",
+        "Text": "Look for Hidden characters within your Sensors: make a contested Systems check against their Agility. Win, and they're revealed."
+      },
+      "prepare": {
+        "Name": "Prepare",
+        "Short": "Prepare",
+        "Text": "Pick another quick action and a trigger. Until the start of your next turn, when the trigger happens you may take that action as a reaction."
+      },
+      "eject": {
+        "Name": "Eject",
+        "Short": "Eject",
+        "Text": "Your pilot bails out, flying up to 6 spaces in a direction of your choice. The empty mech is left Impaired."
+      },
+      "shutdown": {
+        "Name": "Shut Down",
+        "Short": "Shut down",
+        "Text": "Power down. All heat and Exposed clear, and a cascading NHP is brought back under control. Until you Boot Up, the mech is Stunned but immune to tech actions and attacks."
+      },
+      "selfdestruct": {
+        "Name": "Self-Destruct",
+        "Short": "Self-destruct",
+        "Text": "Overload the reactor. At the end of your next turn, or the turn after (your choice), the mech is destroyed in a reactor meltdown that blasts everything nearby. Get out first."
+      },
+      "bolster": {
+        "Name": "Bolster",
+        "Short": "Bolster",
+        "Text": "Choose a character within Sensors. Their next skill check or save gets +2 Accuracy. A character benefits from only one Bolster at a time."
+      },
+      "lockon": {
+        "Name": "Lock On",
+        "Short": "Lock on",
+        "Text": "Choose a character within Sensors and line of sight: they gain Lock On. The next attacker can clear it for +1 Accuracy, and some weapons and systems use it for more."
+      },
+      "scan": {
+        "Name": "Scan",
+        "Short": "Scan",
+        "Text": "Choose a character or object within Sensors and line of sight and learn something hidden about it: its stats, a weapon, a system, or its current state."
+      },
+      "invade": {
+        "Name": "Invade",
+        "Short": "Invade",
+        "Text": "Make a tech attack against a character within Sensors and line of sight. On a hit, they take 2 heat and suffer an invade option: Fragment Signal, or one from your systems."
+      },
+      "barrage": {
+        "Name": "Barrage",
+        "Short": "Barrage",
+        "Text": "Attack with two weapons, or with one Superheavy weapon."
+      },
+      "improvised": {
+        "Name": "Improvised Attack",
+        "Short": "Improvise",
+        "Text": "Make a melee attack with whatever's at hand: a fist, a girder, a car. On a hit it deals 1d6 kinetic damage."
+      },
+      "stabilize": {
+        "Name": "Stabilize",
+        "Short": "Stabilize",
+        "Text": "Either cool down (clear all heat and Exposed) or spend 1 Repair to restore all HP. Then reload your Loading weapons, clear Burn, or clear a condition on you or an adjacent ally. The system walks you through it."
+      },
+      "disengage": {
+        "Name": "Disengage",
+        "Short": "Disengage",
+        "Text": "Until the end of your turn, you ignore engagement and your movement doesn't provoke reactions."
+      },
+      "bootup": {
+        "Name": "Boot Up",
+        "Short": "Boot up",
+        "Text": "Bring your Shut Down mech back online."
+      },
+      "mount": {
+        "Name": "Mount / Dismount",
+        "Short": "Mount",
+        "Text": "Climb into an adjacent mech's cockpit, or climb out of yours into an adjacent space."
+      },
+      "jockey": {
+        "Name": "Jockey",
+        "Short": "Jockey",
+        "Text": "On foot only: climb onto an adjacent mech and make a contested Hull check. Win, and you hang on, choosing each turn to distract it, shred its systems or damage it, until you're thrown off."
+      },
+      "fulltech": {
+        "Name": "Full Tech",
+        "Short": "Full tech",
+        "Text": "Take two quick tech actions (the same one twice is fine), or one full tech action from your systems."
+      },
+      "brace": {
+        "Name": "Brace",
+        "Short": "Brace",
+        "Text": "Once per round, when you're hit and damage has been rolled: you're Resistant to all damage, heat and burn from that attack, and other attacks against you take +1 Difficulty until the end of your next turn. On that turn you can take only one quick action and no reactions."
+      },
+      "overwatch": {
+        "Name": "Overwatch",
+        "Short": "Overwatch",
+        "Text": "Once per round, when a hostile starts any movement inside one of your weapons' Threat: Skirmish them with that weapon before they move."
+      },
+      "fragment": {
+        "Name": "Fragment Signal",
+        "Short": "Fragment",
+        "Text": "The basic invade option. On a hit, the target becomes Impaired and Slowed until the end of their next turn."
+      },
+      "overcharge": {
+        "Name": "Overcharge",
+        "Short": "Overcharge",
+        "Text": "Free action, once per turn: take one extra quick action, then take heat from your Overcharge track."
+      }
+    },
+    "Chat": {
+      "Init": "Init",
+      "Trigger": "Trigger",
+      "Effect": "Effect",
+      "Deployable": "Deployable",
+      "Deploy": "Deploy: {activation}",
+      "Size": "Size {n}"
+    },
+    "Npc": {
+      "Title": "NPC Deck",
+      "Round": "Round {n}",
+      "Scene": "Scene",
+      "CountLabel": "{alive} of {total} NPCs still up",
+      "ToAct": "{n} to act",
+      "Expand": "Expand the NPC Deck (Alt+N)",
+      "Collapse": "Collapse the NPC Deck (Alt+N)",
+      "Empty": "No NPCs in the combat or on this scene.",
+      "SelectHint": "Click: select and look · Shift-click: add to selection · Double-click: sheet",
+      "TargetedBy": "Targeted by {names}",
+      "Activations": "Activations left this round",
+      "Structure": "Structure",
+      "Stress": "Stress",
+      "Burn": "Burn",
+      "Overshield": "Overshield",
+      "BurnShort": "BURN {n}",
+      "OverShort": "OS {n}",
+      "Heat": "Heat",
+      "Conditions": "Conditions",
+      "Activate": "Activate",
+      "EndTurn": "End turn",
+      "Recharge": "Recharge",
+      "Sheet": "Sheet",
+      "Footer": "Click a row ▸ details · Hover a feature ▸ full text · Click ▸ use · Right-click ▸ post",
+      "Attack": "Attack",
+      "Accuracy": "Accuracy",
+      "Difficulty": "Difficulty",
+      "Type": {
+        "Weapon": "Weapons",
+        "Tech": "Tech",
+        "System": "Systems",
+        "Reaction": "Reactions",
+        "Trait": "Traits"
+      },
+      "State": {
+        "destroyed": "Destroyed",
+        "spent": "No uses left",
+        "uncharged": "Waiting on a recharge roll"
+      },
+      "Hint": {
+        "attack": "Click: attack · Right-click: post to chat",
+        "tech": "Click: tech attack · Right-click: post to chat",
+        "use": "Click: use (posts its card) · Right-click: post text only"
+      },
+      "ToolTitle": "NPC Deck (Alt+N)",
+      "Outside": "Not in combat",
+      "OutsideHint": "Selected on the map; this NPC isn't in the combat.",
+      "Init": {
+        "Title": "Initiative",
+        "Ready": "{n} to act",
+        "Done": "{n} done",
+        "DoneLabel": "Done",
+        "NoActivations": "{name} has no activations left this round.",
+        "State": {
+          "acting": "acting now",
+          "ready": "still to act",
+          "done": "done this round",
+          "defeated": "defeated"
+        },
+        "Tip": {
+          "acting": "<b>{name}</b> is acting<br>Hover: look here · Click: select · Double-click: look at it",
+          "ready": "<b>{name}</b>: {left}/{max} activations left<br>Hover: look here · Click: select · Double-click: look at it · Right-click: start their turn",
+          "done": "<b>{name}</b>: done this round<br>Hover: look here · Click: select · Double-click: look at it",
+          "defeated": "<b>{name}</b>: defeated<br>Hover: look here · Click: select"
+        }
+      }
+    }
+  }
+}

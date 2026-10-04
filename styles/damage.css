@@ -1,0 +1,479 @@
+/* ==========================================================================
+   Battle damage: cracked glass for lost structure, drained colour and warning
+   lights for lost stress, steam through the cracks when both run low.
+   Drawn by src/ui/damage/DamageLayer.js.
+   ========================================================================== */
+
+.lfd-themed {
+  --lfd-crack: 236 243 255;
+  --lfd-crack-hot: 255 244 222;
+  --lfd-crack-ember: 255 178 92;
+  --lfd-steam-warn: #ffb03a;
+}
+
+#lancer-flight-deck .lfd-damage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#lancer-flight-deck.is-collapsed .lfd-damage,
+#lancer-flight-deck.is-standby .lfd-damage {
+  display: none;
+}
+
+#lancer-flight-deck .lfd-damage > * {
+  position: absolute;
+  inset: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Cracks
+   -------------------------------------------------------------------------- */
+
+/* Screen blending: a crack can only brighten what's under it, so text stays legible */
+#lancer-flight-deck .lfd-cracks {
+  /* Sized to the geometry (it may outgrow a panel that shrank; the layer clips it) */
+  inset: 0 auto auto 0;
+  overflow: visible;
+  mix-blend-mode: screen;
+}
+
+#lancer-flight-deck .lfd-crack,
+#lancer-flight-deck .lfd-crack-glow {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#lancer-flight-deck .lfd-crack {
+  stroke: rgb(var(--lfd-crack) / 0.5);
+  stroke-width: calc(var(--w, 1) * 0.95px);
+}
+
+#lancer-flight-deck .lfd-crack-glow {
+  stroke: rgb(var(--lfd-crack) / 0.075);
+  stroke-width: calc(var(--w, 1) * 3.4px);
+}
+
+#lancer-flight-deck .lfd-web .lfd-crack {
+  stroke: rgb(var(--lfd-crack) / 0.5);
+}
+
+#lancer-flight-deck .lfd-facets polygon {
+  fill: rgb(var(--lfd-crack) / var(--a, 0.04));
+}
+
+/* Forming: the crack races out from the impact, white-hot, then cools to resting */
+#lancer-flight-deck .lfd-fracture.is-forming .lfd-crack,
+#lancer-flight-deck .lfd-fracture.is-forming .lfd-crack-glow {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation:
+    lfd-crack-draw var(--dur) cubic-bezier(0.12, 0.8, 0.3, 1) calc(var(--t0, 0ms) + var(--delay)) forwards,
+    lfd-crack-cool 1500ms ease-out calc(var(--t0, 0ms) + var(--delay)) both;
+}
+
+#lancer-flight-deck .lfd-fracture.is-forming .lfd-crack-glow {
+  animation:
+    lfd-crack-draw var(--dur) cubic-bezier(0.12, 0.8, 0.3, 1) calc(var(--t0, 0ms) + var(--delay)) forwards,
+    lfd-glow-cool 1500ms ease-out calc(var(--t0, 0ms) + var(--delay)) both;
+}
+
+/* Heat bloom: the forming crack glows like overheated metal, then the glow dies */
+#lancer-flight-deck .lfd-fracture.is-forming .lfd-main {
+  animation: lfd-bloom 1600ms ease-out calc(var(--t0, 0ms)) both;
+}
+
+@keyframes lfd-bloom {
+  0% { filter: drop-shadow(0 0 2.5px rgb(var(--lfd-crack-ember) / 0.9)); }
+  45% { filter: drop-shadow(0 0 1.5px rgb(var(--lfd-crack-ember) / 0.5)); }
+  100% { filter: drop-shadow(0 0 0 rgb(var(--lfd-crack-ember) / 0)); }
+}
+
+#lancer-flight-deck .lfd-fracture.is-forming .lfd-facets polygon {
+  animation: lfd-facet-in 500ms ease-out calc(var(--t0, 0ms) + 60ms) both;
+}
+
+/* Mending: each crack zips closed back toward its impact, faintly tinted, then the
+   rest of the fracture fades */
+#lancer-flight-deck .lfd-fracture.is-mending {
+  animation: lfd-mend 1100ms ease-in forwards;
+}
+
+#lancer-flight-deck .lfd-fracture.is-mending :is(.lfd-crack, .lfd-crack-glow) {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: lfd-crack-undraw 850ms cubic-bezier(0.5, 0, 0.75, 0.5) forwards;
+}
+
+#lancer-flight-deck .lfd-fracture.is-mending .lfd-crack {
+  stroke: color-mix(in srgb, var(--lfd-ok) 45%, rgb(var(--lfd-crack) / 0.55));
+}
+
+@keyframes lfd-crack-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes lfd-crack-cool {
+  0% { stroke: rgb(var(--lfd-crack-hot) / 1); }
+  35% { stroke: rgb(var(--lfd-crack-hot) / 0.85); }
+  100% { stroke: rgb(var(--lfd-crack) / 0.5); }
+}
+
+@keyframes lfd-glow-cool {
+  0% { stroke: rgb(var(--lfd-crack-ember) / 0.7); }
+  40% { stroke: rgb(var(--lfd-crack-ember) / 0.3); }
+  100% { stroke: rgb(var(--lfd-crack) / 0.075); }
+}
+
+@keyframes lfd-facet-in {
+  0% { opacity: 0; }
+  30% { opacity: 1; fill: rgb(var(--lfd-crack-hot) / 0.22); }
+  100% { opacity: 1; }
+}
+
+@keyframes lfd-crack-undraw {
+  to { stroke-dashoffset: 1; }
+}
+
+@keyframes lfd-mend {
+  0%, 55% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   The impact
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck .lfd-damage-fx {
+  mix-blend-mode: screen;
+}
+
+#lancer-flight-deck .lfd-damage-fx > div {
+  position: absolute;
+  inset: auto;
+  width: 0;
+  height: 0;
+}
+
+#lancer-flight-deck .lfd-impact-flash::before {
+  content: "";
+  position: absolute;
+  left: -70px;
+  top: -70px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(255 255 255 / 0.95) 0 6%,
+    rgb(255 226 170 / 0.75) 16%,
+    color-mix(in srgb, var(--lfd-accent) 30%, transparent) 40%,
+    transparent 70%
+  );
+  animation: lfd-impact-flash 600ms cubic-bezier(0.2, 0.6, 0.35, 1) forwards;
+}
+
+#lancer-flight-deck .lfd-impact-ring::before {
+  content: "";
+  position: absolute;
+  left: -40px;
+  top: -40px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 1.5px solid rgb(255 255 255 / 0.8);
+  animation: lfd-impact-ring 420ms cubic-bezier(0.1, 0.6, 0.3, 1) forwards;
+}
+
+#lancer-flight-deck .lfd-spark::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -0.5px;
+  width: 9px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, rgb(255 255 255), #ffcf6b 40%, transparent);
+  transform-origin: 0 50%;
+  transform: rotate(var(--rot));
+  opacity: 0;
+  animation: lfd-spark 260ms ease-out var(--d) forwards;
+}
+
+/* Shards: the outer element drifts sideways at a steady speed, the inner one falls and
+   tumbles under "gravity" (an ease-in curve), so the arc looks thrown, not slid */
+#lancer-flight-deck .lfd-shard {
+  animation: lfd-shard-x var(--dur) linear var(--d) both;
+}
+
+#lancer-flight-deck .lfd-shard i {
+  position: absolute;
+  left: calc(var(--s) / -2);
+  top: calc(var(--s) / -2);
+  width: var(--s);
+  height: var(--s);
+  background: linear-gradient(135deg, rgb(255 255 255 / 0.9), rgb(190 205 225 / 0.45));
+  clip-path: polygon(0 0, 100% 35%, 40% 100%);
+  animation: lfd-shard-y var(--dur) cubic-bezier(0.45, 0, 0.9, 0.6) var(--d) both;
+}
+
+@keyframes lfd-impact-flash {
+  0% { opacity: 1; transform: scale(0.2); }
+  18% { opacity: 1; transform: scale(0.85); }
+  100% { opacity: 0; transform: scale(1.6); }
+}
+
+@keyframes lfd-impact-ring {
+  0% { opacity: 0.9; transform: scale(0.1); }
+  100% { opacity: 0; transform: scale(2.3); }
+}
+
+@keyframes lfd-spark {
+  0% { opacity: 1; translate: 0 0; }
+  100% { opacity: 0; translate: var(--dx) var(--dy); }
+}
+
+@keyframes lfd-shard-x {
+  from { transform: translateX(0); }
+  to { transform: translateX(var(--dx)); }
+}
+
+@keyframes lfd-shard-y {
+  0% { opacity: 0; transform: translateY(0) rotate(0); }
+  8% { opacity: 1; }
+  75% { opacity: 0.8; }
+  100% { opacity: 0; transform: translateY(var(--dy)) rotate(var(--rot)); }
+}
+
+/* The whole screen jolts on impact: a faint white pop, and the readouts tear into RGB */
+#lancer-flight-deck .lfd-damage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: #fff;
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+
+#lancer-flight-deck .lfd-damage.is-impact::after {
+  animation: lfd-white-pop 220ms ease-out;
+}
+
+@keyframes lfd-white-pop {
+  0% { opacity: 0.16; }
+  100% { opacity: 0; }
+}
+
+/* Stuck pixels near each impact */
+#lancer-flight-deck .lfd-pixels rect {
+  fill: rgb(var(--c) / 0.55);
+}
+
+#lancer-flight-deck .lfd-fracture.is-forming .lfd-pixels rect {
+  animation: lfd-pixel-on 900ms steps(1) calc(var(--t0, 0ms) + 120ms) both;
+}
+
+@keyframes lfd-pixel-on {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  30% { opacity: 0.2; }
+  45%, 100% { opacity: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   Stress: drained colour, warning lights, brownouts
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-stress-1 { --lfd-sat: 0.84; }
+#lancer-flight-deck.lfd-stress-2 { --lfd-sat: 0.68; }
+#lancer-flight-deck.lfd-stress-3 { --lfd-sat: 0.52; }
+
+/* Shut Down and Destroyed have their own filters on the body plates; those win */
+#lancer-flight-deck.lfd-stressed:not(.is-shutdown, .is-destroyed) .lfd-plate,
+#lancer-flight-deck.lfd-stressed:is(.is-shutdown, .is-destroyed) .lfd-plate:not(.lfd-body) {
+  /* No transition: the brownout masks the change, and the impact tear must snap off */
+  filter: saturate(var(--lfd-sat, 1));
+}
+
+/* The RGB tear of an impact (after the stress rule: same specificity, so this wins) */
+#lancer-flight-deck.is-impact.is-impact .lfd-plate {
+  filter: saturate(var(--lfd-sat, 1)) drop-shadow(2px 0 0 rgb(255 40 90 / 0.45)) drop-shadow(-2px 0 0 rgb(40 220 255 / 0.45));
+}
+
+/* Emergency lighting: a faint amber wash creeping in from the bezel */
+#lancer-flight-deck .lfd-damage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--lfd-steam-warn) 16%, transparent), transparent 9%),
+    linear-gradient(270deg, color-mix(in srgb, var(--lfd-steam-warn) 16%, transparent), transparent 9%);
+  mix-blend-mode: screen;
+  transition: opacity 1s ease;
+}
+
+#lancer-flight-deck.lfd-stress-1 .lfd-damage::before { animation: lfd-emergency 5.5s ease-in-out infinite; --peak: 0.35; }
+#lancer-flight-deck.lfd-stress-2 .lfd-damage::before { animation: lfd-emergency 4s ease-in-out infinite; --peak: 0.6; }
+#lancer-flight-deck.lfd-stress-3 .lfd-damage::before {
+  animation: lfd-emergency 2.4s ease-in-out infinite;
+  --peak: 0.85;
+  --lfd-steam-warn: var(--lfd-warning);
+}
+
+/* Warning LEDs on the bezel: inside the plates' padding, clear of the readouts */
+#lancer-flight-deck .lfd-warn-leds {
+  z-index: 5;
+  display: none;
+}
+
+#lancer-flight-deck.lfd-stressed .lfd-warn-leds {
+  display: block;
+}
+
+#lancer-flight-deck .lfd-warn-leds i {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--lfd-caution);
+  transform: rotate(45deg);
+  box-shadow: 0 0 5px var(--lfd-caution), 0 0 1px #fff inset;
+  opacity: 0.15;
+  animation: lfd-led 2.8s ease-in-out infinite;
+}
+
+#lancer-flight-deck .lfd-warn-leds .r1 { right: 2px; top: 16%; animation-delay: 0s; }
+#lancer-flight-deck .lfd-warn-leds .r2 { right: 2px; top: 50%; animation-delay: -0.9s; }
+#lancer-flight-deck .lfd-warn-leds .r3 { right: 2px; top: 84%; animation-delay: -1.8s; }
+#lancer-flight-deck .lfd-warn-leds .l1 { left: 2px; top: 33%; animation-delay: -0.45s; }
+#lancer-flight-deck .lfd-warn-leds .l2 { left: 2px; top: 67%; animation-delay: -1.35s; }
+
+/* One LED per stress point lost, then all of them */
+#lancer-flight-deck.lfd-stress-1 .lfd-warn-leds :is(.r2, .r3, .l1, .l2) { display: none; }
+#lancer-flight-deck.lfd-stress-2 .lfd-warn-leds :is(.r3, .l2) { display: none; }
+
+#lancer-flight-deck.lfd-stress-3 .lfd-warn-leds i {
+  background: var(--lfd-warning);
+  box-shadow: 0 0 6px var(--lfd-warning), 0 0 1px #fff inset;
+  animation-duration: 1.2s;
+}
+
+/* Brownout (each stress hit) and, at the last point, the odd flicker */
+#lancer-flight-deck .lfd-dim {
+  z-index: 4;
+  background:
+    linear-gradient(180deg, transparent 0 46%, rgb(255 255 255 / 0.05) 48% 52%, transparent 54%) 0 -100% / 100% 200% no-repeat,
+    #000;
+  opacity: 0;
+}
+
+#lancer-flight-deck.lfd-stress-3 .lfd-dim {
+  animation: lfd-flicker 7.5s steps(1) infinite;
+}
+
+#lancer-flight-deck .lfd-damage.is-brownout .lfd-dim {
+  animation: lfd-brownout 1200ms linear;
+}
+
+@keyframes lfd-emergency {
+  0%, 100% { opacity: calc(var(--peak) * 0.25); }
+  50% { opacity: var(--peak); }
+}
+
+@keyframes lfd-led {
+  0%, 100% { opacity: 0.15; }
+  45%, 55% { opacity: 1; }
+}
+
+@keyframes lfd-brownout {
+  0% { opacity: 0; background-position: 0 -100%; }
+  6% { opacity: 0.55; }
+  11% { opacity: 0.12; }
+  17% { opacity: 0.48; }
+  26% { opacity: 0.2; background-position: 0 -40%; }
+  38% { opacity: 0.34; }
+  55% { opacity: 0.1; background-position: 0 20%; }
+  75% { opacity: 0.16; }
+  100% { opacity: 0; background-position: 0 100%; }
+}
+
+@keyframes lfd-flicker {
+  0%, 93% { opacity: 0; }
+  94% { opacity: 0.32; }
+  95% { opacity: 0.05; }
+  96.5% { opacity: 0.22; }
+  98%, 100% { opacity: 0; }
+}
+
+/* Steam sits over the cracks it comes out of, under the lights */
+#lancer-flight-deck .lfd-steam {
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+}
+
+#lancer-flight-deck .lfd-cracks { z-index: 1; }
+#lancer-flight-deck .lfd-damage-fx { z-index: 3; }
+
+/* Reduced motion: damage is shown, never animated */
+#lancer-flight-deck.lfd-reduce-motion .lfd-damage *,
+#lancer-flight-deck.lfd-reduce-motion .lfd-damage::before {
+  animation: none !important;
+}
+
+#lancer-flight-deck.lfd-reduce-motion.lfd-stressed .lfd-damage::before {
+  opacity: 0.4;
+}
+
+#lancer-flight-deck.lfd-reduce-motion .lfd-warn-leds i {
+  opacity: 0.8;
+}
+
+/* --------------------------------------------------------------------------
+   Collapsed tab: the damage still shows on the slim strip
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.is-collapsed:is(.lfd-cracked, .lfd-stressed) .lfd-tab {
+  position: relative;
+}
+
+#lancer-flight-deck.is-collapsed.lfd-cracked .lfd-tab::after {
+  content: "";
+  position: absolute;
+  top: 22px;
+  right: 0;
+  width: 34px;
+  height: 60px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.6;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 60'%3E%3Cg fill='none' stroke='%23eef3ff' stroke-width='.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M33 12 L26 16 L22 13 L15 22 L11 21 L5 31 L3 39'/%3E%3Cpath d='M26 16 L25 27 L19 33 L20 42'/%3E%3Cpath d='M15 22 L13 30'/%3E%3Cpath d='M33 12 L29 6 M33 12 L28 11 M33 12 L28 17 M33 12 L30 19' stroke-opacity='.8'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
+}
+
+/* A stress LED at the foot of the tab */
+#lancer-flight-deck.is-collapsed.lfd-stressed .lfd-tab::before {
+  content: "";
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  background: var(--lfd-caution);
+  transform: rotate(45deg);
+  box-shadow: 0 0 5px var(--lfd-caution);
+  animation: lfd-led 2.8s ease-in-out infinite;
+}
+
+#lancer-flight-deck.is-collapsed.lfd-stress-3 .lfd-tab::before {
+  background: var(--lfd-warning);
+  box-shadow: 0 0 6px var(--lfd-warning);
+  animation-duration: 1.2s;
+}

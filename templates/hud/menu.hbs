@@ -1,0 +1,67 @@
+<div class="lfd-hud-frame">
+  <header class="lfd-hud-head">
+    {{#if back}}
+    <button type="button" class="lfd-hud-ctl" data-hud="back" data-tooltip="LFD.Hud.Back" aria-label="{{localize 'LFD.Hud.Back'}}">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    {{else}}
+    <span class="lfd-hud-emblem" aria-hidden="true"><i class="{{icon}}"></i></span>
+    {{/if}}
+    <div class="lfd-hud-titles">
+      <span class="lfd-hud-kicker">{{#if crumb}}{{crumb}} ›{{else}}{{kicker}}{{/if}}</span>
+      <span class="lfd-hud-title">{{title}}</span>
+    </div>
+    {{#if economy}}
+    <div class="lfd-hud-econ {{#if economy.spent}}is-spent{{/if}} {{#if economy.wide}}is-wide{{/if}}" aria-label="{{#if economy.aria}}{{economy.aria}}{{else}}{{economy.text}}{{/if}}">
+      {{#if economy.count}}<b class="lfd-hud-count">{{economy.count}}</b>{{/if}}
+      {{#if economy.pips.length}}<span class="lfd-hud-pips" aria-hidden="true">{{#each economy.pips}}<i class="{{#if on}}is-on{{/if}}"></i>{{/each}}</span>{{/if}}
+      {{#if economy.text}}<small>{{economy.text}}</small>{{/if}}
+    </div>
+    {{/if}}
+    <button type="button" class="lfd-hud-ctl" data-hud="close" data-tooltip="LFD.Hud.Close" aria-label="{{localize 'LFD.Hud.Close'}}">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </header>
+
+  {{#if readouts.length}}
+  <dl class="lfd-hud-readouts">
+    {{#each readouts}}
+    <div class="{{#if alert}}is-alert{{/if}}"><dt>{{label}}</dt><dd>{{value}}</dd></div>
+    {{/each}}
+  </dl>
+  {{/if}}
+  {{#if notice}}<p class="lfd-hud-notice"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> {{notice}}</p>{{/if}}
+
+  <div class="lfd-hud-body">
+    {{#each sections}}
+    <section class="lfd-hud-section lfd-hud-{{layout}}" data-section="{{id}}">
+      <h4 class="lfd-hud-section-title">
+        <span>{{title}}</span>
+        {{#if note}}<small class="is-{{noteState}}">{{note}}</small>{{/if}}
+      </h4>
+      <ul>
+        {{#each items}}
+        <li style="--i:{{i}}">
+          <button type="button" class="lfd-hud-item is-{{state}} {{#if active}}is-active{{/if}} {{#if warn}}is-warn{{/if}} {{#if busy}}is-busy{{/if}} {{#if tech}}is-tech{{/if}}"
+                  data-entry="{{key}}" data-sent="{{localize 'LFD.Hud.Sent'}}">
+            {{#if lamp}}<span class="lfd-hud-lamp" aria-hidden="true"></span>{{/if}}
+            <span class="lfd-hud-glyph" aria-hidden="true"><i class="{{icon}}"></i></span>
+            <span class="lfd-hud-text">
+              <span class="lfd-hud-label">{{label}}</span>
+              {{#if sub}}<span class="lfd-hud-sub">{{sub}}</span>{{/if}}
+            </span>
+            {{#if heat}}<span class="lfd-hud-heat" aria-label="{{localize 'LFD.Systems.Heat' n=heat}}"><i class="cci cci-heat" aria-hidden="true"></i>{{heat}}</span>{{/if}}
+            {{#if pips}}<span class="lfd-hud-uses" aria-hidden="true">{{#each pips}}<i class="{{#if on}}is-on{{/if}}"></i>{{/each}}</span>
+            {{else if readout}}<span class="lfd-hud-readout">{{readout}}</span>{{/if}}
+          </button>
+        </li>
+        {{/each}}
+      </ul>
+    </section>
+    {{else}}
+    <p class="lfd-hud-empty">{{empty}}</p>
+    {{/each}}
+  </div>
+
+  <footer class="lfd-hud-foot">{{footer}}</footer>
+</div>

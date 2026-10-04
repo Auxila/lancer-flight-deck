@@ -1,0 +1,54 @@
+<header class="lfd-header lfd-plate">
+  {{!-- Collapsed tab: a slim vertical strip with the two numbers that matter most --}}
+  <button type="button" class="lfd-tab" data-action="toggleCollapse" data-tooltip="LFD.Header.Expand" aria-label="{{localize 'LFD.Header.Expand'}}">
+    <span class="lfd-tab-badge">{{header.badge}}</span>
+    <span class="lfd-tab-title">{{localize "LFD.Title"}}</span>
+    {{#unless standby}}
+    <span class="lfd-tab-mini {{#if header.mini.danger}}is-danger{{/if}}" aria-hidden="true">
+      <i class="mdi mdi-fire"></i>{{header.mini.heat}}
+    </span>
+    <span class="lfd-tab-mini" aria-hidden="true"><i class="mdi mdi-hexagon-multiple"></i>{{header.mini.structure}}</span>
+    {{#if header.alertWarning}}<span class="lfd-tab-alert lfd-k-warning" style="animation-delay:{{header.warningDelay}}ms" aria-hidden="true">▲</span>
+    {{else if header.alertCaution}}<span class="lfd-tab-alert lfd-k-caution" style="animation-delay:{{header.cautionDelay}}ms" aria-hidden="true">◆</span>{{/if}}
+    {{/unless}}
+  </button>
+
+  <div class="lfd-header-main">
+    <span class="lfd-drag-grip" data-tooltip="LFD.Move.Hint" aria-hidden="true"><i class="fa-solid fa-grip-vertical"></i></span>
+    <div class="lfd-badge" aria-hidden="true">{{header.badge}}</div>
+    <div class="lfd-ident">
+      {{#if standby}}
+      <div class="lfd-mech-name">{{localize "LFD.Header.Standby"}}</div>
+      <div class="lfd-frame-name">{{localize "LFD.Header.StandbyHint"}}</div>
+      {{else}}
+      <button type="button" class="lfd-mech-name" data-action="openSheet" data-tooltip="LFD.Header.OpenSheet">{{header.mechName}}</button>
+      <div class="lfd-frame-name">{{header.frameName}}</div>
+      {{/if}}
+    </div>
+    <div class="lfd-header-controls">
+      {{#if header.floating}}
+      <button type="button" class="lfd-icon-btn" data-action="dock" data-tooltip="LFD.Move.Dock" aria-label="{{localize 'LFD.Move.Dock'}}">
+        <i class="fa-solid fa-thumbtack"></i>
+      </button>
+      {{/if}}
+      <button type="button" class="lfd-icon-btn" data-action="toggleMute"
+              data-tooltip="{{#if header.muted}}LFD.Header.Unmute{{else}}LFD.Header.Mute{{/if}}"
+              aria-label="{{#if header.muted}}{{localize 'LFD.Header.Unmute'}}{{else}}{{localize 'LFD.Header.Mute'}}{{/if}}"
+              aria-pressed="{{#if header.muted}}true{{else}}false{{/if}}">
+        <i class="fa-solid {{#if header.muted}}fa-volume-xmark{{else}}fa-volume-low{{/if}}"></i>
+      </button>
+      <button type="button" class="lfd-icon-btn" data-action="toggleCollapse" data-tooltip="LFD.Header.Collapse" aria-label="{{localize 'LFD.Header.Collapse'}}">
+        <i class="fa-solid fa-angles-left lfd-collapse-icon"></i>
+      </button>
+    </div>
+  </div>
+
+  {{#unless standby}}
+  <div class="lfd-datalink {{#if header.jammed}}is-jammed{{/if}}">
+    <span class="lfd-datalink-label">{{localize "LFD.Header.Pilot"}}</span>
+    <span class="lfd-datalink-callsign">{{header.callsign}}</span>
+    {{#if header.activation}}<span class="lfd-activation">{{localize "LFD.Header.Activation"}}</span>{{/if}}
+    <span class="lfd-datalink-status">{{#if header.jammed}}{{localize "LFD.Header.LinkJammed"}}{{else}}{{localize "LFD.Header.LinkOk"}}{{/if}}</span>
+  </div>
+  {{/unless}}
+</header>

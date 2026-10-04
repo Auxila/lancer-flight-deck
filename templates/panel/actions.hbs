@@ -1,0 +1,43 @@
+<section class="lfd-actions lfd-plate lfd-body" aria-label="{{localize 'LFD.Action.Title'}}">
+  {{#unless standby}}
+  <ul class="lfd-action-bus" aria-label="{{localize 'LFD.Action.Bus'}}">
+    {{#each actions.lights}}
+    <li>
+      <button type="button" class="lfd-light lfd-light-{{id}} {{#if on}}is-on{{/if}} {{#if open}}is-open{{/if}}"
+              data-action="menu" data-menu="{{id}}" aria-haspopup="dialog" aria-expanded="{{#if open}}true{{else}}false{{/if}}"
+              aria-label="{{localize label}}: {{#if on}}{{localize 'LFD.Action.Ready'}}{{else}}{{localize 'LFD.Action.Spent'}}{{/if}}"
+              data-tooltip="{{#if toggle}}LFD.Action.HintToggle{{else}}LFD.Action.HintOpen{{/if}}">
+        {{#if invade}}
+        <span class="lfd-invade-rain" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="lfd-invade-scan" aria-hidden="true"></span>
+        {{/if}}
+        <span class="lfd-light-lamp" aria-hidden="true"></span>
+        <span class="lfd-light-label" {{#if invade}}data-text="{{localize label}}"{{/if}}>{{localize label}}</span>
+        {{#if detail}}<span class="lfd-light-detail">{{detail}}</span>
+        {{else if pips}}<span class="lfd-light-pips" aria-hidden="true">{{#each pips}}<i class="{{#if on}}is-on{{/if}}"></i>{{/each}}</span>{{/if}}
+      </button>
+    </li>
+    {{/each}}
+  </ul>
+  <div class="lfd-buttons">
+    <button type="button" class="lfd-btn lfd-btn-oc" data-action="overcharge" {{#if actions.overcharge.disabled}}disabled{{/if}}>
+      <span>{{localize "LFD.Action.Overcharge"}}</span><small>{{actions.overcharge.cost}}</small>
+    </button>
+    <button type="button" class="lfd-btn" data-action="stabilize" {{#if actions.stabilize.disabled}}disabled{{/if}}>
+      <span>{{localize "LFD.Action.Stabilize"}}</span>
+    </button>
+    <button type="button" class="lfd-btn lfd-btn-core {{#if actions.core.spent}}is-spent{{/if}}" data-action="corePower"
+            {{#if actions.core.disabled}}disabled{{/if}} {{#if actions.core.name}}data-tooltip="{{actions.core.name}}"{{/if}}>
+      <span>{{localize "LFD.Action.CorePower"}}</span>
+      <small>{{#if actions.core.spent}}{{localize "LFD.Action.CoreSpent"}}{{else if actions.core.name}}{{actions.core.name}}{{else}}{{localize "LFD.Action.NoCore"}}{{/if}}</small>
+    </button>
+    <button type="button" class="lfd-btn lfd-btn-systems {{#if actions.systems.open}}is-open{{/if}}" data-action="toggleSystems"
+            aria-haspopup="dialog" aria-expanded="{{#if actions.systems.open}}true{{else}}false{{/if}}" data-tooltip="LFD.Systems.ButtonHint">
+      <i class="cci cci-mech-system lfd-btn-systems-icon" aria-hidden="true"></i>
+      <span>{{localize "LFD.Systems.Button"}}</span>
+      <small>{{#if actions.systems.total}}{{actions.systems.ready}}/{{actions.systems.total}}{{else}}{{localize "LFD.Systems.NoneShort"}}{{/if}}</small>
+      <i class="fa-solid fa-chevron-right lfd-btn-systems-chevron" aria-hidden="true"></i>
+    </button>
+  </div>
+  {{/unless}}
+</section>

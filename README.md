@@ -1,0 +1,368 @@
+# Flight Deck: cockpit HUD for LANCER
+
+A docked instrument panel for your mech in Foundry VTT. It shows what the sheet buries,
+reacts to the rules as they happen, and makes short synthesized sounds that only you hear.
+
+- **Foundry:** v13 (verified 13.351)
+- **System:** LANCER 3.1+ (verified 3.1.3)
+- **Assets:** none. The visuals are CSS and inline SVG, and every sound is synthesized with the Web Audio API.
+- **Optional:** [Token Magic FX](https://foundryvtt.com/packages/tokenmagic) for the silhouette effects of Exposed, Shredded, Jammed and Impaired. Everything else works without it.
+
+## Install
+
+1. In Foundry's setup screen, open **Add-on Modules** and click **Install Module**.
+2. Paste this into **Manifest URL** at the bottom and click **Install**:
+   ```
+   https://github.com/Auxila/lancer-flight-deck/releases/latest/download/module.json
+   ```
+3. In your LANCER world, open **Game Settings → Manage Modules**, tick **Flight Deck**, and save.
+
+Hosted servers (The Forge, Molten and others) take the same manifest URL. Foundry checks it for updates, so new releases show up under **Update** in Add-on Modules.
+
+The panel is opt-in for each player: the first time a player logs in with a mech, they're asked once. Anyone can turn it on later with **Alt+C** or in **Configure Settings**. GMs get the NPC Deck from the chessboard button in the token controls, or with **Alt+N**.
+
+## What it shows
+
+| Section | Contents |
+|---|---|
+| Header | Manufacturer badge, mech and frame, pilot callsign, comms link status, your activation |
+| Hull | HP with overshield, armor, burn, and Evasion / E-Def / Speed / Sensors / Save / Tech |
+| Reactor heat | One segment per point of heat, the Danger Zone boundary, the Overcharge ladder, and the odds that the next Overcharge pushes you over your Heat Cap |
+| Integrity | Structure and stress pips. Each track shows the next check's dice, the exact chance of every outcome, and the chance of losing the mech |
+| Master caution | 16 fixed annunciator tiles: warnings ▲, cautions ◆, advisories ●. Shape and border style repeat the colour's meaning |
+| Actions | Action lights that open the HUD menus (INVADE, MOVE, QUICK, FULL, REACT, CORE), Overcharge, Stabilize and Core Power buttons that run the system's own flows, and SYSTEMS AVAILABLE |
+
+Example: a mech at 2/4 structure shows `Next check 3d6 · Loss 42.1%`. The breakdown is 34.7% Direct Hit and 7.4% Crushing Hit; a Direct Hit is fatal with one structure left. `npm test` checks these numbers against brute-force enumeration.
+
+## Cockpit events
+
+| Event | Visual | Sound |
+|---|---|---|
+| Heat enters the Danger Zone | Heat plate glows, DZ tile lights | 1.8 s turbine spool-up, then an optional hum that fades within ~12 s |
+| Stress lost | Stress track flashes, the panel browns out; with cracks, steam blows out of them | 2.5 s of Geiger clicks; a soft hiss if the glass is cracked |
+| Structure lost | The glass fractures (see Battle damage), the panel kicks | Low impact thud and a crackle of breaking glass |
+| Lock On, Exposed, Stunned, Shredded | Tiles light and flash | Two-tone caution chime |
+| Reactor meltdown (`meltdown_timer` or the Reactor Meltdown status) | Tile shows `T-n` | One klaxon cycle |
+| Jammed | Static and scanlines over the comms strip | — |
+| Shut Down / Boot Up | Instruments drop to emergency power / skippable boot sequence | Boot blips |
+| Core Power spent | CORE ONLINE banner | Rising sweep |
+
+New alerts flash hard for about 4 seconds, then ease off by 10 seconds and settle to steady lit for as long as the condition lasts. Re-renders don't restart the fade. With the panel collapsed, the tab shows a ▲ or ◆ that fades the same way.
+
+### Audio discipline
+
+Audio is built for tables that talk over Discord:
+- Cues are short and only fire on events.
+- Each cue has a cooldown, so stacked updates make one sound.
+- A limiter prevents clipping.
+- Cues are dropped, not queued, while the browser's audio lock is closed.
+- Everything plays on Foundry's interface audio context, so the **Interface** volume slider controls it.
+- Each player has their own mute and volume.
+
+## Battle damage
+
+The panel wears the mech's damage, and it stays there until it's repaired.
+
+- **Structure: the glass fractures.** Each structure point lost strikes a new impact on the
+  panel's bezel: a hot flash and shockwave ring, sparks, a split-second RGB tear across the
+  readouts, and the panel kicks. A spider-web fracture forms at the impact, cracks race
+  inward and branch, burn amber and cool to pale glass over a second or so, and glass shards
+  drop off. A few stuck pixels stay lit near each impact. The cracks remain until structure
+  is repaired, when they zip closed back toward their impacts and fade.
+- **Stress: the power falters.** Each point lost drains colour from the plates, lights
+  another amber LED on the bezel and brings up a faint amber emergency wash; each hit browns
+  the panel out for a moment. At the last point the LEDs turn red and the power flickers now
+  and then.
+- **Both low: steam.** Once the glass is cracked and stress is at half or below, steam vents
+  through the cracks: jets that brake, billow and rise, in hissing bursts with quiet wisps
+  between. It vents harder at the last stress point and harder again at the last structure.
+- **Readability.** Impacts sit on the bezel and cracks stop short of the panel's far side.
+  Crack lines are blended so they can only brighten what's under them, never darken it, and
+  steam is translucent; every readout stays legible.
+- **Every mech cracks its own way.** The fractures are generated from the mech's id and the
+  structure point lost, so the same mech always shows the same damage, across reloads,
+  without anything being saved.
+- Only real changes animate: opening the panel, reloading or switching mechs draws the
+  damage as it stands. Collapsed, the tab shows a small crack and a stress LED. Reduced
+  motion shows all the damage without animating any of it.
+- To inspect it frame by frame:
+  `game.modules.get("lancer-flight-deck").api.damageClock.setScale(0.1)` slows the damage
+  timers and steam to a tenth. Slow the CSS to match with DevTools > Animations.
+
+## HUD menus
+
+Every light on the action bus is a button. Click one and a translucent HUD opens beside the
+panel's bottom plate, in the current theme's colours. One menu is open at a time; click the
+light again, press Esc or use × to close it. Right-click a light (QUICK, FULL, REACT, MOVE)
+to mark that slot spent, or available again.
+
+| Light | Menu |
+|---|---|
+| INVADE | Fragment Signal and every invade option from your systems, frame and talents, with Tech Attack, Sensors and your current target. The button itself is a live terminal: hex rain, a scan line and a short glitch every few seconds. It goes quiet when no quick action is left. |
+| MOVE | Movement modes your token can use (walk, climb, jump, teleport…), set on the token so the ruler measures them, plus Boost, Disengage and a movement reset |
+| QUICK | Skirmish, Boost, Grapple, Ram, Hide, Search, Prepare, Eject, Shut Down, Self-Destruct; quick tech (Bolster, Lock On, Scan, Invade); then every quick and quick-tech action from your gear |
+| FULL | Barrage, Improvised Attack, Stabilize, Disengage, Boot Up, Mount, Jockey, Full Tech; then every full and full-tech action from your gear |
+| REACT | Brace and Overwatch, then every reaction your frame, systems, weapons, talents and core bonuses give you |
+| CORE | Core power and passive, frame traits, protocols (PROTOCOL moved here from the action bus), and free actions including Overcharge |
+
+**SYSTEMS AVAILABLE**, under the Overcharge / Stabilize / Core Power buttons, opens the same
+HUD listing every installed system with its state (ready, Limited uses, destroyed, cascading).
+Clicking a system posts its **full text** to chat: type, SP and uses, the effect, every action
+(activation, heat, frequency, trigger and effect, never collapsed), the deployables it creates
+with their stats and actions, its description, and its tags, in LANCER's own chat styling.
+That's information only: it never spends a Limited use or applies heat (LANCER's own system
+card prints only the effect, so gear that keeps its rules in actions came out nearly empty).
+Frame traits and the core passive post their actions too.
+
+- **Hover** (or focus with the keyboard) any entry for its full rules text at once: trigger,
+  effect, heat cost, uses, tags. Gear text is the LCP's own; basic actions carry a short
+  paraphrase. The card stays up for as long as the pointer rests on the entry, even when
+  the menu redraws underneath it; **middle-click** pins it (Foundry's tooltip lock) so you
+  can move onto it to read long text, and moving away dismisses it.
+- **Click** to run it through LANCER's own flows, so cards, rolls, heat, Limited uses and
+  Loading are the system's:
+  - attacks open LANCER's attack HUD (Skirmish, Barrage and Overwatch first ask which mounted
+    weapon; a Barrage takes two);
+  - tech actions and invades roll tech attacks against E-Defense;
+  - Lock On puts the condition on your targets (through the GM for enemies, as with the tile),
+    Scan uses LANCER's Scan database, Hide / Shut Down / Boot Up set the status on your mech,
+    Self-Destruct starts the meltdown countdown;
+  - everything else posts its card to chat.
+- **Action economy.** When an action goes through (a cancelled attack doesn't count), its slot
+  is marked spent on LANCER's action tracker, using LANCER's own rules: a quick action uses the
+  full action first, a full action uses both. The world setting **HUD menus spend actions**
+  chooses: only in an active combat (default), always, or never.
+- **Reactions** follow both limits: LANCER's tracker (one reaction per turn), and each reaction
+  once per round. A reaction taken from the HUD shows USED until the next round.
+- **Keyboard:** arrow keys move between entries, Enter runs one, Esc goes back or closes.
+- The HUD flips to the panel's other side when there's no room (for example docked right),
+  scales with the panel, and follows it when you drag or scroll it.
+
+Two LANCER quirks the HUD works around: LANCER's basic attack flow titles every card
+"BASIC ATTACK", and an actor-level tech attack with any title other than "TECH ATTACK" rolls
+against Evasion. Grapple, Ram, Improvised Attack and Fragment Signal get their real titles
+and the right defence, without changing LANCER's flows for anyone else.
+
+## NPC Deck (GMs)
+
+The Flight Deck is a cockpit for one mech; a GM runs a whole enemy force. The NPC Deck is
+the GM's board for it: one slim row per NPC, docked on the side away from the Flight Deck
+(right by default), toggled from the token controls or with **Alt+N** (which then
+collapses and expands it). Players never see it.
+
+- **Initiative strip:** across the top, everyone in the combat, players and NPCs, as
+  portraits in three groups: **acting** (lit and breathing), **still to act** (with their
+  LANCER activation pips), and **done** this round (greyed, ticked). The header sums it up
+  (`▶ Interceptor · 9 to act · 3 done`). Players come first in each group. Big fights switch
+  to smaller portraits. Portraits show each combatant's token art, as on the map: an image set
+  on the combatant, else the token (its dynamic-ring art if any), else the actor's portrait,
+  skipping LANCER's placeholder icons when real art exists. Animated tokens show a still
+  frame; a combatant with no art at all shows a mech or NPC glyph in its side's colour.
+  - **Hover** a portrait: a big animated red "look here" marker lands on that token on the
+    map (sonar ripples, a turning dashed ring, chevrons pointing in). If the token is off
+    screen, a red arrow on the edge of the map points to it with its name. Only you see it.
+  - **Click** a portrait: selects the token, exactly as clicking it on the map would (Shift
+    adds to the selection). **Double-click** looks at it. **Right-click** starts that
+    combatant's turn (LANCER's popcorn initiative).
+- **The roster:** the started combat's NPCs in turn order (destroyed ones sink to the
+  bottom), or, with no combat, every NPC token on the scene. Unlinked copies of the same NPC
+  are separate rows with their own health and conditions.
+- **It follows you:** the open row follows the turn, and your selection. Select an NPC on
+  the map and its row opens and scrolls into view; select one that isn't in the combat and
+  it appears at the top, marked "Not in combat". The deck stays open throughout.
+- **Move and resize it like the Flight Deck:** drag the header to float it anywhere, drop it
+  at a screen edge to dock it again (or use the pin), and drag the corner grip to scale it
+  (70–160%, double-click to reset, arrow keys when focused). Layout is saved per GM.
+- **Each row:** a disposition stripe (hostile, neutral, friendly, secret), name, tier and
+  template, HP and heat bars, structure and stress pips when it has more than one,
+  condition icons with Burn and Overshield, LANCER activations left this round, and a
+  crosshair with a marker in each player's colour for **every player targeting it**.
+  Whoever's turn it is glows; NPCs that have already acted this round dim. A row flashes
+  red when its NPC takes damage, and kicks when it loses structure.
+- **One row opens at a time**, whoever's turn it is unless you open another: its stats,
+  HP / heat steppers, its features as buttons (Weapons, Tech, Systems, Reactions, Traits,
+  with Recharge and Limited state), condition toggles, **Activate** / **End turn** (LANCER's
+  popcorn initiative), Recharge, and the sheet.
+- **Features:** hover for the full text with its numbers at the NPC's tier (attack,
+  accuracy, range, damage). Click to use it through LANCER's own flows (attack, tech attack,
+  or its card, with Limited, Recharge and heat handled by the system); right-click posts its
+  text without using it.
+- **Rows:** click a name to select the token and look at it (Shift adds to the selection),
+  double-click for the sheet; hovering a row lights its token on the map.
+
+### Several targets
+
+Attacks with several targets go to LANCER's attack HUD, which handles each target (and
+its Lock On) separately. Actions the rules aim at **one** character (Lock On, Scan and the
+basic invade) need exactly one target: with several, the HUD says so and does nothing, so no
+condition or action is wasted. Readouts list every target's Evasion or E-Defense in target
+order (`10/8/12`).
+
+## Moving, resizing and editing
+
+- **Move.** Drag the header (the grip, badge or empty header space) to float the panel anywhere. Drop it near the left or right screen edge, where dashed targets appear, to dock it again, or use the pin button. Floating positions are saved per player and stay on screen when the window resizes.
+- **Resize.** Drag the grip in the bottom corner. The whole panel scales evenly from 70% to 160%, so the instruments stay in proportion. Double-click the grip to reset, use the arrow keys when it's focused, or set **Panel size** in settings.
+- **Hull and Reactor Heat.** Each value has −5 / −1 / +1 / +5 buttons, and the number itself is a field:
+  - type `7` to set it, `+3` / `-4` to adjust, or `=-2` to force an absolute value
+  - Enter applies and Esc cancels
+  - rapid clicks merge into a single update, and the new value shows immediately
+- **HP and heat edits use the system's own automation.** HP may go below 0, because LANCER carries the overflow into the next structure. HP at or below 0 starts the Structure flow, and heat over the cap starts the Overheat flow.
+
+## Condition tiles
+
+Every annunciator tile is a button. A strip above the grid shows who each kind of click will hit:
+
+- **Apply to:** every condition except Lock On goes to your **selected** token(s). With nothing selected, it goes to the mech on the panel. Targeted tokens are ignored.
+- **Lock On →:** Lock On goes to your **targeted** token(s) (press T over a token). With no target, it falls back to your selection, then the panel's mech.
+
+When the recipient isn't the mech on the panel, small rings mark the tiles it already has.
+
+| Tile | Click | Right-click | Shift+click |
+|---|---|---|---|
+| Status tiles (Exposed, Jammed, Stunned…) | Toggle. Across several tokens: remove if all have it, otherwise add | — | — |
+| Lock On | Toggle on your target(s) | — | — |
+| Burn, Overshield | +1 | −1 | Clear |
+| Hidden | Toggle Hidden | Toggle Invisible | — |
+| Meltdown | Start a countdown (asks for turns) or clear it | Tick down one turn | — |
+
+**Players and enemies.** Players can only select tokens they own, so they can only condition their own mech. The single exception is **Lock On**. A player's Lock On on an enemy is applied by the active GM through v13's built-in user queries (no socketlib), and the GM side refuses any other request for an unowned token. The world setting **Players can Lock On tokens they do not own** turns the exception off.
+
+**Structure and Overheat prompts.** When HP is edited to 0 or below, or heat over the cap, LANCER starts its own Structure or Overheat flow. LANCER shows that prompt to the mech's **owning player** when one is online, and to GMs only otherwise. If you're a GM and the prompt went to a player, the panel tells you who has it.
+
+## Condition effects on tokens
+
+Every condition has its own look on the token itself. Three techniques, each matched to its job:
+
+| Condition | Effect | How |
+|---|---|---|
+| Exposed | The frame burns red-hot; the silhouette stays readable | Token Magic FX: red adjustment + fire + pulsing glow |
+| Shredded | Constant white smoke billowing along the outline | Token Magic FX: xglow aura |
+| Jammed | Bright electricity crawling over the frame, art visible | Token Magic FX: electric (screen blend) + blue glow |
+| Impaired | Every ~3 s a short surge: arcs crawl over the frame, an amber rim glow swells and the image glitches with an RGB split, then it goes quiet. Weaker than Jammed | Token Magic FX: electric + glow + rgbSplit, synced |
+| Prone | The token art tips 90° onto its side, with a short fall | Local rotation of the art |
+| Slowed | A web on the ground under the base, strands tightening on the lower body | Drawn overlay |
+| Immobile | Two chains run from shackles on the hull to stakes in the ground. They take turns yanking taut: the links rattle and reel in, a spark flies at the shackle, the stake shudders and kicks up dust, then the chain sags back on a spring | Drawn overlay |
+| Lock On | Red targeting brackets that slam in, then breathe | Drawn overlay |
+| Stunned | Sparks orbiting the crown | Drawn overlay |
+| Engaged | Clash chevrons pushing in from both sides | Drawn overlay |
+| Hidden | A slow dotted perimeter | Drawn overlay |
+| Shut Down | The frame dims; a red standby light blinks | Drawn overlay |
+| Reactor Meltdown | A radiation badge with the T-n countdown, beating faster near zero | Drawn overlay |
+
+- **Token Magic filters** follow the art's silhouette. They're saved on the token, so exactly **one** client writes them: the active GM, or the first active owner if no GM is online. That client reconciles the token's own `lfd-` filters against its conditions, so nothing doubles up, nothing hits a permission error, and a player's Lock On applied by the GM still updates correctly. It listens to document hooks, so it keeps working while the GM's Foundry is a background tab.
+- **Drawn overlays and Prone** are rendered on each client from the token's conditions. Nothing is saved, so they need no permissions and can't go stale. They sit above the art but under Foundry's bars and status icons.
+- **Lancer QoL** keeps its own visuals for Burn, Overshield, Danger Zone, Invisible, Intangible and Cascading. For Jammed, the world setting **Jammed effect** picks Flight Deck's electricity (default) or QoL's version; with Flight Deck chosen, QoL's darkening Jammed filter is removed where both would stack.
+- **Settings:** "Condition effects on tokens" and "Condition effect strength" are per player. "Condition effects on token art" is per world and removes the saved filters when turned off. Reduced motion freezes the overlays on a still frame.
+
+## Controls and settings
+
+- **Alt+C** turns the panel on, then collapses and expands it. You can rebind it in Configure Controls.
+- The speaker button in the panel header mutes audio.
+- Client settings, which are per player: show panel, dock side, theme, panel size, opacity, reduce motion, cold boot, audio, volume, and Danger Zone afterglow.
+- World settings: offer the panel to each player once when they first log in with a mech (opt-in; nobody is forced), whether players can Lock On tokens they don't own, and when HUD menus spend actions.
+
+The panel follows the last mech token you control. If you aren't controlling one, it falls back to your assigned character (or your pilot's active mech).
+
+## Layout
+
+The panel docks inside Foundry's own UI columns instead of floating:
+- **Left dock:** beside the scene controls.
+- **Right dock:** beside the sidebar, above the chat notifications.
+
+It measures the hotbar, players list and chat input, and caps its own height above them. It scrolls internally instead of covering them.
+
+## Architecture
+
+```
+src/
+  index.js                     hooks, API (game.modules.get("lancer-flight-deck").api)
+  constants.js                 ids, status ids (note: Slowed is "slow")
+  settings.js                  client/world settings
+  core/
+    FlightDeckManager.js       lifecycle, actor resolution, partial re-render, events
+    TelemetryAdapter.js        LANCER actor -> snapshot, snapshot diff -> events
+    ConditionControl.js        tile clicks -> status/counter/meltdown ops, GM query handler
+    SynthesizerEngine.js       Web Audio cues on game.audio.interface
+    Odds.js                    exact check/overcharge maths (pure, Node-testable)
+  themes/
+    BaseTheme.js, GMSTheme.js, registry.js
+  actions/
+    basic.js                   LANCER's basic actions: menu, icon, slot, how each runs
+    catalog.js                 every action from equipped gear, weapons, hover cards
+    menus.js                   HUD view models (JSON-safe) + what each entry does
+    runner.js                  runs entries through LANCER flows; action economy rules
+    chatCards.js               full-text chat cards for systems, traits and core passives
+  npc/
+    NpcDeck.js                 the GM's NPC Deck (frameless ApplicationV2)
+    NpcRoster.js               who's in play, initiative, row and feature view models, cards
+    LookHere.js                the "look here" marker on the map (PIXI, this client only)
+  ui/
+    FlightDeckPanel.js         frameless ApplicationV2, docking, overlays
+    HudMenu.js                 the HUD menus beside the panel
+    HoverCards.js              full-text hover cards on Foundry's tooltip (HUD, NPC Deck)
+    DeckFrame.js               docked / floating placement, drag to move, grip to resize
+    damage/
+      fracture.js              seeded fracture geometry, damage levels (pure, Node-testable)
+      DamageLayer.js           cracks, impacts, stress lights, brownouts, mending
+      SteamField.js            canvas steam venting through the cracks
+      clock.js                 the effects' clock (slow motion for inspection)
+    components/*.js            view models per section
+templates/panel/*.hbs          one Handlebars part per section
+templates/hud/menu.hbs         every HUD menu
+styles/flight-deck-base.css    layout, instruments, effects
+styles/hud.css                 action buttons, INVADE terminal, HUD menus, hover cards
+styles/damage.css              battle damage
+styles/npc.css                 the NPC Deck
+templates/npc/deck.hbs         the NPC Deck
+styles/themes/gms.css          GMS palette and ornaments
+```
+
+Each section is an ApplicationV2 part, and only the parts whose data changed re-render.
+
+## Adding a manufacturer theme
+
+1. Subclass `BaseTheme` with `id`, `label`, `badge`, `manufacturers` (frame manufacturer codes, for example `["HA"]`), `audio` and `bootLines()`.
+2. Add `styles/themes/<id>.css` that sets the `--lfd-*` variables on `.lfd-theme-<id>`, then list it in `module.json`.
+3. Register it in `themes/registry.js`, or from another module with `api.registerTheme(MyTheme)`.
+4. Optionally override individual part templates with `static templates = { heat: "..." }`.
+
+Frames whose manufacturer has no theme use GMS.
+
+Canon manufacturer colours from Massif's lancer-data:
+
+| Manufacturer | Light | Dark |
+|---|---|---|
+| GMS | `#991E2A` | `#db1a2d` |
+| IPS-N | `#0c4d99` | `#1c9ae8` |
+| SSC | `#b57e07` | `#d1920a` |
+| HORUS | `#046e3c` | `#00a256` |
+| HA | `#6e4373` | `#a15ea8` |
+
+## Development
+
+```bash
+npm test
+```
+
+The tests cover the odds maths against brute-force enumeration, the action-economy rules, the fracture geometry and damage levels, NPC feature states and token portraits. The UI was verified in a real Foundry 13.351 server with LANCER 3.1.3, in Chromium and Firefox, with no other modules active.
+
+### Releasing
+
+1. Bump `version` in `module.json` (and `package.json`), and add a section to `CHANGELOG.md`.
+2. `npm run package` builds `dist/module.json` and `dist/lancer-flight-deck.zip` with only the files Foundry needs, and moves the `download` URL to the new version's tag.
+3. Commit, push, and publish both files as a GitHub release tagged `v<version>`:
+   ```bash
+   gh release create v0.4.1 dist/module.json dist/lancer-flight-deck.zip --notes-file CHANGELOG.md
+   ```
+
+The manifest URL always points at the latest release's `module.json`, so installed copies pick the update up.
+
+## Licence
+
+MIT, see [LICENSE](LICENSE).
+
+### Lancer notice
+
+"Flight Deck" is not an official *Lancer* product; it is a third party work, and is not
+affiliated with Massif Press. "Flight Deck" is published via the *Lancer* Third Party License.
+*Lancer* is copyright Massif Press.

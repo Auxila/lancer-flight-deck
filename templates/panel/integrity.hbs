@@ -1,0 +1,31 @@
+<section class="lfd-integrity lfd-plate lfd-body" aria-label="{{localize 'LFD.Integrity.Title'}}">
+  {{#unless standby}}
+  <div class="lfd-section-title"><span>{{localize "LFD.Integrity.Title"}}</span></div>
+  {{#each integrity.tracks}}
+  <div class="lfd-track lfd-state-{{state}}" data-track="{{kind}}">
+    <div class="lfd-track-head">
+      <span class="lfd-track-label">{{localize label}}</span>
+      <span class="lfd-pips" role="img" aria-label="{{localize label}} {{value}}/{{max}}">
+        {{#each pips}}<span class="lfd-pip {{#if intact}}is-intact{{else}}is-lost{{/if}}"></span>{{/each}}
+      </span>
+      <span class="lfd-readout">{{value}}<small>/{{max}}</small></span>
+    </div>
+    {{#if segments}}
+    <div class="lfd-odds" data-tooltip-html="{{tooltip}}" data-tooltip-direction="RIGHT">
+      <div class="lfd-odds-head">
+        <span>{{localize "LFD.Integrity.NextCheck" dice=dice}}</span>
+        <span class="lfd-odds-loss">{{localize "LFD.Integrity.Loss" pct=destroyPct}}</span>
+      </div>
+      <div class="lfd-odds-bar">
+        {{#each segments}}<span class="lfd-band lfd-band-{{kind}} {{#if check}}is-check{{/if}}" style="flex-basis:{{width}}%"></span>{{/each}}
+      </div>
+    </div>
+    {{else if headline}}
+    <div class="lfd-odds lfd-odds-final" {{#if tooltip}}data-tooltip="{{tooltip}}"{{/if}}>
+      <span class="lfd-k-warning">{{headline}}</span>
+    </div>
+    {{/if}}
+  </div>
+  {{/each}}
+  {{/unless}}
+</section>

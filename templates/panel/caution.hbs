@@ -1,0 +1,32 @@
+<section class="lfd-caution lfd-plate lfd-body" aria-label="{{localize 'LFD.Caution.Title'}}">
+  {{#unless standby}}
+  <div class="lfd-apply-to">
+    <span class="lfd-apply-seg {{#if caution.applyTo.differs}}is-other{{/if}} {{#unless caution.applyTo.name}}is-none{{/unless}}"
+          data-tooltip="LFD.Apply.ConditionsHint">
+      <i class="fa-solid fa-hand-pointer" aria-hidden="true"></i>
+      <span class="lfd-apply-label">{{localize "LFD.Apply.ToSelected"}}</span>
+      <span class="lfd-apply-name">{{#if caution.applyTo.name}}{{caution.applyTo.name}}{{else}}{{localize "LFD.Apply.None"}}{{/if}}</span>
+    </span>
+    <span class="lfd-apply-seg {{#if caution.applyTo.lockOnDiffers}}is-other{{/if}} {{#unless caution.applyTo.lockOnName}}is-none{{/unless}}"
+          data-tooltip="LFD.Apply.LockOnHint">
+      <i class="fa-solid fa-crosshairs" aria-hidden="true"></i>
+      <span class="lfd-apply-label">{{localize "LFD.Apply.LockOnTo"}}</span>
+      <span class="lfd-apply-name">{{#if caution.applyTo.lockOnName}}{{caution.applyTo.lockOnName}}{{else}}{{localize "LFD.Apply.None"}}{{/if}}</span>
+    </span>
+  </div>
+  <div class="lfd-annunciator" role="group" aria-label="{{localize 'LFD.Caution.Title'}}">
+    {{#each caution.tiles}}
+    <button type="button" class="lfd-tile lfd-k-{{kind}} {{#if lit}}is-lit{{/if}} {{#if fresh}}is-fresh{{/if}} {{#if sel}}has-sel sel-{{sel}}{{/if}}"
+            data-action="tile" data-tile="{{id}}" data-tooltip="{{tooltip}}"
+            {{#if fresh}}style="animation-delay:{{alertDelay}}ms"{{/if}}
+            aria-pressed="{{#if lit}}true{{else}}false{{/if}}"
+            aria-label="{{localize label}}{{#if detail}} {{detail}}{{/if}}: {{#if lit}}{{localize 'LFD.Caution.On'}}{{else}}{{localize 'LFD.Caution.Off'}}{{/if}}. {{tooltip}}">
+      <span class="lfd-tile-glyph" aria-hidden="true">{{glyph}}</span>
+      <span class="lfd-tile-label">{{localize label}}</span>
+      {{#if detail}}<span class="lfd-tile-detail">{{detail}}</span>{{/if}}
+      {{#if sel}}<span class="lfd-tile-sel" aria-hidden="true"></span>{{/if}}
+    </button>
+    {{/each}}
+  </div>
+  {{/unless}}
+</section>

@@ -1,0 +1,60 @@
+{
+  "id": "lancer-flight-deck",
+  "title": "Flight Deck: Cockpit HUD for LANCER",
+  "description": "<p>A diegetic cockpit for your mech: heat and Danger Zone, structure and stress check odds, condition tiles, HUD menus for every quick, full and reaction action your gear allows, an INVADE terminal, battle damage that cracks and vents the panel, condition effects on tokens, and short audio cues synthesized in the browser (no sound or image files). Opt-in per player.</p><p>GMs also get the NPC Deck: an initiative strip showing who has acted, a compact row per NPC with HP, heat and features, and a \"look here\" marker on the map.</p><p>\"Flight Deck\" is not an official <i>Lancer</i> product; it is a third party work, and is not affiliated with Massif Press. \"Flight Deck\" is published via the <i>Lancer</i> Third Party License.</p><p><i>Lancer</i> is copyright Massif Press.</p>",
+  "authors": [
+    {
+      "name": "Auxila",
+      "url": "https://github.com/Auxila"
+    }
+  ],
+  "url": "https://github.com/Auxila/lancer-flight-deck",
+  "manifest": "https://github.com/Auxila/lancer-flight-deck/releases/latest/download/module.json",
+  "download": "https://github.com/Auxila/lancer-flight-deck/releases/download/v0.4.0/lancer-flight-deck.zip",
+  "license": "https://github.com/Auxila/lancer-flight-deck/blob/main/LICENSE",
+  "readme": "https://github.com/Auxila/lancer-flight-deck/blob/main/README.md",
+  "changelog": "https://github.com/Auxila/lancer-flight-deck/blob/main/CHANGELOG.md",
+  "bugs": "https://github.com/Auxila/lancer-flight-deck/issues",
+  "version": "0.4.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13.351",
+    "maximum": "13"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "lancer",
+        "type": "system",
+        "compatibility": {
+          "minimum": "3.1.0",
+          "verified": "3.1.3"
+        }
+      }
+    ],
+    "recommends": [
+      {
+        "id": "tokenmagic",
+        "type": "module",
+        "reason": "Optional. Adds the silhouette-following token effects for Exposed, Shredded, Jammed and Impaired; everything else works without it."
+      }
+    ]
+  },
+  "esmodules": [
+    "src/index.js"
+  ],
+  "styles": [
+    "styles/flight-deck-base.css",
+    "styles/hud.css",
+    "styles/damage.css",
+    "styles/npc.css",
+    "styles/themes/gms.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ]
+}

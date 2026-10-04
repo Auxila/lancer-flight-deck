@@ -1,0 +1,1704 @@
+/* ==========================================================================
+   Flight Deck: base layout, instruments and cockpit effects.
+   Theme files (styles/themes/*.css) only set the --lfd-* palette and ornaments.
+   ========================================================================== */
+
+/* Palette defaults for everything Flight Deck draws (panel, systems flyout, tooltips).
+   Themes override them with `#lancer-flight-deck.lfd-theme-x, .lfd-themed.lfd-theme-x`. */
+.lfd-themed {
+  --lfd-bg: #111214;
+  --lfd-plate: #1a1b1e;
+  --lfd-plate-2: #24252a;
+  --lfd-line: #3a3c42;
+  --lfd-ink: #e9e6e1;
+  --lfd-ink-dim: #8f8c86;
+  --lfd-accent: #c8c8c8;
+  --lfd-accent-deep: #7a7a7a;
+  --lfd-accent-ink: #111214;
+  --lfd-ok: #4fd17d;
+  --lfd-caution: #f5a524;
+  --lfd-warning: #ff4545;
+  --lfd-lethal: #b3121f;
+  --lfd-advisory: #4fd17d;
+  --lfd-heat-safe: #f2c14e;
+  --lfd-heat-danger: #ff5a2a;
+  --lfd-font-display: "Orbitron", "Signika", sans-serif;
+  --lfd-font-data: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Consolas, "Liberation Mono", monospace;
+  --lfd-font-body: "Signika", sans-serif;
+  --lfd-chamfer: 9px;
+}
+
+#lancer-flight-deck.lfd-panel {
+  --lfd-width: 340px;
+  --lfd-opacity: 0.92;
+
+  /* Undo the floating-window defaults every v13 Application gets */
+  position: relative;
+  z-index: auto;
+  flex: none;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: var(--lfd-width);
+  min-width: 0;
+  min-height: 0;
+  max-height: calc(100% - 4px);
+  margin: 0;
+  padding: 0 2px 0 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lfd-line) transparent;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--lfd-ink);
+  font-family: var(--lfd-font-data);
+  font-size: 12px;
+  line-height: 1.25;
+  pointer-events: auto;
+  opacity: var(--lfd-opacity);
+  transition: opacity 160ms ease;
+  user-select: none;
+}
+
+#lancer-flight-deck.lfd-panel.lfd-dock-right {
+  align-self: flex-end;
+}
+
+#lancer-flight-deck.lfd-panel:hover,
+#lancer-flight-deck.lfd-panel:focus-within {
+  opacity: 1;
+}
+
+#lancer-flight-deck * {
+  box-sizing: border-box;
+}
+
+/* Foundry gives every button a fixed height; ours size to content unless a rule says otherwise */
+#lancer-flight-deck button {
+  height: auto;
+  min-height: 0;
+  font: inherit;
+  color: inherit;
+  margin: 0;
+  line-height: inherit;
+  box-shadow: none;
+}
+
+#lancer-flight-deck button:focus-visible {
+  outline: 2px solid var(--lfd-accent);
+  outline-offset: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   Plates
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck .lfd-plate {
+  position: relative;
+  padding: 6px 8px 7px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.035), transparent 40%),
+    var(--lfd-plate);
+  border: 1px solid var(--lfd-line);
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--lfd-chamfer)) 0,
+    100% var(--lfd-chamfer),
+    100% 100%,
+    var(--lfd-chamfer) 100%,
+    0 calc(100% - var(--lfd-chamfer))
+  );
+}
+
+#lancer-flight-deck .lfd-plate:empty,
+#lancer-flight-deck.is-standby .lfd-body {
+  display: none;
+}
+
+#lancer-flight-deck .lfd-section-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-family: var(--lfd-font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lfd-accent);
+}
+
+#lancer-flight-deck .lfd-readout {
+  font-family: var(--lfd-font-data);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck .lfd-readout small {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-readout em {
+  font-style: normal;
+}
+
+#lancer-flight-deck .lfd-muted {
+  color: var(--lfd-ink-dim);
+  font-size: 11px;
+}
+
+#lancer-flight-deck .lfd-k-ok { color: var(--lfd-ok); }
+#lancer-flight-deck .lfd-k-caution { color: var(--lfd-caution); }
+#lancer-flight-deck .lfd-k-warning { color: var(--lfd-warning); }
+#lancer-flight-deck .lfd-k-advisory { color: var(--lfd-advisory); }
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck .lfd-header {
+  padding-bottom: 6px;
+}
+
+#lancer-flight-deck .lfd-header-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#lancer-flight-deck .lfd-badge {
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 42px;
+  height: 30px;
+  padding: 0 6px;
+  font-family: var(--lfd-font-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--lfd-accent-ink);
+  background: var(--lfd-accent);
+}
+
+#lancer-flight-deck .lfd-ident {
+  flex: 1;
+  min-width: 0;
+}
+
+#lancer-flight-deck .lfd-mech-name {
+  display: block;
+  max-width: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+  background: none;
+  font-family: var(--lfd-font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--lfd-ink);
+  cursor: pointer;
+}
+
+#lancer-flight-deck div.lfd-mech-name {
+  cursor: default;
+}
+
+#lancer-flight-deck .lfd-frame-name {
+  overflow: hidden;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck.is-standby .lfd-frame-name {
+  white-space: normal;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+#lancer-flight-deck .lfd-header-controls {
+  flex: none;
+  display: flex;
+  gap: 3px;
+}
+
+#lancer-flight-deck .lfd-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--lfd-line);
+  border-radius: 0;
+  background: var(--lfd-plate-2);
+  color: var(--lfd-ink-dim);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+#lancer-flight-deck .lfd-icon-btn:hover {
+  color: var(--lfd-ink);
+  border-color: var(--lfd-accent);
+}
+
+#lancer-flight-deck.lfd-dock-right .lfd-collapse-icon {
+  transform: scaleX(-1);
+}
+
+/* Datalink strip */
+#lancer-flight-deck .lfd-datalink {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 3px 6px;
+  overflow: hidden;
+  background: #0c0c0e;
+  border: 1px solid var(--lfd-line);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+#lancer-flight-deck .lfd-datalink-label {
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-datalink-callsign {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#lancer-flight-deck .lfd-datalink-status {
+  flex: none;
+  color: var(--lfd-ok);
+}
+
+#lancer-flight-deck .lfd-activation {
+  flex: none;
+  padding: 0 4px;
+  background: var(--lfd-accent);
+  color: var(--lfd-accent-ink);
+  font-weight: 700;
+}
+
+#lancer-flight-deck .lfd-datalink.is-jammed .lfd-datalink-status {
+  color: var(--lfd-caution);
+}
+
+/* Jammed: static and rolling scanlines across the comms strip */
+#lancer-flight-deck .lfd-datalink.is-jammed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.10) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.06) 0 2px, transparent 2px 5px);
+  mix-blend-mode: screen;
+  animation: lfd-static 0.35s steps(4) infinite;
+}
+
+#lancer-flight-deck .lfd-datalink.is-jammed .lfd-datalink-callsign {
+  animation: lfd-jitter 1.6s steps(1) infinite;
+}
+
+/* Collapsed tab (hidden unless collapsed) */
+#lancer-flight-deck .lfd-tab {
+  display: none;
+}
+
+#lancer-flight-deck.is-collapsed {
+  width: auto;
+  overflow: visible;
+}
+
+#lancer-flight-deck.is-collapsed .lfd-body,
+#lancer-flight-deck.is-collapsed .lfd-header-main,
+#lancer-flight-deck.is-collapsed .lfd-datalink,
+#lancer-flight-deck.is-collapsed .lfd-boot,
+#lancer-flight-deck.is-collapsed .lfd-banner {
+  display: none;
+}
+
+#lancer-flight-deck.is-collapsed .lfd-header {
+  padding: 0;
+  clip-path: none;
+  border: none;
+  background: none;
+}
+
+#lancer-flight-deck.is-collapsed .lfd-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 34px;
+  padding: 6px 0 8px;
+  border: 1px solid var(--lfd-line);
+  border-radius: 0;
+  background: var(--lfd-plate);
+  cursor: pointer;
+}
+
+#lancer-flight-deck .lfd-tab-badge {
+  width: 100%;
+  padding: 3px 0;
+  background: var(--lfd-accent);
+  color: var(--lfd-accent-ink);
+  font-family: var(--lfd-font-display);
+  font-size: 8px;
+  font-weight: 800;
+  text-align: center;
+}
+
+#lancer-flight-deck .lfd-tab-title {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--lfd-font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+#lancer-flight-deck .lfd-tab-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 9.5px;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-tab-mini.is-danger {
+  color: var(--lfd-caution);
+}
+
+#lancer-flight-deck .lfd-tab-alert {
+  font-size: 12px;
+  animation: lfd-tab-alert 10s linear forwards;
+}
+
+/* --------------------------------------------------------------------------
+   Hull
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck .lfd-hp-bar {
+  position: relative;
+  height: 10px;
+  overflow: hidden;
+  background: #0b0b0d;
+  border: 1px solid var(--lfd-line);
+}
+
+#lancer-flight-deck .lfd-hp-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--lfd-ink);
+  transition: width 260ms ease;
+}
+
+#lancer-flight-deck .lfd-hp-fill.is-low {
+  background: var(--lfd-warning);
+}
+
+#lancer-flight-deck .lfd-os-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--lfd-advisory) 85%, transparent) 0 4px,
+    color-mix(in srgb, var(--lfd-advisory) 45%, transparent) 4px 8px
+  );
+  mix-blend-mode: screen;
+}
+
+#lancer-flight-deck .lfd-hull-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+#lancer-flight-deck .lfd-tag {
+  padding: 1px 5px;
+  background: var(--lfd-plate-2);
+  border: 1px solid var(--lfd-line);
+  font-size: 10.5px;
+}
+
+#lancer-flight-deck .lfd-tag b {
+  font-weight: 400;
+  color: var(--lfd-ink-dim);
+  text-transform: uppercase;
+}
+
+#lancer-flight-deck .lfd-stats {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 3px;
+  margin: 6px 0 0;
+}
+
+#lancer-flight-deck .lfd-stat {
+  padding: 2px 0 1px;
+  background: #0d0d0f;
+  border-top: 1px solid var(--lfd-line);
+  text-align: center;
+}
+
+#lancer-flight-deck .lfd-stat dt {
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-stat dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   Heat
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck .lfd-heat-gauge {
+  margin-bottom: 6px;
+}
+
+#lancer-flight-deck .lfd-heat-segments {
+  display: grid;
+  grid-template-columns: repeat(var(--lfd-seg-count), 1fr);
+  gap: 3px;
+  height: 15px;
+  padding: 0 3px;
+}
+
+#lancer-flight-deck .lfd-seg {
+  position: relative;
+  background: #0b0b0d;
+  border: 1px solid var(--lfd-line);
+  transform: skewX(-14deg);
+  transition: background 180ms ease, box-shadow 180ms ease;
+}
+
+#lancer-flight-deck .lfd-seg.is-dz {
+  background: color-mix(in srgb, var(--lfd-heat-danger) 12%, #0b0b0d);
+  border-color: color-mix(in srgb, var(--lfd-heat-danger) 35%, var(--lfd-line));
+}
+
+#lancer-flight-deck .lfd-seg.is-filled {
+  background: var(--lfd-heat-safe);
+  border-color: var(--lfd-heat-safe);
+}
+
+#lancer-flight-deck .lfd-seg.is-filled.is-dz {
+  background: var(--lfd-heat-danger);
+  border-color: var(--lfd-heat-danger);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--lfd-heat-danger) 70%, transparent);
+}
+
+/* The Danger Zone boundary: a tick ahead of the first DZ segment */
+#lancer-flight-deck .lfd-seg.is-boundary::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--lfd-heat-danger);
+}
+
+#lancer-flight-deck .lfd-heat-continuous {
+  position: relative;
+  height: 15px;
+  background: #0b0b0d;
+  border: 1px solid var(--lfd-line);
+}
+
+#lancer-flight-deck .lfd-heat-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, var(--lfd-heat-safe), var(--lfd-heat-danger));
+}
+
+#lancer-flight-deck .lfd-dz-line {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--lfd-heat-danger);
+}
+
+#lancer-flight-deck .lfd-dz-label {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-heat.is-danger {
+  border-color: color-mix(in srgb, var(--lfd-heat-danger) 55%, var(--lfd-line));
+}
+
+#lancer-flight-deck .lfd-heat.is-spooling {
+  animation: lfd-spool 2s ease-in-out;
+}
+
+#lancer-flight-deck .lfd-heat.is-over .lfd-seg.is-filled {
+  animation: lfd-blink 0.7s steps(2, jump-none) infinite;
+}
+
+/* Overcharge */
+#lancer-flight-deck .lfd-oc {
+  padding: 5px 6px;
+  background: #0d0d0f;
+  border: 1px solid var(--lfd-line);
+}
+
+#lancer-flight-deck .lfd-oc.is-hit {
+  animation: lfd-hit 0.9s ease-out;
+}
+
+#lancer-flight-deck .lfd-oc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#lancer-flight-deck .lfd-oc-label {
+  font-family: var(--lfd-font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-oc-cost {
+  padding: 1px 6px;
+  background: var(--lfd-accent);
+  color: var(--lfd-accent-ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+#lancer-flight-deck .lfd-oc-ladder {
+  display: flex;
+  gap: 3px;
+  margin: 5px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+#lancer-flight-deck .lfd-oc-ladder li {
+  flex: 1;
+  padding: 1px 0;
+  border: 1px solid var(--lfd-line);
+  font-size: 10px;
+  text-align: center;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-oc-ladder li.is-spent {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+#lancer-flight-deck .lfd-oc-ladder li.is-current {
+  border-color: var(--lfd-accent);
+  color: var(--lfd-ink);
+  font-weight: 700;
+}
+
+#lancer-flight-deck .lfd-oc-odds {
+  margin-top: 4px;
+  font-size: 10.5px;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-risk-some .lfd-oc-odds b { color: var(--lfd-caution); }
+#lancer-flight-deck .lfd-risk-high .lfd-oc-odds b { color: var(--lfd-warning); }
+#lancer-flight-deck .lfd-risk-none .lfd-oc-odds b { color: var(--lfd-ok); font-weight: 400; }
+
+/* --------------------------------------------------------------------------
+   Integrity
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck .lfd-track + .lfd-track {
+  margin-top: 7px;
+}
+
+#lancer-flight-deck .lfd-track-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#lancer-flight-deck .lfd-track-label {
+  flex: none;
+  width: 78px;
+  font-family: var(--lfd-font-display);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#lancer-flight-deck .lfd-pips {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+#lancer-flight-deck .lfd-pip {
+  width: 15px;
+  height: 17px;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: var(--lfd-ink);
+}
+
+#lancer-flight-deck .lfd-pip.is-lost {
+  background:
+    repeating-linear-gradient(45deg, var(--lfd-warning) 0 2px, transparent 2px 5px),
+    color-mix(in srgb, var(--lfd-warning) 22%, #0b0b0d);
+}
+
+#lancer-flight-deck .lfd-track.is-hit {
+  animation: lfd-hit 0.9s ease-out;
+}
+
+#lancer-flight-deck .lfd-track[data-track="stress"].is-hit {
+  animation: lfd-hit 0.8s ease-out 3;
+}
+
+#lancer-flight-deck .lfd-odds {
+  margin-top: 4px;
+  padding: 3px 5px 4px;
+  background: #0d0d0f;
+  border: 1px solid var(--lfd-line);
+  cursor: help;
+}
+
+#lancer-flight-deck .lfd-odds-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-odds-loss {
+  font-weight: 700;
+  color: var(--lfd-warning);
+}
+
+#lancer-flight-deck .lfd-odds-bar {
+  display: flex;
+  height: 7px;
+  overflow: hidden;
+  background: #000;
+}
+
+#lancer-flight-deck .lfd-band {
+  flex-grow: 0;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+#lancer-flight-deck .lfd-band-ok { background: color-mix(in srgb, var(--lfd-ok) 70%, #000); }
+#lancer-flight-deck .lfd-band-caution { background: var(--lfd-caution); }
+#lancer-flight-deck .lfd-band-warning { background: var(--lfd-warning); }
+#lancer-flight-deck .lfd-band-lethal {
+  background: repeating-linear-gradient(-45deg, var(--lfd-lethal) 0 3px, #000 3px 5px);
+}
+
+/* A band whose outcome hinges on a HULL / ENGINEERING check */
+#lancer-flight-deck .lfd-band.is-check {
+  background-image: repeating-linear-gradient(-45deg, rgb(0 0 0 / 0.55) 0 2px, transparent 2px 5px);
+}
+
+#lancer-flight-deck .lfd-odds-final {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Rich tooltip (rendered inside Foundry's #tooltip) */
+#tooltip .lfd-tip {
+  min-width: 200px;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  text-align: left;
+}
+
+#tooltip .lfd-tip header {
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+#tooltip .lfd-tip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+#tooltip .lfd-tip-row.lfd-k-caution b { color: #f5a524; }
+#tooltip .lfd-tip-row.lfd-k-warning b,
+#tooltip .lfd-tip-row.lfd-k-lethal b { color: #ff6b6b; }
+
+#tooltip .lfd-tip footer {
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
+/* --------------------------------------------------------------------------
+   Master caution annunciator
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck .lfd-annunciator {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+}
+
+#lancer-flight-deck .lfd-tile {
+  --k: var(--lfd-caution);
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  column-gap: 3px;
+  min-width: 0;
+  min-height: 27px;
+  padding: 2px 4px 2px 7px;
+  background: #0a0a0c;
+  border: 1px solid #26272c;
+  color: color-mix(in srgb, var(--k) 26%, #3a3a3a);
+  font-family: var(--lfd-font-display);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#lancer-flight-deck .lfd-tile.lfd-k-warning { --k: var(--lfd-warning); }
+#lancer-flight-deck .lfd-tile.lfd-k-advisory { --k: var(--lfd-advisory); }
+
+/* Kind glyph sits in the corner so the legend gets the full width */
+#lancer-flight-deck .lfd-tile-glyph {
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  font-size: 6px;
+  line-height: 1;
+}
+
+#lancer-flight-deck .lfd-tile-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#lancer-flight-deck .lfd-tile-detail {
+  font-family: var(--lfd-font-data);
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+#lancer-flight-deck .lfd-tile.is-lit {
+  background: color-mix(in srgb, var(--k) 18%, #0a0a0c);
+  border-color: var(--k);
+  color: var(--k);
+  text-shadow: 0 0 6px color-mix(in srgb, var(--k) 70%, transparent);
+  box-shadow: inset 0 0 10px color-mix(in srgb, var(--k) 25%, transparent);
+}
+
+/* Border style repeats the meaning: warnings doubled, advisories dotted */
+#lancer-flight-deck .lfd-tile.lfd-k-warning.is-lit {
+  border-style: double;
+  border-width: 3px;
+  padding: 0 2px 0 5px;
+}
+
+#lancer-flight-deck .lfd-tile.lfd-k-advisory.is-lit {
+  border-style: dotted;
+}
+
+#lancer-flight-deck .lfd-tile.is-fresh {
+  animation: lfd-tile-alert 10s linear forwards;
+}
+
+/* --------------------------------------------------------------------------
+   Actions
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck .lfd-action-bus {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 3px;
+  margin: 0 0 6px;
+  padding: 0;
+  list-style: none;
+}
+
+#lancer-flight-deck .lfd-action-bus > li {
+  display: flex;
+  min-width: 0;
+}
+
+/* Each light is a button: click opens its HUD menu, right-click marks the slot (styles/hud.css) */
+#lancer-flight-deck .lfd-light {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 0 2px;
+  overflow: hidden;
+  background: #0d0d0f;
+  border: 1px solid #26272c;
+  border-radius: 0;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+#lancer-flight-deck .lfd-light-lamp {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #24252a;
+  box-shadow: inset 0 0 2px #000;
+}
+
+#lancer-flight-deck .lfd-light.is-on .lfd-light-lamp {
+  background: var(--lfd-ok);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--lfd-ok) 80%, transparent);
+}
+
+#lancer-flight-deck .lfd-light-core.is-on .lfd-light-lamp {
+  background: var(--lfd-accent);
+  box-shadow: 0 0 7px var(--lfd-accent);
+}
+
+#lancer-flight-deck .lfd-light-label {
+  font-family: var(--lfd-font-display);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-light.is-on .lfd-light-label {
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck .lfd-light-detail {
+  font-size: 9px;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-buttons {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 4px;
+}
+
+#lancer-flight-deck .lfd-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 3px 4px;
+  overflow: hidden;
+  background: var(--lfd-plate-2);
+  border: 1px solid var(--lfd-line);
+  border-bottom: 2px solid var(--lfd-accent-deep);
+  border-radius: 0;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+#lancer-flight-deck .lfd-btn span {
+  font-family: var(--lfd-font-display);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+#lancer-flight-deck .lfd-btn small {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 9.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--lfd-accent) 22%, var(--lfd-plate-2));
+  border-color: var(--lfd-accent);
+}
+
+#lancer-flight-deck .lfd-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+#lancer-flight-deck .lfd-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+#lancer-flight-deck .lfd-btn-core:not(:disabled) {
+  border-bottom-color: var(--lfd-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Cockpit states and overlays
+   -------------------------------------------------------------------------- */
+
+/* Shut Down: emergency power only */
+#lancer-flight-deck.is-shutdown .lfd-body {
+  filter: grayscale(0.9) brightness(0.45);
+}
+
+#lancer-flight-deck.is-shutdown .lfd-header {
+  border-color: var(--lfd-warning);
+}
+
+/* Destroyed */
+#lancer-flight-deck.is-destroyed .lfd-body {
+  filter: grayscale(1) contrast(0.8) brightness(0.32);
+}
+
+#lancer-flight-deck.is-shaken {
+  animation: lfd-shake 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/* Cold boot overlay */
+#lancer-flight-deck .lfd-boot {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 18px;
+  background:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.03) 0 1px, transparent 1px 3px),
+    rgb(6 6 8 / 0.97);
+  cursor: pointer;
+  animation: lfd-fade-in 120ms ease-out;
+}
+
+#lancer-flight-deck .lfd-boot.is-ending {
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+#lancer-flight-deck .lfd-boot-badge {
+  align-self: flex-start;
+  margin-bottom: 10px;
+  padding: 4px 10px;
+  background: var(--lfd-accent);
+  color: var(--lfd-accent-ink);
+  font-family: var(--lfd-font-display);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+#lancer-flight-deck .lfd-boot-line {
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  overflow: hidden;
+  clip-path: inset(0 100% 0 0);
+  animation: lfd-type 280ms steps(18) forwards;
+}
+
+#lancer-flight-deck .lfd-boot-line:last-of-type {
+  color: var(--lfd-ok);
+}
+
+#lancer-flight-deck .lfd-boot-skip {
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+}
+
+/* Banner (CORE ONLINE / SIGNAL LOST) */
+#lancer-flight-deck .lfd-banner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38%;
+  z-index: 9;
+  padding: 10px 0;
+  background: var(--lfd-accent);
+  color: var(--lfd-accent-ink);
+  font-family: var(--lfd-font-display);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-transform: uppercase;
+  pointer-events: none;
+  animation: lfd-banner 1.6s ease-out forwards;
+}
+
+#lancer-flight-deck .lfd-banner-lost {
+  background: #000;
+  color: var(--lfd-warning);
+  animation-duration: 2.6s;
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion: no flashing, shaking, typing or scanline movement
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-reduce-motion *,
+#lancer-flight-deck.lfd-reduce-motion *::before,
+#lancer-flight-deck.lfd-reduce-motion *::after,
+#lancer-flight-deck.lfd-reduce-motion {
+  animation: none !important;
+  transition: none !important;
+}
+
+#lancer-flight-deck.lfd-reduce-motion .lfd-boot-line {
+  clip-path: none;
+}
+
+#lancer-flight-deck.lfd-reduce-motion .lfd-tile.is-fresh {
+  outline: 2px solid var(--k);
+  outline-offset: -4px;
+}
+
+/* --------------------------------------------------------------------------
+   Keyframes
+   -------------------------------------------------------------------------- */
+
+@keyframes lfd-blink {
+  0% { opacity: 1; }
+  100% { opacity: 0.35; }
+}
+
+@keyframes lfd-tile-flash {
+  0% { background: color-mix(in srgb, var(--k) 45%, #0a0a0c); }
+  100% { background: color-mix(in srgb, var(--k) 12%, #0a0a0c); }
+}
+
+@keyframes lfd-static {
+  0% { background-position: 0 0, 0 0; }
+  25% { background-position: 0 1px, 3px 0; }
+  50% { background-position: 0 2px, -2px 0; }
+  75% { background-position: 0 1px, 1px 0; }
+  100% { background-position: 0 0, 0 0; }
+}
+
+@keyframes lfd-jitter {
+  0%, 82%, 100% { transform: none; filter: none; }
+  84% { transform: translateX(2px); filter: blur(0.6px); }
+  88% { transform: translateX(-3px); }
+  92% { transform: translateX(1px); filter: blur(0.4px); }
+}
+
+@keyframes lfd-spool {
+  0% { box-shadow: inset 0 0 0 0 transparent; }
+  60% { box-shadow: inset 0 0 22px color-mix(in srgb, var(--lfd-heat-danger) 55%, transparent); }
+  100% { box-shadow: inset 0 0 0 0 transparent; }
+}
+
+@keyframes lfd-hit {
+  0% { background-color: color-mix(in srgb, var(--lfd-warning) 45%, transparent); }
+  100% { background-color: transparent; }
+}
+
+/* A hard kick that settles: the hit, the rebound, then smaller and smaller */
+@keyframes lfd-shake {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  7% { transform: translate(-6px, 3px) rotate(-0.6deg); }
+  18% { transform: translate(5px, -2px) rotate(0.45deg); }
+  32% { transform: translate(-3px, 1px) rotate(-0.2deg); }
+  50% { transform: translate(2px, 0) rotate(0.1deg); }
+  70% { transform: translate(-1px, 0) rotate(0); }
+}
+
+@keyframes lfd-type {
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes lfd-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes lfd-banner {
+  0% { opacity: 0; transform: scaleY(0.2); }
+  12% { opacity: 1; transform: scaleY(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ==========================================================================
+   Interaction: editors, push-button tiles, moving, resizing
+   ========================================================================== */
+
+/* Section titles that hold an editor centre their contents */
+#lancer-flight-deck .lfd-section-title:has(.lfd-editor) {
+  align-items: center;
+}
+
+/* Value editors: [−5][−1] value/max [+1][+5] */
+#lancer-flight-deck .lfd-editor {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+#lancer-flight-deck .lfd-step {
+  width: 26px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--lfd-line);
+  border-radius: 0;
+  background: #0d0d0f;
+  color: var(--lfd-ink-dim);
+  font-family: var(--lfd-font-data);
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#lancer-flight-deck .lfd-step:hover:not(:disabled) {
+  border-color: var(--lfd-accent);
+  color: var(--lfd-ink);
+  background: color-mix(in srgb, var(--lfd-accent) 18%, #0d0d0f);
+}
+
+#lancer-flight-deck .lfd-step:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+#lancer-flight-deck .lfd-step:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+#lancer-flight-deck .lfd-editor-value {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  margin: 0 3px;
+  font-family: var(--lfd-font-data);
+}
+
+#lancer-flight-deck .lfd-editor-value input {
+  width: 34px;
+  height: 22px;
+  padding: 0 2px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--lfd-ink);
+  font-family: var(--lfd-font-data);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: right;
+  box-shadow: none;
+  outline: none;
+}
+
+#lancer-flight-deck .lfd-editor-value input:hover:not(:disabled) {
+  border-color: var(--lfd-line);
+}
+
+#lancer-flight-deck .lfd-editor-value input:focus {
+  border-color: var(--lfd-accent);
+  background: #0b0b0d;
+  text-align: center;
+}
+
+#lancer-flight-deck .lfd-editor-value input:disabled {
+  color: var(--lfd-ink);
+  cursor: default;
+}
+
+#lancer-flight-deck .lfd-editor-value small {
+  font-size: 11px;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-editor.is-low input,
+#lancer-flight-deck .lfd-editor.is-negative input,
+#lancer-flight-deck .lfd-editor.is-over input {
+  color: var(--lfd-warning);
+}
+
+#lancer-flight-deck .lfd-editor.is-danger input {
+  color: var(--lfd-heat-danger);
+}
+
+/* A value waiting on its update: a subtle underline until the re-render lands */
+#lancer-flight-deck .lfd-editor.is-pending input {
+  border-bottom-color: var(--lfd-accent);
+}
+
+/* Who tile clicks apply to: conditions (selection) and Lock On (targets) */
+#lancer-flight-deck .lfd-apply-to {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 3px;
+  margin-bottom: 4px;
+}
+
+#lancer-flight-deck .lfd-apply-seg {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 2px 5px;
+  background: #0c0c0e;
+  border: 1px solid var(--lfd-line);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-apply-seg i {
+  flex: none;
+  font-size: 9px;
+}
+
+#lancer-flight-deck .lfd-apply-label {
+  flex: none;
+}
+
+#lancer-flight-deck .lfd-apply-name {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck .lfd-apply-seg.is-other {
+  border-color: var(--lfd-accent-deep);
+}
+
+#lancer-flight-deck .lfd-apply-seg.is-other i,
+#lancer-flight-deck .lfd-apply-seg.is-other .lfd-apply-name {
+  color: var(--lfd-accent);
+}
+
+#lancer-flight-deck .lfd-apply-seg.is-none .lfd-apply-name {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--lfd-ink-dim);
+}
+
+/* Tiles are push-buttons */
+#lancer-flight-deck button.lfd-tile {
+  border-radius: 0;
+  cursor: pointer;
+  transition: border-color 100ms ease, filter 100ms ease;
+}
+
+#lancer-flight-deck button.lfd-tile:hover {
+  border-color: color-mix(in srgb, var(--k) 70%, #26272c);
+  color: color-mix(in srgb, var(--k) 55%, #3a3a3a);
+  filter: brightness(1.15);
+}
+
+#lancer-flight-deck button.lfd-tile.is-lit:hover {
+  color: var(--k);
+}
+
+#lancer-flight-deck button.lfd-tile:active {
+  transform: translateY(1px);
+  filter: brightness(0.9);
+}
+
+#lancer-flight-deck button.lfd-tile:focus-visible {
+  outline: 2px solid var(--k);
+  outline-offset: 1px;
+}
+
+/* The selection (when it isn't the mech on the panel) has this condition */
+#lancer-flight-deck .lfd-tile-sel {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--lfd-accent);
+  border-radius: 50%;
+}
+
+#lancer-flight-deck .lfd-tile.sel-all .lfd-tile-sel {
+  background: var(--lfd-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Moving
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck .lfd-header-main {
+  cursor: grab;
+}
+
+#lancer-flight-deck .lfd-header-main button,
+#lancer-flight-deck .lfd-header-main input {
+  cursor: pointer;
+}
+
+#lancer-flight-deck .lfd-drag-grip {
+  flex: none;
+  margin: 0 -2px 0 -3px;
+  font-size: 11px;
+  color: var(--lfd-line);
+}
+
+#lancer-flight-deck .lfd-header-main:hover .lfd-drag-grip {
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck.is-dragging,
+#lancer-flight-deck.is-dragging .lfd-header-main {
+  cursor: grabbing;
+  opacity: 0.9;
+  transition: none;
+}
+
+#lancer-flight-deck.lfd-panel.lfd-floating {
+  position: fixed;
+  z-index: var(--z-index-app, 30);
+  margin: 0;
+}
+
+#lancer-flight-deck.lfd-floating .lfd-header {
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.45);
+}
+
+/* Drop targets shown while dragging */
+.lfd-dock-zone {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: var(--z-index-app, 30);
+  width: 72px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgb(219 26 45 / 0.16), transparent);
+  border-left: 2px dashed rgb(219 26 45 / 0.35);
+  color: rgb(255 255 255 / 0.7);
+  font: 700 10px/1.2 "Orbitron", sans-serif;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  opacity: 0.55;
+  transition: opacity 120ms ease, background 120ms ease;
+}
+
+.lfd-dock-zone-left {
+  left: 0;
+}
+
+.lfd-dock-zone-right {
+  right: 0;
+  border-left: none;
+  border-right: 2px dashed rgb(219 26 45 / 0.35);
+  background: linear-gradient(270deg, rgb(219 26 45 / 0.16), transparent);
+}
+
+.lfd-dock-zone.is-active {
+  opacity: 1;
+  background: linear-gradient(90deg, rgb(219 26 45 / 0.38), transparent);
+}
+
+.lfd-dock-zone-right.is-active {
+  background: linear-gradient(270deg, rgb(219 26 45 / 0.38), transparent);
+}
+
+/* --------------------------------------------------------------------------
+   Resizing
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck .lfd-resize {
+  position: sticky;
+  bottom: 0;
+  z-index: 8;
+  align-self: flex-end;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -20px; /* overlay the last plate's corner instead of adding height */
+  cursor: nwse-resize;
+  background:
+    linear-gradient(135deg, transparent 0 45%, var(--lfd-ink-dim) 45% 52%, transparent 52% 64%,
+      var(--lfd-ink-dim) 64% 71%, transparent 71% 83%, var(--lfd-ink-dim) 83% 90%, transparent 90%);
+  opacity: 0.55;
+  touch-action: none;
+}
+
+#lancer-flight-deck .lfd-resize:hover,
+#lancer-flight-deck .lfd-resize:focus-visible,
+#lancer-flight-deck.is-resizing .lfd-resize {
+  opacity: 1;
+  outline: none;
+  filter: drop-shadow(0 0 2px var(--lfd-accent));
+}
+
+/* Docked right, the grip moves to the outer (left) corner */
+#lancer-flight-deck.lfd-dock-right .lfd-resize {
+  align-self: flex-start;
+  cursor: nesw-resize;
+  transform: scaleX(-1);
+}
+
+#lancer-flight-deck.is-collapsed .lfd-resize {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Alert decay (generated): a new caution/warning blinks at full strength for
+   4 s, the blink dies away by 8.5 s, then the collapsed tab glyph fades by 10 s while
+   condition tiles settle to steady lit. JS retires the alert at 10 s; a negative
+   animation-delay resumes the fade after re-renders. Mirrors ALERT_MS.
+   -------------------------------------------------------------------------- */
+
+@keyframes lfd-tile-alert {
+  0.00% { background: color-mix(in srgb, var(--k) 45.0%, #0a0a0c); }
+  1.12% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
+  2.25% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
+  3.38% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
+  4.50% { background: color-mix(in srgb, var(--k) 12.0%, #0a0a0c); }
+  5.62% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
+  6.75% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
+  7.88% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
+  9.00% { background: color-mix(in srgb, var(--k) 45.0%, #0a0a0c); }
+  10.13% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
+  11.25% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
+  12.38% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
+  13.50% { background: color-mix(in srgb, var(--k) 12.0%, #0a0a0c); }
+  14.63% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
+  15.75% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
+  16.88% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
+  18.00% { background: color-mix(in srgb, var(--k) 45.0%, #0a0a0c); }
+  19.13% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
+  20.25% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
+  21.38% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
+  22.50% { background: color-mix(in srgb, var(--k) 12.0%, #0a0a0c); }
+  23.62% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
+  24.75% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
+  25.87% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
+  27.00% { background: color-mix(in srgb, var(--k) 45.0%, #0a0a0c); }
+  28.12% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
+  29.25% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
+  30.37% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
+  31.50% { background: color-mix(in srgb, var(--k) 12.0%, #0a0a0c); }
+  32.62% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
+  33.75% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
+  34.87% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
+  36.00% { background: color-mix(in srgb, var(--k) 45.0%, #0a0a0c); }
+  37.12% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
+  38.25% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
+  39.37% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
+  40.50% { background: color-mix(in srgb, var(--k) 12.0%, #0a0a0c); }
+  41.62% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
+  42.75% { background: color-mix(in srgb, var(--k) 28.4%, #0a0a0c); }
+  43.87% { background: color-mix(in srgb, var(--k) 39.7%, #0a0a0c); }
+  45.00% { background: color-mix(in srgb, var(--k) 44.1%, #0a0a0c); }
+  46.12% { background: color-mix(in srgb, var(--k) 39.0%, #0a0a0c); }
+  47.25% { background: color-mix(in srgb, var(--k) 27.8%, #0a0a0c); }
+  48.37% { background: color-mix(in srgb, var(--k) 16.9%, #0a0a0c); }
+  49.50% { background: color-mix(in srgb, var(--k) 12.7%, #0a0a0c); }
+  50.62% { background: color-mix(in srgb, var(--k) 17.0%, #0a0a0c); }
+  51.75% { background: color-mix(in srgb, var(--k) 26.7%, #0a0a0c); }
+  52.87% { background: color-mix(in srgb, var(--k) 35.8%, #0a0a0c); }
+  54.00% { background: color-mix(in srgb, var(--k) 38.8%, #0a0a0c); }
+  55.12% { background: color-mix(in srgb, var(--k) 34.3%, #0a0a0c); }
+  56.25% { background: color-mix(in srgb, var(--k) 25.4%, #0a0a0c); }
+  57.37% { background: color-mix(in srgb, var(--k) 17.2%, #0a0a0c); }
+  58.50% { background: color-mix(in srgb, var(--k) 14.2%, #0a0a0c); }
+  59.62% { background: color-mix(in srgb, var(--k) 17.3%, #0a0a0c); }
+  60.75% { background: color-mix(in srgb, var(--k) 23.9%, #0a0a0c); }
+  61.87% { background: color-mix(in srgb, var(--k) 29.5%, #0a0a0c); }
+  63.00% { background: color-mix(in srgb, var(--k) 31.1%, #0a0a0c); }
+  64.12% { background: color-mix(in srgb, var(--k) 27.9%, #0a0a0c); }
+  65.25% { background: color-mix(in srgb, var(--k) 22.3%, #0a0a0c); }
+  66.37% { background: color-mix(in srgb, var(--k) 17.6%, #0a0a0c); }
+  67.50% { background: color-mix(in srgb, var(--k) 16.0%, #0a0a0c); }
+  68.62% { background: color-mix(in srgb, var(--k) 17.6%, #0a0a0c); }
+  69.75% { background: color-mix(in srgb, var(--k) 20.8%, #0a0a0c); }
+  70.87% { background: color-mix(in srgb, var(--k) 23.2%, #0a0a0c); }
+  72.00% { background: color-mix(in srgb, var(--k) 23.5%, #0a0a0c); }
+  73.12% { background: color-mix(in srgb, var(--k) 21.8%, #0a0a0c); }
+  74.25% { background: color-mix(in srgb, var(--k) 19.5%, #0a0a0c); }
+  75.37% { background: color-mix(in srgb, var(--k) 17.9%, #0a0a0c); }
+  76.50% { background: color-mix(in srgb, var(--k) 17.4%, #0a0a0c); }
+  77.62% { background: color-mix(in srgb, var(--k) 17.9%, #0a0a0c); }
+  78.75% { background: color-mix(in srgb, var(--k) 18.6%, #0a0a0c); }
+  79.87% { background: color-mix(in srgb, var(--k) 18.8%, #0a0a0c); }
+  81.00% { background: color-mix(in srgb, var(--k) 18.6%, #0a0a0c); }
+  82.12% { background: color-mix(in srgb, var(--k) 18.3%, #0a0a0c); }
+  83.25% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  84.37% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  85.50% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  86.62% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  87.75% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  88.87% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  90.00% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  91.12% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  92.25% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  93.37% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  94.50% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  95.62% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  96.75% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  97.88% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  99.00% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+}
+
+@keyframes lfd-tab-alert {
+  0.00% { opacity: 1.000; }
+  1.12% { opacity: 0.897; }
+  2.25% { opacity: 0.650; }
+  3.38% { opacity: 0.403; }
+  4.50% { opacity: 0.300; }
+  5.62% { opacity: 0.403; }
+  6.75% { opacity: 0.650; }
+  7.88% { opacity: 0.897; }
+  9.00% { opacity: 1.000; }
+  10.13% { opacity: 0.897; }
+  11.25% { opacity: 0.650; }
+  12.38% { opacity: 0.403; }
+  13.50% { opacity: 0.300; }
+  14.63% { opacity: 0.403; }
+  15.75% { opacity: 0.650; }
+  16.88% { opacity: 0.897; }
+  18.00% { opacity: 1.000; }
+  19.13% { opacity: 0.897; }
+  20.25% { opacity: 0.650; }
+  21.38% { opacity: 0.403; }
+  22.50% { opacity: 0.300; }
+  23.62% { opacity: 0.403; }
+  24.75% { opacity: 0.650; }
+  25.87% { opacity: 0.897; }
+  27.00% { opacity: 1.000; }
+  28.12% { opacity: 0.897; }
+  29.25% { opacity: 0.650; }
+  30.37% { opacity: 0.403; }
+  31.50% { opacity: 0.300; }
+  32.62% { opacity: 0.403; }
+  33.75% { opacity: 0.650; }
+  34.87% { opacity: 0.897; }
+  36.00% { opacity: 1.000; }
+  37.12% { opacity: 0.897; }
+  38.25% { opacity: 0.650; }
+  39.37% { opacity: 0.403; }
+  40.50% { opacity: 0.300; }
+  41.62% { opacity: 0.405; }
+  42.75% { opacity: 0.654; }
+  43.87% { opacity: 0.900; }
+  45.00% { opacity: 1.000; }
+  46.12% { opacity: 0.903; }
+  47.25% { opacity: 0.674; }
+  48.37% { opacity: 0.457; }
+  49.50% { opacity: 0.380; }
+  50.62% { opacity: 0.487; }
+  51.75% { opacity: 0.709; }
+  52.87% { opacity: 0.918; }
+  54.00% { opacity: 1.000; }
+  55.12% { opacity: 0.924; }
+  56.25% { opacity: 0.754; }
+  57.37% { opacity: 0.601; }
+  58.50% { opacity: 0.558; }
+  59.62% { opacity: 0.644; }
+  60.75% { opacity: 0.805; }
+  61.87% { opacity: 0.947; }
+  63.00% { opacity: 1.000; }
+  64.12% { opacity: 0.954; }
+  65.25% { opacity: 0.857; }
+  66.37% { opacity: 0.778; }
+  67.50% { opacity: 0.765; }
+  68.62% { opacity: 0.820; }
+  69.75% { opacity: 0.907; }
+  70.87% { opacity: 0.976; }
+  72.00% { opacity: 1.000; }
+  73.12% { opacity: 0.982; }
+  74.25% { opacity: 0.950; }
+  75.37% { opacity: 0.930; }
+  76.50% { opacity: 0.935; }
+  77.62% { opacity: 0.957; }
+  78.75% { opacity: 0.982; }
+  79.87% { opacity: 0.996; }
+  81.00% { opacity: 1.000; }
+  82.12% { opacity: 0.999; }
+  83.25% { opacity: 0.998; }
+  84.37% { opacity: 1.000; }
+  85.50% { opacity: 0.967; }
+  86.62% { opacity: 0.892; }
+  87.75% { opacity: 0.817; }
+  88.87% { opacity: 0.742; }
+  90.00% { opacity: 0.667; }
+  91.12% { opacity: 0.592; }
+  92.25% { opacity: 0.517; }
+  93.37% { opacity: 0.442; }
+  94.50% { opacity: 0.367; }
+  95.62% { opacity: 0.292; }
+  96.75% { opacity: 0.217; }
+  97.88% { opacity: 0.142; }
+  99.00% { opacity: 0.067; }
+}

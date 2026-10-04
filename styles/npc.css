@@ -1,0 +1,1056 @@
+/* ==========================================================================
+   NPC Deck: the GM's board for every NPC in the fight (src/npc/NpcDeck.js).
+   Same palette as the cockpit, deliberately quieter: rows are slim, one opens.
+   ========================================================================== */
+
+#lancer-flight-deck-npc {
+  --npc-hostile: var(--lfd-warning);
+  --npc-neutral: var(--lfd-caution);
+  --npc-friendly: #4aa8ff;
+  --npc-secret: #b07cff;
+  position: relative;
+  z-index: auto;
+  flex: none;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  min-height: 0;
+  margin: 0 0 6px;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lfd-line) transparent;
+  color: var(--lfd-ink);
+  font-family: var(--lfd-font-data);
+  font-size: 11px;
+  line-height: 1.25;
+  pointer-events: auto;
+  user-select: none;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+#lancer-flight-deck-npc.lfd-dock-right {
+  align-self: flex-end;
+}
+
+#lancer-flight-deck-npc * {
+  box-sizing: border-box;
+}
+
+#lancer-flight-deck-npc button {
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+#lancer-flight-deck-npc button:focus-visible {
+  outline: 1px solid var(--lfd-accent);
+  outline-offset: -1px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-frame {
+  display: flex;
+  flex-direction: column;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.03), transparent 60px),
+    var(--lfd-plate);
+  border: 1px solid var(--lfd-line);
+  border-top: 2px solid var(--lfd-accent);
+  opacity: 0.96;
+}
+
+/* Header */
+#lancer-flight-deck-npc .lfd-npc-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 7px;
+  border-bottom: 1px solid var(--lfd-line);
+  background: var(--lfd-bg);
+}
+
+#lancer-flight-deck-npc .lfd-npc-badge {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 24px;
+  font-size: 14px;
+  color: var(--lfd-accent-ink);
+  background: linear-gradient(180deg, var(--lfd-accent), var(--lfd-accent-deep));
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 75% 100%, 0 100%);
+}
+
+#lancer-flight-deck-npc .lfd-npc-titles {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#lancer-flight-deck-npc .lfd-npc-kicker {
+  font: 600 7.5px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck-npc .lfd-npc-title {
+  font: 700 11.5px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+#lancer-flight-deck-npc .lfd-npc-count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-count b {
+  font: 700 12px/1 var(--lfd-font-display);
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck-npc .lfd-npc-count small {
+  font-size: 9px;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck-npc .lfd-npc-count span {
+  font: 600 7px/1 var(--lfd-font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lfd-ok);
+}
+
+#lancer-flight-deck-npc .lfd-npc-ctl {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  font-size: 10px;
+  color: var(--lfd-ink-dim);
+  background: var(--lfd-plate-2);
+  border: 1px solid var(--lfd-line);
+}
+
+#lancer-flight-deck-npc .lfd-npc-ctl:hover {
+  color: var(--lfd-ink);
+  border-color: var(--lfd-accent);
+}
+
+/* Roster */
+#lancer-flight-deck-npc .lfd-npc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+}
+
+#lancer-flight-deck-npc .lfd-npc-row {
+  --disp: var(--npc-hostile);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 4px 6px 5px 9px;
+  background: color-mix(in srgb, var(--lfd-bg) 70%, var(--lfd-plate));
+  border: 1px solid transparent;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+#lancer-flight-deck-npc .lfd-npc-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--disp);
+  opacity: 0.85;
+}
+
+#lancer-flight-deck-npc .lfd-npc-row.disp-0 { --disp: var(--npc-neutral); }
+#lancer-flight-deck-npc .lfd-npc-row.disp-1 { --disp: var(--npc-friendly); }
+#lancer-flight-deck-npc .lfd-npc-row.disp--2 { --disp: var(--npc-secret); }
+
+#lancer-flight-deck-npc .lfd-npc-row:hover {
+  background: color-mix(in srgb, var(--lfd-accent) 8%, var(--lfd-bg));
+  border-color: color-mix(in srgb, var(--lfd-accent) 35%, transparent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-row.is-selected {
+  border-color: color-mix(in srgb, var(--lfd-ink) 45%, transparent);
+}
+
+/* Whose turn it is */
+#lancer-flight-deck-npc .lfd-npc-row.is-turn {
+  background: color-mix(in srgb, var(--lfd-accent) 14%, var(--lfd-bg));
+  border-color: var(--lfd-accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--lfd-accent) 30%, transparent);
+}
+
+/* Already acted this round: still readable, but clearly not "up next" */
+#lancer-flight-deck-npc .lfd-npc-row.is-acted:not(.is-open) .lfd-npc-top,
+#lancer-flight-deck-npc .lfd-npc-row.is-acted:not(.is-open) .lfd-npc-bars {
+  opacity: 0.55;
+}
+
+#lancer-flight-deck-npc .lfd-npc-row.is-destroyed {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+#lancer-flight-deck-npc .lfd-npc-row.is-destroyed .lfd-npc-name {
+  text-decoration: line-through;
+}
+
+/* Damage: a red flash, and a harder kick when structure goes */
+#lancer-flight-deck-npc .lfd-npc-row.is-hit {
+  animation: lfd-npc-hit 0.9s ease-out;
+}
+
+#lancer-flight-deck-npc .lfd-npc-row.is-structure-hit {
+  animation: lfd-npc-hit 1.4s ease-out, lfd-npc-kick 0.45s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@keyframes lfd-npc-hit {
+  0% { background: color-mix(in srgb, var(--lfd-warning) 45%, var(--lfd-bg)); }
+  100% { background: color-mix(in srgb, var(--lfd-bg) 70%, var(--lfd-plate)); }
+}
+
+@keyframes lfd-npc-kick {
+  0%, 100% { transform: none; }
+  15% { transform: translateX(-4px); }
+  35% { transform: translateX(3px); }
+  60% { transform: translateX(-1px); }
+}
+
+#lancer-flight-deck-npc .lfd-npc-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+#lancer-flight-deck-npc .lfd-npc-turn {
+  flex: none;
+  width: 8px;
+  font-size: 8px;
+  color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-name {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font: 700 10px/1.3 var(--lfd-font-display);
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#lancer-flight-deck-npc .lfd-npc-name:hover {
+  color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-tier,
+#lancer-flight-deck-npc .lfd-npc-tpl {
+  flex: none;
+  padding: 0 3px;
+  font: 700 7.5px/1.5 var(--lfd-font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+  border: 1px solid var(--lfd-line);
+}
+
+#lancer-flight-deck-npc .lfd-npc-tpl {
+  color: var(--lfd-caution);
+  border-color: color-mix(in srgb, var(--lfd-caution) 45%, transparent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-spacer {
+  flex: 1 1 auto;
+}
+
+#lancer-flight-deck-npc .lfd-npc-targeted {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 9px;
+  color: var(--lfd-warning);
+}
+
+#lancer-flight-deck-npc .lfd-npc-targeted b {
+  width: 6px;
+  height: 6px;
+  background: var(--c);
+  transform: rotate(45deg);
+  box-shadow: 0 0 4px var(--c);
+}
+
+#lancer-flight-deck-npc .lfd-npc-acts {
+  flex: none;
+  display: flex;
+  gap: 2px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-acts i {
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--lfd-ok);
+  border-radius: 50%;
+}
+
+#lancer-flight-deck-npc .lfd-npc-acts i.is-on {
+  background: var(--lfd-ok);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--lfd-ok) 70%, transparent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-chev {
+  flex: none;
+  font-size: 8px;
+  color: var(--lfd-ink-dim);
+  transition: transform 150ms ease;
+}
+
+#lancer-flight-deck-npc .lfd-npc-row.is-open .lfd-npc-chev {
+  transform: rotate(180deg);
+  color: var(--lfd-accent);
+}
+
+/* Bars */
+#lancer-flight-deck-npc .lfd-npc-bars {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-bar {
+  position: relative;
+  flex: 1 1 0;
+  height: 11px;
+  overflow: hidden;
+  background: #0a0a0c;
+  border: 1px solid var(--lfd-line);
+}
+
+#lancer-flight-deck-npc .lfd-npc-bar.is-heat {
+  flex: 0.6 1 0;
+}
+
+#lancer-flight-deck-npc .lfd-npc-bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--lfd-ok);
+  transition: width 400ms ease;
+}
+
+#lancer-flight-deck-npc .lfd-npc-bar.lvl-caution > span { background: var(--lfd-caution); }
+#lancer-flight-deck-npc .lfd-npc-bar.lvl-warning > span { background: var(--lfd-warning); }
+#lancer-flight-deck-npc .lfd-npc-bar.is-heat > span { background: var(--lfd-heat-safe); }
+#lancer-flight-deck-npc .lfd-npc-bar.is-heat.is-danger > span { background: var(--lfd-heat-danger); }
+
+#lancer-flight-deck-npc .lfd-npc-bar > b {
+  position: relative;
+  display: block;
+  padding: 0 4px;
+  font: 700 9px/9px var(--lfd-font-data);
+  text-align: right;
+  color: #fff;
+  text-shadow: 0 0 2px #000, 0 0 2px #000;
+}
+
+#lancer-flight-deck-npc .lfd-npc-bar > b small {
+  font-size: 8px;
+  opacity: 0.8;
+}
+
+#lancer-flight-deck-npc .lfd-npc-pips {
+  flex: none;
+  display: flex;
+  gap: 2px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-pips i {
+  width: 6px;
+  height: 7px;
+  background: #24252a;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+
+#lancer-flight-deck-npc .lfd-npc-pips.is-structure i.is-on { background: var(--lfd-ink); }
+#lancer-flight-deck-npc .lfd-npc-pips.is-stress i.is-on { background: var(--lfd-heat-danger); }
+
+/* Conditions on the row */
+#lancer-flight-deck-npc .lfd-npc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-chips img {
+  width: 15px;
+  height: 15px;
+  border: none;
+  filter: drop-shadow(0 0 1px #000);
+}
+
+#lancer-flight-deck-npc .lfd-npc-chips img.is-lockon {
+  filter: drop-shadow(0 0 3px var(--lfd-warning));
+}
+
+#lancer-flight-deck-npc .lfd-npc-chip {
+  padding: 0 4px;
+  font: 700 8px/14px var(--lfd-font-display);
+  letter-spacing: 0.06em;
+  border: 1px solid currentColor;
+}
+
+#lancer-flight-deck-npc .lfd-npc-chip.is-burn { color: var(--lfd-heat-danger); }
+#lancer-flight-deck-npc .lfd-npc-chip.is-os { color: #6fc3ff; }
+
+/* Expanded */
+#lancer-flight-deck-npc .lfd-npc-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 3px;
+  padding-top: 5px;
+  border-top: 1px solid var(--lfd-line);
+  cursor: default;
+}
+
+#lancer-flight-deck-npc .lfd-npc-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2px;
+  margin: 0;
+}
+
+#lancer-flight-deck-npc .lfd-npc-stats div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 0;
+  background: #0d0d0f;
+  border: 1px solid #26272c;
+}
+
+#lancer-flight-deck-npc .lfd-npc-stats dt {
+  margin: 0;
+  font: 600 6.5px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.1em;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck-npc .lfd-npc-stats dd {
+  margin: 0;
+  font: 700 11px/1.2 var(--lfd-font-data);
+}
+
+#lancer-flight-deck-npc .lfd-npc-adjust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-adjust-label {
+  margin: 0 3px 0 2px;
+  font: 700 7.5px/1 var(--lfd-font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck-npc .lfd-npc-adjust-label:not(:first-child) {
+  margin-left: 8px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-adjust button {
+  min-width: 24px;
+  padding: 2px 3px;
+  font: 700 9px/1.2 var(--lfd-font-data);
+  background: var(--lfd-plate-2);
+  border: 1px solid var(--lfd-line);
+}
+
+#lancer-flight-deck-npc .lfd-npc-adjust button:hover {
+  border-color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature-group h5 {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 3px;
+  padding: 0;
+  border: none;
+  font: 600 7.5px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature-group h5::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(90deg, var(--lfd-line), transparent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 3px 6px 3px 4px;
+  background: var(--lfd-plate-2);
+  border: 1px solid var(--lfd-line);
+  border-left: 2px solid var(--lfd-accent-deep);
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature span {
+  overflow: hidden;
+  font: 600 8.5px/1.25 var(--lfd-font-display);
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature i {
+  font-size: 10px;
+  color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature em {
+  font: 700 8px/1 var(--lfd-font-data);
+  font-style: normal;
+  color: var(--lfd-ok);
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature:hover {
+  background: color-mix(in srgb, var(--lfd-accent) 16%, var(--lfd-plate-2));
+  border-color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature.is-passive {
+  border-left-color: var(--lfd-line);
+  opacity: 0.8;
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature:is(.is-spent, .is-destroyed, .is-uncharged) {
+  opacity: 0.5;
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature.is-uncharged em.is-recharge,
+#lancer-flight-deck-npc .lfd-npc-feature.is-spent em {
+  color: var(--lfd-warning);
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature.is-destroyed span {
+  text-decoration: line-through;
+}
+
+#lancer-flight-deck-npc .lfd-npc-conds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-conds button {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 22px;
+  background: #0d0d0f;
+  border: 1px solid #26272c;
+  opacity: 0.55;
+}
+
+#lancer-flight-deck-npc .lfd-npc-conds button img {
+  width: 16px;
+  height: 16px;
+  border: none;
+}
+
+#lancer-flight-deck-npc .lfd-npc-conds button:hover {
+  opacity: 1;
+  border-color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-conds button.is-on {
+  opacity: 1;
+  background: color-mix(in srgb, var(--lfd-caution) 22%, #0d0d0f);
+  border-color: var(--lfd-caution);
+}
+
+#lancer-flight-deck-npc .lfd-npc-cmds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-cmds button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px;
+  font: 700 8px/1.3 var(--lfd-font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--lfd-plate-2);
+  border: 1px solid var(--lfd-line);
+}
+
+#lancer-flight-deck-npc .lfd-npc-cmds button:hover {
+  border-color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-cmds button.is-primary {
+  color: var(--lfd-accent-ink);
+  background: var(--lfd-accent);
+  border-color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-empty {
+  margin: 10px;
+  font-size: 10px;
+  color: var(--lfd-ink-dim);
+  text-align: center;
+}
+
+#lancer-flight-deck-npc .lfd-npc-foot {
+  padding: 4px 8px 5px;
+  font: 600 6.5px/1.3 var(--lfd-font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+  border-top: 1px solid var(--lfd-line);
+}
+
+/* Clear the resize grip, which sits over this corner when scrolled to the end */
+#lancer-flight-deck-npc:not(.lfd-dock-right) .lfd-npc-foot {
+  padding-right: 20px;
+}
+
+#lancer-flight-deck-npc.lfd-dock-right .lfd-npc-foot {
+  padding-left: 20px;
+}
+
+/* Collapsed: just the header bar */
+#lancer-flight-deck-npc.is-collapsed .lfd-npc-frame {
+  border-bottom-width: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   Moving and resizing (src/ui/DeckFrame.js)
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck-npc .lfd-npc-head {
+  cursor: grab;
+}
+
+#lancer-flight-deck-npc .lfd-npc-head :is(button, img) {
+  cursor: pointer;
+}
+
+#lancer-flight-deck-npc .lfd-npc-grip {
+  flex: none;
+  margin: 0 -2px 0 -3px;
+  font-size: 9px;
+  color: var(--lfd-ink-dim);
+  opacity: 0.6;
+}
+
+#lancer-flight-deck-npc .lfd-npc-head:hover .lfd-npc-grip {
+  opacity: 1;
+  color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc.lfd-floating {
+  position: fixed;
+  z-index: var(--z-index-app, 30);
+  margin: 0;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.5);
+}
+
+#lancer-flight-deck-npc.is-dragging,
+#lancer-flight-deck-npc.is-dragging .lfd-npc-head {
+  cursor: grabbing;
+  user-select: none;
+}
+
+#lancer-flight-deck-npc.is-dragging {
+  opacity: 0.9;
+}
+
+#lancer-flight-deck-npc .lfd-resize {
+  position: sticky;
+  bottom: 0;
+  z-index: 8;
+  align-self: flex-end;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -16px; /* overlays the frame corner instead of adding height */
+  cursor: nwse-resize;
+  background:
+    linear-gradient(135deg, transparent 0 45%, var(--lfd-ink-dim) 45% 52%, transparent 52% 64%,
+      var(--lfd-ink-dim) 64% 71%, transparent 71% 83%, var(--lfd-ink-dim) 83% 90%, transparent 90%);
+  opacity: 0.55;
+  touch-action: none;
+}
+
+#lancer-flight-deck-npc .lfd-resize:hover,
+#lancer-flight-deck-npc .lfd-resize:focus-visible,
+#lancer-flight-deck-npc.is-resizing .lfd-resize {
+  opacity: 1;
+  outline: none;
+  filter: drop-shadow(0 0 2px var(--lfd-accent));
+}
+
+/* Docked right, the grip moves to the outer (left) corner */
+#lancer-flight-deck-npc.lfd-dock-right .lfd-resize {
+  align-self: flex-start;
+  cursor: nesw-resize;
+  transform: scaleX(-1);
+}
+
+#lancer-flight-deck-npc.is-collapsed .lfd-resize {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Initiative strip
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck-npc .lfd-init {
+  padding: 5px 6px 6px;
+  border-bottom: 1px solid var(--lfd-line);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--lfd-accent) 7%, transparent), transparent),
+    color-mix(in srgb, var(--lfd-bg) 85%, var(--lfd-plate));
+}
+
+#lancer-flight-deck-npc .lfd-init-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+
+#lancer-flight-deck-npc .lfd-init-title {
+  font: 600 7.5px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-init-sum {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+  font: 600 7.5px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#lancer-flight-deck-npc .lfd-init-sum b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck-npc .lfd-init-sum b i {
+  margin-right: 3px;
+  font-size: 7px;
+  color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-init-sum em {
+  font-style: normal;
+}
+
+#lancer-flight-deck-npc .lfd-init-sum .is-ready { color: var(--lfd-ok); }
+#lancer-flight-deck-npc .lfd-init-sum .is-done { color: var(--lfd-ink-dim); }
+
+#lancer-flight-deck-npc .lfd-init-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 5px 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#lancer-flight-deck-npc .lfd-init-unit {
+  --ring: var(--lfd-warning);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 40px;
+}
+
+#lancer-flight-deck-npc .lfd-init-unit.side-player { --ring: #4aa8ff; }
+#lancer-flight-deck-npc .lfd-init-unit.side-friendly { --ring: var(--lfd-ok); }
+#lancer-flight-deck-npc .lfd-init-unit.side-neutral { --ring: var(--lfd-caution); }
+
+#lancer-flight-deck-npc .lfd-init-portrait {
+  position: relative;
+  display: block;
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  background: color-mix(in srgb, var(--ring) 55%, #0a0a0c);
+  clip-path: polygon(25% 2%, 75% 2%, 100% 50%, 75% 98%, 25% 98%, 0 50%);
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+#lancer-flight-deck-npc .lfd-init-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: none;
+  background: #0d0d0f;
+  clip-path: polygon(25% 2%, 75% 2%, 100% 50%, 75% 98%, 25% 98%, 0 50%);
+}
+
+#lancer-flight-deck-npc .lfd-init-portrait:hover,
+#lancer-flight-deck-npc .lfd-init-portrait:focus-visible {
+  transform: scale(1.1);
+  background: var(--ring);
+  outline: none;
+}
+
+#lancer-flight-deck-npc .lfd-init-badge {
+  position: absolute;
+  right: 3px;
+  bottom: 4px;
+  display: grid;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  font-size: 7px;
+  color: #fff;
+  background: rgb(0 0 0 / 0.75);
+  border-radius: 50%;
+}
+
+/* Acting now: lit up and breathing */
+#lancer-flight-deck-npc .lfd-init-unit.is-acting .lfd-init-portrait {
+  background: var(--lfd-accent);
+  animation: lfd-init-acting 1.6s ease-in-out infinite;
+}
+
+#lancer-flight-deck-npc .lfd-init-unit.is-acting .lfd-init-badge {
+  color: var(--lfd-accent-ink);
+  background: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-init-unit.is-acting .lfd-init-name {
+  color: var(--lfd-accent);
+}
+
+/* Done for the round: still there, clearly spent */
+#lancer-flight-deck-npc .lfd-init-unit:is(.is-done, .is-defeated) .lfd-init-portrait {
+  background: #3a3c42;
+}
+
+#lancer-flight-deck-npc .lfd-init-unit:is(.is-done, .is-defeated) .lfd-init-portrait img {
+  filter: grayscale(1) brightness(0.55);
+}
+
+#lancer-flight-deck-npc .lfd-init-unit:is(.is-done, .is-defeated) .lfd-init-name {
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck-npc .lfd-init-unit.is-defeated .lfd-init-badge {
+  color: var(--lfd-warning);
+}
+
+#lancer-flight-deck-npc .lfd-init-unit.is-hidden .lfd-init-portrait img {
+  opacity: 0.55;
+}
+
+#lancer-flight-deck-npc .lfd-init-pips {
+  display: flex;
+  gap: 2px;
+  height: 4px;
+}
+
+#lancer-flight-deck-npc .lfd-init-pips i {
+  width: 6px;
+  height: 4px;
+  background: #2a2b30;
+  transform: skewX(-20deg);
+}
+
+#lancer-flight-deck-npc .lfd-init-pips i.is-on {
+  background: var(--lfd-ok);
+  box-shadow: 0 0 3px color-mix(in srgb, var(--lfd-ok) 70%, transparent);
+}
+
+#lancer-flight-deck-npc .lfd-init-name {
+  max-width: 100%;
+  overflow: hidden;
+  font: 600 6.5px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Between "still to act" and "done" */
+#lancer-flight-deck-npc .lfd-init-divider {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  justify-content: center;
+  width: 12px;
+}
+
+#lancer-flight-deck-npc .lfd-init-divider span {
+  padding-left: 2px;
+  font: 600 6px/1 var(--lfd-font-display);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+  border-left: 1px solid var(--lfd-line);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+@keyframes lfd-init-acting {
+  0%, 100% { filter: drop-shadow(0 0 0 var(--lfd-accent)); }
+  50% { filter: drop-shadow(0 0 5px var(--lfd-accent)); }
+}
+
+/* Not in the combat (selected on the map) */
+#lancer-flight-deck-npc .lfd-npc-tpl.is-outside {
+  color: var(--lfd-ink-dim);
+  border-style: dashed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #lancer-flight-deck-npc .lfd-init-unit.is-acting .lfd-init-portrait,
+  #lancer-flight-deck-npc .lfd-npc-row {
+    animation: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   "Look here" arrow, while the marked token is off screen (src/npc/LookHere.js)
+   -------------------------------------------------------------------------- */
+
+.lfd-look-arrow {
+  position: fixed;
+  z-index: calc(var(--z-index-app, 30) + 5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  translate: -50% -50%;
+  pointer-events: none;
+  color: #ff2a2a;
+  filter: drop-shadow(0 0 6px rgb(255 42 42 / 0.8));
+  animation: lfd-look-arrow 0.9s ease-in-out infinite;
+}
+
+.lfd-look-arrow[hidden] {
+  display: none;
+}
+
+.lfd-look-arrow i {
+  font-size: 30px;
+  transform: rotate(var(--rot, 0rad));
+}
+
+.lfd-look-arrow span {
+  padding: 1px 5px;
+  font: 700 10px/1.3 "Orbitron", sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgb(120 0 0 / 0.85);
+  border: 1px solid #ff2a2a;
+}
+
+@keyframes lfd-look-arrow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* Big fights: smaller portraits */
+#lancer-flight-deck-npc .lfd-init-strip.is-crowded {
+  gap: 4px 3px;
+}
+
+#lancer-flight-deck-npc .lfd-init-strip.is-crowded .lfd-init-unit {
+  width: 32px;
+}
+
+#lancer-flight-deck-npc .lfd-init-strip.is-crowded .lfd-init-portrait {
+  width: 29px;
+  height: 29px;
+}
+
+#lancer-flight-deck-npc .lfd-init-strip.is-crowded .lfd-init-name {
+  font-size: 5.5px;
+}
+
+/* No real art (only LANCER's placeholder icon): a clean glyph in the side's colour instead */
+#lancer-flight-deck-npc .lfd-init-glyph {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 17px;
+  color: var(--ring);
+  background: #0d0d0f;
+  clip-path: polygon(25% 2%, 75% 2%, 100% 50%, 75% 98%, 25% 98%, 0 50%);
+}
+
+#lancer-flight-deck-npc .lfd-init-strip.is-crowded .lfd-init-glyph {
+  font-size: 14px;
+}
+
+#lancer-flight-deck-npc .lfd-init-unit:is(.is-done, .is-defeated) .lfd-init-glyph {
+  color: #55575e;
+}
