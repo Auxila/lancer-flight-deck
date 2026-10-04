@@ -114,6 +114,8 @@ export class TokenEffects {
       this.#flushScheduled = false;
       const batch = [...this.#queued];
       this.#queued.clear();
+      // The canvas is tearing down or still drawing; canvasReady re-syncs every token
+      if (!canvas?.ready) return;
       for (const [token, opts] of batch) this.#sync(token, opts);
     });
   }
@@ -140,6 +142,7 @@ export class TokenEffects {
   }
 
   #clear() {
+    this.#queued.clear();
     for (const rig of this.#rigs.values()) rig.destroy();
     this.#rigs.clear();
     this.#stopTicker();

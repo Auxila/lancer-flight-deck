@@ -316,7 +316,9 @@ function weaponsView(vm, entries, view, ctx) {
   vm.notice = loc(`LFD.Hud.WeaponNote.${mode}`);
   const rows = mountedWeapons(ctx.actor).map(w => {
     const key = `weapon:${w.weapon.uuid}`;
-    entries.set(key, { key, type: "weapon", weapon: w.weapon, mode, spend: WEAPON_MODES[mode], tip: () => weaponTip(w) });
+    // Overwatch is one reaction whichever weapon fires it, so it's recorded under the basic tile
+    const reactionKey = mode === "overwatch" ? "basic:overwatch" : undefined;
+    entries.set(key, { key, type: "weapon", weapon: w.weapon, mode, spend: WEAPON_MODES[mode], reactionKey, tip: () => weaponTip(w) });
     const state = itemState(w.weapon);
     const uses = usesOf(w.weapon);
     return {

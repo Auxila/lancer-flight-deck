@@ -244,6 +244,10 @@ export function registerConditionQuery() {
     if (!isRemoteLockOn(op)) throw new Error("Rejected: only Lock On can be applied to tokens you don't own");
     const actor = await fromUuid(actorUuid);
     if (!(actor instanceof Actor)) throw new Error("No such actor");
+    // Only a token in play that players can see: never the sidebar base of unlinked tokens, never a hidden token
+    // (a world actor counts through its linked tokens; a placed token can be linked whatever the prototype says)
+    const tokens = actor.isToken ? [actor.token] : (actor.getDependentTokens?.({ linked: true }) ?? []);
+    if (!tokens.some(t => t && !t.hidden)) throw new Error("Rejected: not a visible token in play");
     console.info(`Flight Deck | ${game.users.get(requester)?.name ?? "A player"} applied`, op, "to", actor.name);
     await execute(actor, op);
     return true;

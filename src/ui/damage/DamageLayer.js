@@ -162,6 +162,7 @@ export class DamageLayer {
     this.#steam?.stop();
     this.element?.remove();
     this.element = null;
+    this.#fx = null; // staggered impacts still queued on the clock see this and stand down
   }
 
   /* -------------------------------------------- */
@@ -311,6 +312,7 @@ export class DamageLayer {
     this.#mending = true;
     this.#mendTimer = clock.after(() => {
       this.#mending = false;
+      if (!this.element) return; // closed while mending
       this.layout({ redraw: false });
       this.#draw(this.#levels?.fractures ?? keep);
       this.#syncSteam();

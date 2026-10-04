@@ -398,7 +398,7 @@ export class FlightDeckManager {
       return false;
     }
     if (ok && spend) await this.#spend(actor, spend);
-    if (ok && entry.spend === "reaction") await recordReaction(actor, entry.key);
+    if (ok && entry.spend === "reaction") await recordReaction(actor, entry.reactionKey ?? entry.key);
     return ok;
   }
 
