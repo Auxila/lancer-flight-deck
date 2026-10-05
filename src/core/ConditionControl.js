@@ -228,7 +228,7 @@ async function applyOperation(op, actors, label) {
     } catch (err) {
       failed++;
       console.warn(`Flight Deck | Could not apply ${label} to ${actor.name}`, err);
-      ui.notifications.warn(game.i18n.format("LFD.Apply.Failed", { name: actor.name, reason: err.message }));
+      ui.notifications.warn(game.i18n.format("LFD.Apply.Failed", { name: actor.token?.name ?? actor.name, reason: err.message }));
     }
   }
   return { applied, failed };

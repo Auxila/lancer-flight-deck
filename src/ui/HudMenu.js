@@ -1,5 +1,5 @@
 import { planWeapons } from "../actions/weaponRules.js";
-import { mountedWeapons } from "../actions/catalog.js";
+import { itemState, mountedWeapons } from "../actions/catalog.js";
 import { MODULE_ID, TEMPLATE_ROOT } from "../constants.js";
 import { buildMenu } from "../actions/menus.js";
 import { usedReactions } from "../actions/runner.js";
@@ -122,6 +122,8 @@ export class HudMenu {
     const actor = this.manager.actor;
     const t = this.manager.telemetry;
     if (!actor || !t) return this.close();
+    // A weapon action in progress was another mech's: its attacks and spending don't carry over
+    if (this.view.sub && this.view.sub.actor !== actor.uuid) this.view = { menu: this.view.menu };
     const ctx = this.#context();
     const { vm, entries } = buildMenu(this.view, ctx);
     const key = JSON.stringify(vm);
@@ -287,7 +289,7 @@ export class HudMenu {
       return this.manager.refresh();
     }
     if (entry.type === "weapons") {
-      this.view = { menu: this.view.menu, sub: { type: "weapons", mode: entry.def.id, fired: [] } };
+      this.view = { menu: this.view.menu, sub: { type: "weapons", mode: entry.def.id, fired: [], actor: this.manager.actor?.uuid } };
       return this.render({ force: true, animate: true });
     }
     // No (more) Auxiliary follow-ups: the weapon action is over
@@ -325,9 +327,9 @@ export class HudMenu {
   /** Note the attack; once the rules leave nothing more to fire, back to the menu. */
   #afterWeapon(entry) {
     const sub = this.view?.sub;
-    if (!sub) return;
+    if (!sub || sub.actor !== entry.weapon.parent?.uuid) return;
     sub.fired = [...(sub.fired ?? []), { id: entry.weapon.uuid, mount: entry.mount, size: entry.size, aux: !!entry.aux }];
-    const weapons = mountedWeapons(this.manager.actor).map(w => ({ id: w.weapon.uuid, mount: w.mountIndex, size: w.size }));
+    const weapons = mountedWeapons(this.manager.actor).map(w => ({ id: w.weapon.uuid, mount: w.mountIndex, size: w.size, ready: itemState(w.weapon) === "ready" }));
     if (planWeapons(sub.mode, weapons, sub.fired).phase === "done") this.view = { menu: this.view.menu };
   }
 

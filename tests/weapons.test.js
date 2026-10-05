@@ -61,3 +61,21 @@ test("barrage: one Auxiliary follow-up per mount fired, never one already fired"
   plan = planWeapons("barrage", ALL, [shot(RIFLE), shot(PISTOL)]); // both primaries on mount 0
   assert.equal(plan.phase, "done"); // the only Auxiliary there has already fired
 });
+
+test("a weapon that can't fire is barred, and never counts as a follow-up", () => {
+  const loadout = [RIFLE, { ...PISTOL, ready: false }, KNIFE, NEXUS];
+  let plan = planWeapons("skirmish", loadout);
+  assert.equal(plan.options.get("pistol").reason, "notReady");
+  plan = planWeapons("skirmish", loadout, [shot(RIFLE)]);
+  assert.equal(plan.phase, "done"); // the only Auxiliary on the rifle's mount is unloaded
+});
+
+test("barrage: when nothing else can fire, the first attack ends the main attacks", () => {
+  const lone = [RIFLE, { ...PISTOL, ready: false }, { ...HMG, ready: false }];
+  let plan = planWeapons("barrage", lone, [shot(RIFLE)]);
+  assert.equal(plan.phase, "done"); // no second weapon, and the follow-up is unloaded
+  plan = planWeapons("barrage", [RIFLE, PISTOL, { ...HMG, ready: false }], [shot(PISTOL)]);
+  assert.equal(plan.phase, "primary"); // the rifle can still be the second attack
+  plan = planWeapons("barrage", [RIFLE, PISTOL], [shot(RIFLE), shot(PISTOL)]);
+  assert.equal(plan.phase, "done");
+});

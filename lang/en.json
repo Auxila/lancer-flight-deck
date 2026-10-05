@@ -597,7 +597,8 @@
         "superheavyWhole": "Whole Barrage",
         "notAux": "Not Auxiliary",
         "otherMount": "Other mount",
-        "auxUsed": "Used"
+        "auxUsed": "Used",
+        "notReady": "Can't fire"
       },
       "WeaponBlockedTip": {
         "fired": "That weapon has already fired in this action.",
@@ -605,7 +606,8 @@
         "superheavyWhole": "A Superheavy weapon takes the whole Barrage: fire it as the first attack.",
         "notAux": "Only an Auxiliary weapon can make the follow-up attack.",
         "otherMount": "The follow-up must come from a mount that fired.",
-        "auxUsed": "That mount has already made its follow-up attack."
+        "auxUsed": "That mount has already made its follow-up attack.",
+        "notReady": "That weapon can't fire right now: it's destroyed, unloaded or out of uses."
       }
     },
     "Basic": {
@@ -822,7 +824,10 @@
         "Release": "Deselect all",
         "Apply": "Click: apply to all {n} selected ({have} of {n} already have it)",
         "Remove": "Click: remove from all {n} selected"
-      }
+      },
+      "CheckQueued": "{name}'s {kind} check is next: it opens once the one that's up is rolled or cancelled.",
+      "CheckStructure": "structure",
+      "CheckOverheat": "overheat"
     }
   }
 }

@@ -313,7 +313,7 @@ function weaponsView(vm, entries, view, ctx) {
   vm.readouts.push(targetReadout(ctx), defenseReadout(ctx, "evasion"));
   const mounted = mountedWeapons(ctx.actor);
   const fired = view.sub.fired ?? [];
-  const plan = planWeapons(mode, mounted.map(w => ({ id: w.weapon.uuid, mount: w.mountIndex, size: w.size })), fired);
+  const plan = planWeapons(mode, mounted.map(w => ({ id: w.weapon.uuid, mount: w.mountIndex, size: w.size, ready: itemState(w.weapon) === "ready" })), fired);
   const followUp = plan.phase === "aux";
   if (mode === "barrage") vm.readouts.push({ label: loc("LFD.Hud.Readout.Attacks"), value: `${plan.made}/${plan.needed}` });
   if (followUp) vm.title = loc("LFD.Hud.AuxTitle");
@@ -324,6 +324,7 @@ function weaponsView(vm, entries, view, ctx) {
     const key = `weapon:${w.weapon.uuid}`;
     const option = plan.options.get(w.weapon.uuid);
     const barred = option && !option.allowed ? option.reason : null;
+    const shownBarred = barred === "notReady" ? null : barred; // its own state says why
     // Overwatch is one reaction whichever weapon fires it, so it's recorded under the basic tile
     const reactionKey = mode === "overwatch" ? "basic:overwatch" : undefined;
     entries.set(key, {
@@ -332,7 +333,7 @@ function weaponsView(vm, entries, view, ctx) {
       spend: fired.length ? null : WEAPON_MODES[mode],
       reactionKey, blocked: barred, tip: () => weaponTip(w),
     });
-    const state = barred ? "used" : itemState(w.weapon);
+    const state = shownBarred ? "used" : itemState(w.weapon);
     const uses = usesOf(w.weapon);
     return {
       key,
@@ -340,10 +341,11 @@ function weaponsView(vm, entries, view, ctx) {
       label: w.weapon.name,
       sub: [w.mount, weaponLine(w.weapon)].filter(Boolean).join(" · "),
       state,
-      readout: barred ? loc(`LFD.Hud.WeaponBlocked.${barred}`) : state !== "ready" ? loc(`LFD.Hud.State.${state}`) : uses ? `${uses.value}/${uses.max}` : null,
+      readout: shownBarred ? loc(`LFD.Hud.WeaponBlocked.${shownBarred}`) : state !== "ready" ? loc(`LFD.Hud.State.${state}`) : uses ? `${uses.value}/${uses.max}` : null,
     };
   });
-  if (followUp) {
+  // Once anything has fired, the action can end here (skip a Barrage's second attack, or a follow-up)
+  if (fired.length) {
     entries.set("weapons:done", { key: "weapons:done", type: "done", tip: () => `<div class="lfd-tip"><p>${foundry.utils.escapeHTML(loc("LFD.Hud.AuxDoneTip"))}</p></div>` });
     rows.push({ key: "weapons:done", icon: "fa-solid fa-check", label: loc("LFD.Hud.AuxDone"), sub: loc("LFD.Hud.AuxDoneSub"), state: "ready", readout: null });
   }

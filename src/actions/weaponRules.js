@@ -15,11 +15,12 @@ export const AUXILIARY = "Auxiliary";
 /**
  * What each weapon may do next in this action.
  * @param {"skirmish"|"barrage"|"overwatch"} mode
- * @param {Array<{id: string, mount: number, size: string}>} weapons   Mounted weapons (mount = mount index)
+ * @param {Array<{id: string, mount: number, size: string, ready?: boolean}>} weapons   Mounted weapons (mount = mount index;
+ *   ready: false for a weapon that can't fire now, destroyed, unloaded or out of uses)
  * @param {Array<{id: string, mount: number, size: string, aux?: boolean}>} [fired]  Attacks made so far this action
  * @returns {{phase: "primary"|"aux"|"done", made: number, needed: number,
  *            options: Map<string, {allowed: boolean, reason: string|null, aux: boolean}>}}
- *   reason: "fired" | "superheavyBarrage" | "superheavyWhole" | "notAux" | "otherMount" | "auxUsed"
+ *   reason: "fired" | "notReady" | "superheavyBarrage" | "superheavyWhole" | "notAux" | "otherMount" | "auxUsed"
  */
 export function planWeapons(mode, weapons, fired = []) {
   const barrage = mode === "barrage";
@@ -28,7 +29,9 @@ export function planWeapons(mode, weapons, fired = []) {
   const firedIds = new Set(fired.map(f => f.id));
   const superheavy = primaries.some(f => f.size === SUPERHEAVY);
   const needed = barrage ? (superheavy ? 1 : 2) : 1;
-  const primaryDone = primaries.length >= needed;
+  // A Barrage whose second attack can't be made (nothing else ready to fire) moves on after the first
+  const canStillFire = weapons.some(w => w.ready !== false && !firedIds.has(w.id) && w.size !== SUPERHEAVY);
+  const primaryDone = primaries.length >= needed || (primaries.length > 0 && !canStillFire);
   const firedMounts = new Set(primaries.map(f => f.mount));
   const auxMounts = new Set(follow.map(f => f.mount));
 
@@ -36,6 +39,7 @@ export function planWeapons(mode, weapons, fired = []) {
   for (const w of weapons) {
     let reason = null;
     if (firedIds.has(w.id)) reason = "fired";
+    else if (w.ready === false) reason = "notReady";
     else if (!primaryDone) {
       if (w.size === SUPERHEAVY && !barrage) reason = "superheavyBarrage";
       else if (w.size === SUPERHEAVY && primaries.length > 0) reason = "superheavyWhole";

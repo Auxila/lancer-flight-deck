@@ -81,7 +81,8 @@ export function mountedWeapons(actor) {
  */
 export function tagsOf(item) {
   const s = item?.system ?? {};
-  return s.all_tags ?? s.tags ?? [];
+  const seen = new Set();
+  return [...(s.all_tags ?? []), ...(s.tags ?? [])].filter(t => t && !seen.has(t.lid) && seen.add(t.lid));
 }
 
 /** Limited uses of an item, or null when unlimited. */

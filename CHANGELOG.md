@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.2
+
+Fixes from a bug hunt (with Gemini reviewing alongside):
+
+- **NPC Deck HP and heat:** steps that take several NPCs to 0 HP (or over their heat cap) at once no longer lose structure or overheat checks. LANCER keeps one such prompt open at a time and cancels the older one, so the checks now open one after another, with a notice naming the NPC whose check is next. Quick repeated clicks on one NPC all count, and the batch bar's × deselects only the NPCs it lists.
+- **Weapon picker:** switching to another mech mid-action starts its weapon action fresh (it used to inherit the first mech's attacks and spend nothing). A Barrage that can't make a second attack moves on after the first, a **Done** button ends the action once anything has fired, and a weapon that can't fire (destroyed, unloaded, out of uses) is barred with the reason.
+- **Damage after a hit:** opens only where LANCER's card offers ROLL DAMAGE (a tech attack only if it's an invade), and never waits on a prompt that's no longer on screen.
+- Tags read from both a weapon's profiles and its base, once each; notices use token names (Squad 2, not its base actor's name).
+
 ## 0.6.1
 
 **Damage after a hit**

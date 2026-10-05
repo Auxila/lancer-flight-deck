@@ -172,7 +172,7 @@ Skirmish, Barrage and Overwatch open a weapon picker that follows LANCER's mount
 
 - **Superheavy** weapons only fire in a Barrage, and take the whole Barrage: elsewhere they're dimmed with the reason, and clicking one explains why.
 - After the main attack(s) the picker turns into an **Auxiliary follow-up** step listing only the weapons that may still fire: a different Auxiliary on the same mount after a Skirmish or Overwatch, and one Auxiliary on each mount that fired after a Barrage (never one that already fired). **Done** ends the action.
-- Only the first attack spends the action; a Barrage's second attack and every follow-up are free. Follow-ups deal no bonus damage, which the picker reminds you of; LANCER's attack prompt is where you leave it off.
+- Only the first attack spends the action; a Barrage's second attack and every follow-up are free. **Done** ends the action at any point once something has fired; weapons that can't fire (destroyed, unloaded, out of uses) are barred with the reason. Follow-ups deal no bonus damage, which the picker reminds you of; LANCER's attack prompt is where you leave it off.
 
 ## Damage after a hit
 
@@ -234,7 +234,7 @@ collapses and expands it). Players never see it.
 
 Select two or more NPC tokens on the map (drag a box, or shift-click tokens or initiative portraits) and a **batch bar** appears at the top of the deck:
 
-- HP and heat steps apply to every selected NPC, each one exactly as if you'd stepped its own row, so LANCER's structure and overheat prompts still come up per NPC.
+- HP and heat steps apply to every selected NPC, each one exactly as if you'd stepped its own row. When several NPCs drop to 0 HP (or go over their heat cap) at once, their structure (or overheat) checks open one after another, since LANCER only keeps one such prompt open; a notice says whose check is next.
 - Condition buttons show whether none, some (half-lit) or all of the selection have it. A click gives it to the ones without it; when all have it, a click removes it from all. The hover card says how many have it.
 - The × clears the selection.
 

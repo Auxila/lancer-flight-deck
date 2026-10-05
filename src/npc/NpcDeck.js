@@ -528,14 +528,72 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     if (actor) await NpcDeck.#adjust(actor, target.dataset.resource, Number(target.dataset.delta) || 0);
   }
 
-  /** HP or heat by a step. LANCER's own update hook starts Structure / Overheat when warranted. */
-  static async #adjust(actor, key, delta) {
+  /**
+   * HP or heat by a step. One NPC's steps run in order, so quick clicks each count (they read the value
+   * the previous step wrote instead of the same stale one).
+   */
+  static #adjust(actor, key, delta) {
+    const prev = NpcDeck.#steps.get(actor.uuid) ?? Promise.resolve();
+    const step = prev.then(() => NpcDeck.#adjustNow(actor, key, delta));
+    const tail = step.catch(err => console.error("Flight Deck |", err));
+    NpcDeck.#steps.set(actor.uuid, tail);
+    tail.then(() => NpcDeck.#steps.get(actor.uuid) === tail && NpcDeck.#steps.delete(actor.uuid));
+    return step;
+  }
+
+  /** Actor uuid -> its last queued step. */
+  static #steps = new Map();
+
+  /** LANCER's own update hook starts Structure / Overheat when warranted. */
+  static async #adjustNow(actor, key, delta) {
     const path = key === "heat" ? "system.heat.value" : "system.hp.value";
     const current = Number(foundry.utils.getProperty(actor, path)) || 0;
     const max = Number(foundry.utils.getProperty(actor, key === "heat" ? "system.heat.max" : "system.hp.max")) || 0;
     // HP may go below 0 (LANCER carries it into the next structure); heat can exceed the cap
     const next = key === "heat" ? Math.max(0, current + delta) : Math.min(max, current + delta);
-    if (next !== current) await actor.update({ [path]: next });
+    if (next === current) return;
+    const s = actor.system ?? {};
+    const prompts = key === "heat" ? next > max && Number(s.stress?.value) > 0 : next <= 0 && Number(s.structure?.value) > 0;
+    if (!prompts) return actor.update({ [path]: next });
+    // LANCER keeps one Structure (or Overheat) prompt open at a time and cancels the older one when
+    // another opens, so steps that start one wait their turn: the next NPC's check opens after this one's.
+    const run = () => NpcDeck.#settle(actor, () => actor.update({ [path]: next }));
+    // Say why the row hasn't changed yet
+    if (NpcDeck.#waiting++ > 0) {
+      const kind = game.i18n.localize(key === "heat" ? "LFD.Npc.CheckOverheat" : "LFD.Npc.CheckStructure");
+      ui.notifications.info(game.i18n.format("LFD.Npc.CheckQueued", { name: actor.token?.name ?? actor.name, kind }));
+    }
+    const turn = NpcDeck.#checks.then(run).finally(() => NpcDeck.#waiting--);
+    NpcDeck.#checks = turn.catch(err => console.error("Flight Deck |", err));
+    return turn;
+  }
+
+  /** Steps that start a Structure or Overheat check, one after another. */
+  static #checks = Promise.resolve();
+  static #waiting = 0;
+
+  /** Run an update; if it starts LANCER's Structure or Overheat check for this actor, wait until that's rolled or cancelled. */
+  static async #settle(actor, update) {
+    const started = new Set();
+    const finished = new Set();
+    let done = null;
+    const mine = flow => flow?.state?.actor?.uuid === actor.uuid;
+    const hooks = [];
+    for (const name of ["StructureFlow", "OverheatFlow"]) {
+      hooks.push([`lancer.preFlow.${name}`, Hooks.on(`lancer.preFlow.${name}`, flow => mine(flow) && started.add(flow))]);
+      hooks.push([`lancer.postFlow.${name}`, Hooks.on(`lancer.postFlow.${name}`, flow => {
+        if (!mine(flow)) return;
+        finished.add(flow);
+        if ([...started].every(f => finished.has(f))) done?.();
+      })]);
+    }
+    try {
+      await update();
+      // LANCER starts the check from its own updateActor hook, which has run by now
+      if ([...started].some(f => !finished.has(f))) await new Promise(resolve => (done = resolve));
+    } finally {
+      for (const [name, id] of hooks) Hooks.off(name, id);
+    }
   }
 
   /* -------------------------------------------- */
@@ -569,23 +627,30 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     };
   }
 
+  /** The selected NPCs' actors, each once (two tokens of one linked actor are one NPC). */
+  static #batchActors() {
+    return [...new Map(NpcDeck.#batchTokens().map(t => [t.actor.uuid, t.actor])).values()];
+  }
+
   static async #onBatchAdjust(event, target) {
     const key = target.dataset.resource;
     const delta = Number(target.dataset.delta) || 0;
-    for (const t of NpcDeck.#batchTokens()) await NpcDeck.#adjust(t.actor, key, delta);
+    // All at once: plain steps land now, steps that start a Structure / Overheat check queue in order
+    await Promise.all(NpcDeck.#batchActors().map(actor => NpcDeck.#adjust(actor, key, delta)));
   }
 
   /** All of them have it: remove it from all. Otherwise: give it to the ones without it. */
   static async #onBatchCondition(event, target) {
     const id = target.dataset.cond;
-    const actors = NpcDeck.#batchTokens().map(t => t.actor);
+    const actors = NpcDeck.#batchActors();
     if (!id || !actors.length) return;
     const all = actors.every(a => a.statuses?.has(id));
     await setStatus(all ? actors : actors.filter(a => !a.statuses?.has(id)), id, !all);
   }
 
+  /** Deselect the NPCs the bar lists; anything else selected (a mech) stays selected. */
   static #onBatchRelease() {
-    canvas?.tokens?.releaseAll();
+    for (const t of NpcDeck.#batchTokens()) t.release();
   }
 
   /** Use a feature with LANCER's own flows. Right-click posts its text instead. */

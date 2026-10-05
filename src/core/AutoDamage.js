@@ -10,14 +10,33 @@ export function registerAutoDamage() {
     if (!message.author?.isSelf || !game.settings.get(MODULE_ID, SETTINGS.AUTO_DAMAGE)) return;
     const attack = message.flags?.lancer?.attackData;
     if (!attack?.targets?.some(t => t.hit || t.crit)) return;
+    // Only where LANCER's own card offers ROLL DAMAGE: every weapon attack, but a tech attack only if it's an invade
+    if (!String(message.content ?? "").includes("lancer-damage-flow")) return;
     // One prompt at a time: LANCER cancels an open damage prompt when another opens, so a Barrage's
     // second hit waits until the first damage is rolled (or cancelled) instead of discarding it.
-    queue = queue.then(() => rollDamage(attack)).catch(err => console.error("Flight Deck | Could not open the damage roll", err));
+    queue = queue.then(() => untilDone(rollDamage(attack))).catch(err => console.error("Flight Deck | Could not open the damage roll", err));
   });
 }
 
 /** Damage prompts waiting their turn; each one resolves when it's rolled or cancelled. */
 let queue = Promise.resolve();
+
+/**
+ * The prompt's flow, or the moment no damage prompt is on screen any more, whichever comes first: if a
+ * prompt ever closes without settling its flow, the next one still opens.
+ */
+function untilDone(flow) {
+  let timer = null;
+  const gone = new Promise(resolve => {
+    let misses = 0;
+    timer = setInterval(() => {
+      const open = [...document.querySelectorAll("#hudzone .component")].some(c => / DAMAGE -- /.test(c.textContent ?? ""));
+      misses = open ? 0 : misses + 1;
+      if (misses >= 3) resolve();
+    }, 1000);
+  });
+  return Promise.race([flow, gone]).finally(() => clearInterval(timer));
+}
 
 /** LANCER's ROLL DAMAGE button (rollDamageCallback), started from the attack data instead of a click. */
 async function rollDamage(attack) {
