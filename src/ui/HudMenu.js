@@ -1,5 +1,5 @@
 import { planWeapons } from "../actions/weaponRules.js";
-import { itemState, mountedWeapons } from "../actions/catalog.js";
+import { itemState, loadDeployables, mountedWeapons } from "../actions/catalog.js";
 import { MODULE_ID, TEMPLATE_ROOT } from "../constants.js";
 import { buildMenu } from "../actions/menus.js";
 import { usedReactions } from "../actions/runner.js";
@@ -32,6 +32,8 @@ export class HudMenu {
   /** @param {import("../core/FlightDeckManager.js").FlightDeckManager} manager */
   constructor(manager) {
     this.manager = manager;
+    // Deploy / Recall / Redeploy entries follow the deployables imported and on the field
+    for (const hook of ["createToken", "deleteToken", "createActor", "deleteActor"]) Hooks.on(hook, () => this.isOpen && this.queueRender());
   }
 
   /** @type {HTMLElement|null} */
@@ -124,6 +126,9 @@ export class HudMenu {
     if (!actor || !t) return this.close();
     // A weapon action in progress was another mech's: its attacks and spending don't carry over
     if (this.view.sub && this.view.sub.actor !== actor.uuid) this.view = { menu: this.view.menu };
+    // Gear that deploys something it doesn't own a copy of yet: look the deployable up once
+    await loadDeployables(actor);
+    if (this.element !== el || !this.view) return;
     const ctx = this.#context();
     const { vm, entries } = buildMenu(this.view, ctx);
     const key = JSON.stringify(vm);

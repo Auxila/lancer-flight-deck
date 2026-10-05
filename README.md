@@ -146,6 +146,24 @@ That's information only: it never spends a Limited use or applies heat (LANCER's
 card prints only the effect, so gear that keeps its rules in actions came out nearly empty).
 Frame traits and the core passive post their actions too.
 
+- **What's listed:** every action stored on your equipped gear: frame traits and core system
+  (core power actions while it's active), installed systems, mounted weapons and their profiles,
+  weapon mods (a Shock Wreath's activation shows under QUICK), talents up to your rank and core
+  bonuses. Two kinds of gear keep their activation elsewhere in the data, and get entries too:
+  - **Tagged gear.** A system tagged "Quick Action", "Protocol" and so on, with its rules in its
+    effect and no action of its own (Electrolasso, Pordego Shield, Shell Shield...), sits in that
+    menu. Using it runs LANCER's own system use: destroyed and Limited checks, Heat (Self), a use
+    spent and its card, as from the sheet.
+  - **Deployables.** Each mine, drone or turret your gear deploys gets **Deploy …** at its own
+    deploy cost, next to the gear (Smoke Charges: Smoke Grenade, then Deploy Smoke Mine). It's paid
+    like a use of the gear and posts LANCER's card with the deployable's rules; then your copy of
+    the deployable (the one LANCER imports for your mech) is placed in the nearest free space
+    beside you, to drag where the rules put it. While it's on the scene, **Recall …** and
+    **Redeploy …** appear where the deployable has them. Placing and removing tokens follows the
+    world's permissions: Foundry lets Assistant GMs and up create and delete tokens by default,
+    so for a player the card goes out and a notice says the GM places it.
+  - Activations written only into rules text ("you may end this system as a quick action") aren't
+    guessed at; they're in each entry's hover card.
 - **Hover** (or focus with the keyboard) any entry for its full rules text at once: trigger,
   effect, heat cost, uses, tags. Gear text is the LCP's own; basic actions carry a short
   paraphrase. The card stays up for as long as the pointer rests on the entry, even when

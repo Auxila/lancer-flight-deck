@@ -1,7 +1,8 @@
 import { STATUS } from "../constants.js";
 import { setStatus, startMeltdown } from "../core/ConditionControl.js";
 import { ATTACK_TITLES, textId } from "./basic.js";
-import { systemChatCard, textWithActions } from "./chatCards.js";
+import { deployableChatCard, systemChatCard, textWithActions } from "./chatCards.js";
+import { placeDeployable, recallOrRedeploy } from "./deployables.js";
 
 /**
  * Runs HUD entries through LANCER's own flows, so every card, roll, heat cost, Limited use and
@@ -172,6 +173,34 @@ export async function runEntry(entry, { actor, targets, token }) {
 
     case "weapon":
       return runFlow("WeaponAttackFlow", entry.weapon, {});
+
+    case "systemUse":
+      // Gear tagged with an activation but no action: LANCER's own system use (destroyed and Limited
+      // checks, Heat (Self), a use spent, its card), as from the sheet
+      return runFlow("SystemFlow", entry.item, {});
+
+    case "deploy": {
+      // Paid for like any use of the gear, then placed beside the mech for the player to drag
+      // LANCER's system card, titled for what was deployed and carrying the deployable's rules
+      const ok =
+        entry.item.type === "mech_system" || entry.item.type === "weapon_mod"
+          ? await runFlow("SystemFlow", entry.item, {
+              title: game.i18n.format("LFD.Deploy.CardTitle", { source: entry.item.name, name: entry.deployable }),
+              effect: entry.action?.detail || undefined,
+            })
+          : await runFlow("SimpleHTMLFlow", entry.item, { html: await deployableChatCard(entry.lid) });
+      if (ok) await placeDeployable(actor, token, entry);
+      return ok;
+    }
+
+    case "recall":
+    case "redeploy":
+      return recallOrRedeploy(actor, token, entry, () =>
+        runFlow("SimpleTextFlow", actor, {
+          title: entry.label,
+          description: `<p>${esc(game.i18n.format(`LFD.Deploy.Card.${entry.run}`, { mech: actor.name, name: entry.deployable }))}</p>`,
+        })
+      );
 
     case "system":
       // The full text, as information: posting it never spends a use or applies heat

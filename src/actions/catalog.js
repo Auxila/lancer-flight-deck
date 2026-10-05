@@ -1,4 +1,4 @@
-import { installedSystems } from "../ui/components/SystemsBay.js";
+import { installedSystems, tagActivations } from "../ui/components/SystemsBay.js";
 
 /**
  * Everything a mech can actually do, gathered from what it has equipped:
@@ -111,16 +111,102 @@ function heatOf(item, action) {
   return tag ? tag.val || "1" : null;
 }
 
+/** Deployable kind -> icon. */
+const DEPLOYABLE_ICON = { Drone: "cci cci-drone", Mine: "cci cci-mine", Deployable: "cci cci-deployable" };
+
 /**
- * Every activatable action from equipped gear.
- * @returns {Array<{key, item, path, action, source, kind, icon, menu, section, spend, heat, state}>}
+ * Everything equipped that can give the mech something to do, in menu order: frame traits and core,
+ * installed systems, mounted weapons (their own actions, then each profile's) and mods, then the
+ * pilot's talents (up to their rank) and core bonuses. Each with its actions as LANCER dot-paths and
+ * the deployables it names.
+ */
+function gearSources(actor) {
+  const out = [];
+  const src = (item, kind, source, actions, deployables, taggable = false) => out.push({ item, kind, source, actions, deployables: deployables ?? [], taggable });
+  const list = (arr, base) => (arr ?? []).map((action, j) => ({ path: `${base}.${j}`, action }));
+
+  const frame = actor.system?.loadout?.frame?.value;
+  if (frame) {
+    const core = frame.system?.core_system ?? {};
+    (frame.system?.traits ?? []).forEach((trait, i) => src(frame, "trait", trait.name, list(trait.actions, `system.traits.${i}.actions`), trait.deployables));
+    src(frame, "core", core.passive_name || core.name, list(core.passive_actions, "system.core_system.passive_actions"), core.deployables);
+    // Active core actions are only usable while the core power is running
+    if (actor.system?.core_active) src(frame, "core", core.active_name || core.name, list(core.active_actions, "system.core_system.active_actions"));
+  }
+  for (const item of installedSystems(actor)) src(item, "system", item.name, list(item.system?.actions, "system.actions"), item.system?.deployables, true);
+  for (const { weapon, mod } of mountedWeapons(actor)) {
+    // LANCER copies a weapon's own actions into a pseudo-profile when it has no profiles (deduplicated below)
+    src(weapon, "weapon", weapon.name, list(weapon.system?.actions, "system.actions"), weapon.system?.deployables);
+    (weapon.system?.profiles ?? []).forEach((profile, p) => src(weapon, "weapon", profile.name || weapon.name, list(profile.actions, `system.profiles.${p}.actions`)));
+    if (mod) src(mod, "mod", mod.name, list(mod.system?.actions, "system.actions"), mod.system?.deployables, true);
+  }
+  for (const item of pilotOf(actor)?.items ?? []) {
+    if (item.type === "talent") {
+      const rank = Math.max(0, Math.min(3, num(item.system?.curr_rank)));
+      (item.system?.ranks ?? []).slice(0, rank).forEach((r, i) => src(item, "talent", `${item.name} ${ROMAN[i] ?? i + 1}`, list(r.actions, `system.ranks.${i}.actions`), r.deployables));
+    } else if (item.type === "core_bonus") {
+      src(item, "corebonus", item.name, list(item.system?.actions, "system.actions"), item.system?.deployables);
+    }
+  }
+  return out;
+}
+
+/** Deployables looked up by LID for gear whose deployable isn't imported for this mech yet. */
+const DEPLOYABLES = new Map();
+
+/**
+ * This mech's own copy of a deployable. LANCER imports one per owner when the gear is added, linked
+ * by system.owner (see its lookupOwnedDeployables).
+ */
+export function ownedDeployable(actor, lid) {
+  const owner = actor?.isToken ? game.actors?.get?.(actor.id) ?? actor : actor;
+  if (!owner || !lid) return null;
+  return game.actors?.find(a => a.type === "deployable" && a.system?.lid === lid && a.system?.owner?.id === owner.uuid) ?? null;
+}
+
+/** A deployable's data: the mech's own copy, else one looked up by LID (see loadDeployables). */
+function deployableDoc(actor, lid) {
+  return ownedDeployable(actor, lid) ?? DEPLOYABLES.get(lid) ?? null;
+}
+
+/** A deployable's name without LANCER's " [Owner]" suffix. */
+export function deployableName(doc) {
+  return String(doc?.name ?? "").replace(/\s*\[[^\]]*\]\s*$/, "");
+}
+
+/** Look up the deployables the mech's gear names but doesn't own a copy of (world, then compendium). */
+export async function loadDeployables(actor) {
+  if (!actor) return;
+  const missing = new Set();
+  for (const s of gearSources(actor)) for (const lid of s.deployables) if (!DEPLOYABLES.has(lid) && !ownedDeployable(actor, lid)) missing.add(lid);
+  await Promise.all(
+    [...missing].map(async lid => {
+      let doc = null;
+      try {
+        doc = (await game.lancer?.fromLid?.(lid)) ?? null;
+      } catch {
+        doc = null;
+      }
+      DEPLOYABLES.set(lid, doc?.type === "deployable" ? doc : null);
+    })
+  );
+}
+
+/**
+ * Every action the mech's gear gives it, routed to a HUD menu. Per source, in order:
+ *  - its structured actions (LANCER's ActivationFlow runs them by dot-path);
+ *  - for systems and mods tagged "Quick Action", "Protocol"... with no action of that kind, the
+ *    gear itself (using it is LANCER's SystemFlow: destroyed / Limited checks, Heat (Self), a use, its card);
+ *  - a Deploy entry per deployable it names, at the deployable's own activation (deploying mines,
+ *    drones and turrets is data on the deployable, not an action on the gear), and Recall / Redeploy
+ *    while that deployable is on the scene.
  */
 export function itemActions(actor) {
   const out = [];
   if (!actor) return out;
-  // LANCER copies a weapon's own actions into a pseudo-profile when it has no profiles
+  const i18n = game.i18n;
   const seen = new Set();
-  const add = (item, path, action, source, kind) => {
+  const add = (item, path, action, source, kind, extra = {}) => {
     const route = ACTIVATION_MENU[action?.activation];
     if (!route) return;
     const signature = `${item.uuid}|${action.name}|${action.activation}|${action.detail ?? ""}`;
@@ -142,48 +228,50 @@ export function itemActions(actor) {
       heat: heatOf(item, action),
       state: itemState(item),
       tech: !!action.tech_attack || action.activation === "Invade",
+      ...extra,
     });
   };
 
-  const frame = actor.system?.loadout?.frame?.value;
-  if (frame) {
-    const core = frame.system?.core_system ?? {};
-    (frame.system?.traits ?? []).forEach((trait, i) =>
-      (trait.actions ?? []).forEach((a, j) => add(frame, `system.traits.${i}.actions.${j}`, a, trait.name, "trait"))
-    );
-    (core.passive_actions ?? []).forEach((a, j) =>
-      add(frame, `system.core_system.passive_actions.${j}`, a, core.passive_name || core.name, "core")
-    );
-    // Active core actions are only usable while the core power is running
-    if (actor.system?.core_active) {
-      (core.active_actions ?? []).forEach((a, j) =>
-        add(frame, `system.core_system.active_actions.${j}`, a, core.active_name || core.name, "core")
-      );
+  for (const s of gearSources(actor)) {
+    for (const { path, action } of s.actions) add(s.item, path, action, s.source, s.kind);
+
+    const deployables = [...new Set(s.deployables)].map(lid => ({ lid, doc: deployableDoc(actor, lid) })).filter(d => d.doc);
+    if (s.taggable) {
+      const have = new Set(s.actions.map(x => x.action?.activation));
+      const deploys = new Set(deployables.map(d => d.doc.system?.activation));
+      for (const activation of tagActivations(s.item)) {
+        // Already an action of that kind (an Invade is a quick tech action), or deploying it is the activation
+        if (have.has(activation) || deploys.has(activation) || (activation === "Quick Tech" && have.has("Invade"))) continue;
+        add(s.item, `tag.${activation}`, { name: s.item.name, activation, detail: s.item.system?.effect ?? "" }, s.source, s.kind, {
+          run: "systemUse",
+          tech: false,
+          hint: "LFD.Hud.Hint.systemUse",
+        });
+      }
     }
-  }
-  for (const item of installedSystems(actor)) {
-    (item.system?.actions ?? []).forEach((a, j) => add(item, `system.actions.${j}`, a, item.name, "system"));
-  }
-  for (const { weapon, mod } of mountedWeapons(actor)) {
-    (weapon.system?.actions ?? []).forEach((a, j) => add(weapon, `system.actions.${j}`, a, weapon.name, "weapon"));
-    (weapon.system?.profiles ?? []).forEach((profile, p) =>
-      (profile.actions ?? []).forEach((a, j) =>
-        add(weapon, `system.profiles.${p}.actions.${j}`, a, profile.name || weapon.name, "weapon")
-      )
-    );
-    if (mod) (mod.system?.actions ?? []).forEach((a, j) => add(mod, `system.actions.${j}`, a, mod.name, "mod"));
-  }
-  const pilot = pilotOf(actor);
-  for (const item of pilot?.items ?? []) {
-    if (item.type === "talent") {
-      const rank = Math.max(0, Math.min(3, num(item.system?.curr_rank)));
-      (item.system?.ranks ?? []).slice(0, rank).forEach((r, i) =>
-        (r.actions ?? []).forEach((a, j) =>
-          add(item, `system.ranks.${i}.actions.${j}`, a, `${item.name} ${ROMAN[i] ?? i + 1}`, "talent")
-        )
-      );
-    } else if (item.type === "core_bonus") {
-      (item.system?.actions ?? []).forEach((a, j) => add(item, `system.actions.${j}`, a, item.name, "corebonus"));
+
+    for (const { lid, doc } of deployables) {
+      const d = doc.system ?? {};
+      const name = deployableName(doc);
+      const icon = DEPLOYABLE_ICON[d.type] ?? DEPLOYABLE_ICON.Deployable;
+      const base = { run: "deploy", lid, deployable: name, icon, tech: false };
+      // Gear whose own action already is the deployment ("Deploy Turret") doesn't get a second entry
+      const deployAction = s.actions.some(({ action }) => action?.activation === d.activation && (/deploy/i.test(action.name ?? "") || (name && (action.name ?? "").toLowerCase().includes(name.toLowerCase()))));
+      if (!deployAction) {
+        add(s.item, `deploy.${lid}`, { name: i18n.format("LFD.Hud.Deploy", { name }), activation: d.activation, detail: d.detail ?? "" }, s.source, s.kind, { ...base, hint: "LFD.Hud.Hint.deploy" });
+      }
+      const fielded = ownedDeployable(actor, lid)?.getActiveTokens?.(false, true)?.length > 0;
+      if (!fielded) continue;
+      for (const [verb, activation] of [["Recall", d.recall], ["Redeploy", d.redeploy]]) {
+        const run = verb.toLowerCase();
+        add(s.item, `${run}.${lid}`, { name: i18n.format(`LFD.Hud.${verb}`, { name }), activation, detail: "" }, s.source, s.kind, {
+          ...base,
+          run,
+          heat: null,
+          state: "ready",
+          hint: `LFD.Hud.Hint.${run}`,
+        });
+      }
     }
   }
   return out;
@@ -216,7 +304,7 @@ export function actionTip(entry) {
   if (action.init) out.push(`<div><em>${esc(i18n.localize("LFD.Hud.Init"))}</em> ${action.init}</div>`);
   if (action.trigger) out.push(`<div class="lfd-tip-trigger"><em>${esc(i18n.localize("LFD.Systems.Trigger"))}</em> ${action.trigger}</div>`);
   if (action.detail) out.push(`<div class="lfd-tip-effect">${action.detail}</div>`);
-  out.push(`<footer>${esc(i18n.localize(entry.tech ? "LFD.Hud.Hint.Tech" : "LFD.Hud.Hint.Activate"))}</footer>`);
+  out.push(`<footer>${esc(i18n.localize(entry.hint ?? (entry.tech ? "LFD.Hud.Hint.Tech" : "LFD.Hud.Hint.Activate")))}</footer>`);
   return `<div class="lfd-tip">${out.join("")}</div>`;
 }
 

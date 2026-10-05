@@ -143,7 +143,7 @@ function basicTile(def, entries, extra = {}) {
 
 /** A gear action as a row. */
 function actionRow(entry, entries) {
-  entries.set(entry.key, { ...entry, type: entry.tech ? "techAction" : "activation", tip: () => actionTip(entry) });
+  entries.set(entry.key, { ...entry, type: entry.run ?? (entry.tech ? "techAction" : "activation"), tip: () => actionTip(entry) });
   const uses = usesOf(entry.item);
   return {
     key: entry.key,

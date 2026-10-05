@@ -10,6 +10,25 @@ const LIMITED = "tg_limited";
 /** Uses at or under this many show as pips; more show as a number. */
 const MAX_PIPS = 6;
 
+/**
+ * LANCER's activation tags. Some gear (Electrolasso, Pordego Shield, Shell Shield...) is only tagged
+ * "Quick Action" or "Protocol", with its rules in the effect text and no structured action.
+ */
+export const TAG_ACTIVATION = {
+  tg_quick_action: "Quick",
+  tg_full_action: "Full",
+  tg_quick_tech: "Quick Tech",
+  tg_full_tech: "Full Tech",
+  tg_protocol: "Protocol",
+  tg_reaction: "Reaction",
+  tg_free_action: "Free",
+};
+
+/** The activations an item's tags name, each once, in tag order. */
+export function tagActivations(item) {
+  return [...new Set((item?.system?.tags ?? []).map(t => TAG_ACTIVATION[t?.lid]).filter(Boolean))];
+}
+
 const num = v => (Number.isFinite(Number(v)) ? Number(v) : 0);
 
 /** @returns {Item[]} the installed mech_system items, skipping empty or broken refs */
@@ -45,7 +64,7 @@ export function readSystems(actor) {
     const action = s.actions?.[0];
     let readout = null;
     if (state !== "ready") readout = game.i18n.localize(`LFD.Systems.State.${state}`);
-    else if (!uses) readout = action?.activation || s.type || null;
+    else if (!uses) readout = action?.activation || tagActivations(item)[0] || s.type || null;
     return {
       id: item.id,
       name: item.name,

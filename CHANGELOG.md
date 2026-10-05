@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.8
+
+**Every action your gear gives you**
+- Systems tagged "Quick Action", "Full Action", "Protocol", "Reaction" and so on, with no action of their own (Electrolasso, Pordego Shield, Shell Shield, Lightning Field Generator... 23 in the core and LCP data), now sit in that HUD menu. Using one runs LANCER's own system use: destroyed and Limited checks, Heat (Self), a use spent, its card.
+- Deployables: each mine, drone or turret your gear deploys gets a **Deploy** entry at its own deploy cost, right after the gear's actions (Smoke Charges: Smoke Grenade, then Deploy Smoke Mine; 144 deployables in the data). It's paid through LANCER's system use, posts the system card titled for what was deployed with the deployable's rules, and places your copy of the deployable beside your mech to drag into position. **Recall** and **Redeploy** appear while it's on the scene and the deployable has them. Token placing and removal follow the world's permissions (Assistant GM and up by default); players get the card and a notice that the GM places it.
+- SYSTEMS AVAILABLE shows a tagged system's activation (QUICK) instead of its type.
+- Unit tests for the gear catalog (`tests/catalog.test.js`).
+
 ## 0.6.7
 
 - System chat cards (SYSTEMS AVAILABLE → click) leave out the flavor text: rules, actions, deployables and tags only. A system whose only rules text is its description still shows it, as the hover card does.

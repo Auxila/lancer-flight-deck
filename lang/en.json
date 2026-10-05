@@ -541,7 +541,11 @@
         "attack": "Click: roll the attack",
         "core": "Click: activate core power",
         "moveMode": "Click: set your token's movement",
-        "tracker": "Click: reset"
+        "tracker": "Click: reset",
+        "systemUse": "Click: use it (LANCER spends a use and applies its heat)",
+        "deploy": "Click: deploy it beside your mech",
+        "recall": "Click: recall it from the field",
+        "redeploy": "Click: redeploy it, then drag it to its new space"
       },
       "MoveMode": "Movement mode",
       "ResetMove": "Reset movement",
@@ -623,7 +627,10 @@
         "otherMount": "The follow-up must come from a mount that fired.",
         "auxUsed": "That mount has already made its follow-up attack.",
         "notReady": "That weapon can't fire right now: it's destroyed, unloaded or out of uses."
-      }
+      },
+      "Deploy": "Deploy {name}",
+      "Recall": "Recall {name}",
+      "Redeploy": "Redeploy {name}"
     },
     "Basic": {
       "skirmish": {
@@ -852,6 +859,20 @@
       "CheckQueued": "{name}'s {kind} check is next: it opens once the one that's up is rolled or cancelled.",
       "CheckStructure": "structure",
       "CheckOverheat": "overheat"
+    },
+    "Deploy": {
+      "NotImported": "Flight Deck: {name} isn't in this world for {mech} yet. LANCER imports it when the gear is added to the mech; your GM can import it.",
+      "NoToken": "Flight Deck: put your mech on the scene to place {name}.",
+      "GmPlaces": "Flight Deck: your GM places {name} (this world doesn't let players create tokens).",
+      "Placed": "Flight Deck: {name} placed beside {mech}. Drag it where it goes.",
+      "NotOnField": "Flight Deck: {name} isn't on this scene.",
+      "GmRecalls": "Flight Deck: your GM removes {name} (this world doesn't let players delete tokens).",
+      "DragIt": "Flight Deck: drag {name} to its new space.",
+      "Card": {
+        "recall": "{mech} recalls {name}.",
+        "redeploy": "{mech} redeploys {name}."
+      },
+      "CardTitle": "{source}: deploy {name}"
     }
   }
 }

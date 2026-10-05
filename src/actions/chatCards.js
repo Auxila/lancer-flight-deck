@@ -65,14 +65,17 @@ export function actionBlocks(actions, fallbackName = "") {
     .join("");
 }
 
+async function deployableByLid(lid) {
+  try {
+    return (await game.lancer?.fromLid?.(lid)) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /** A deployable the gear creates (drone, turret, mine...), from the world or the compendium. */
 async function deployableBlock(lid) {
-  let doc = null;
-  try {
-    doc = await game.lancer?.fromLid?.(lid);
-  } catch {
-    doc = null;
-  }
+  const doc = await deployableByLid(lid);
   if (!doc) return "";
   const s = doc.system ?? {};
   const stats = [
@@ -121,6 +124,16 @@ export async function systemChatCard(item) {
   return `<div class="card clipped-bot lfd-chat-card" style="margin: 0px;">
   <div class="lancer-header lancer-system">// ${esc(item.name.toUpperCase())} //</div>
   <div class="lfd-chat-body">${body.join("")}</div>
+</div>`;
+}
+
+/** A deployable's own card, for Deploy entries whose source isn't a system (frame traits, talents). */
+export async function deployableChatCard(lid) {
+  const doc = await deployableByLid(lid);
+  const name = String(doc?.name ?? lid).replace(/\s*\[[^\]]*\]\s*$/, "");
+  return `<div class="card clipped-bot lfd-chat-card" style="margin: 0px;">
+  <div class="lancer-header lancer-system">// ${esc(name.toUpperCase())} //</div>
+  <div class="lfd-chat-body">${await deployableBlock(lid)}</div>
 </div>`;
 }
 
