@@ -75,10 +75,19 @@ export function mountedWeapons(actor) {
   return out;
 }
 
+/**
+ * Every tag on an item. A mech weapon keeps its tags on its profiles, and LANCER gathers them in
+ * system.all_tags; systems and NPC features carry them on system.tags.
+ */
+export function tagsOf(item) {
+  const s = item?.system ?? {};
+  return s.all_tags ?? s.tags ?? [];
+}
+
 /** Limited uses of an item, or null when unlimited. */
 export function usesOf(item) {
   const s = item?.system ?? {};
-  const tag = (s.tags ?? []).find(t => t?.lid === LIMITED);
+  const tag = tagsOf(item).find(t => t?.lid === LIMITED);
   if (!tag) return null;
   return { value: num(s.uses?.value), max: num(s.uses?.max) || num(tag.val) };
 }
@@ -89,14 +98,15 @@ export function itemState(item) {
   if (s.destroyed) return "destroyed";
   const uses = usesOf(item);
   if (uses && uses.value <= 0) return "spent";
-  if (item?.type === "mech_weapon" && (s.tags ?? []).some(t => t?.lid === "tg_loading") && s.loaded === false) return "unloaded";
+  const loading = typeof item?.isLoading === "function" ? item.isLoading() : tagsOf(item).some(t => t?.lid === "tg_loading");
+  if (item?.type === "mech_weapon" && loading && s.loaded === false) return "unloaded";
   return "ready";
 }
 
 /** Heat the action costs: its own heat cost, else the item's Heat (Self) tag. */
 function heatOf(item, action) {
   if (num(action?.heat_cost) > 0) return num(action.heat_cost);
-  const tag = (item?.system?.tags ?? []).find(t => t?.lid === SELF_HEAT);
+  const tag = tagsOf(item).find(t => t?.lid === SELF_HEAT);
   return tag ? tag.val || "1" : null;
 }
 

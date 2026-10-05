@@ -174,6 +174,15 @@ Skirmish, Barrage and Overwatch open a weapon picker that follows LANCER's mount
 - After the main attack(s) the picker turns into an **Auxiliary follow-up** step listing only the weapons that may still fire: a different Auxiliary on the same mount after a Skirmish or Overwatch, and one Auxiliary on each mount that fired after a Barrage (never one that already fired). **Done** ends the action.
 - Only the first attack spends the action; a Barrage's second attack and every follow-up are free. Follow-ups deal no bonus damage, which the picker reminds you of; LANCER's attack prompt is where you leave it off.
 
+## Damage after a hit
+
+When an attack you make hits or crits at least one target, LANCER's damage roll prompt opens by itself, as if you'd pressed ROLL DAMAGE on the attack card (which stays there for re-rolls). It works for attacks from anywhere: the HUD, the sheet, macros.
+
+- Every target is in the one prompt with its result already chosen: **Crit**, **Hit** or **Miss** (a Reliable weapon's misses still take their Reliable damage).
+- An area attack (Blast, Burst, Line, Cone) is one attack, so it opens one prompt for all its targets.
+- Several attacks in a row (a Barrage, for one) queue their prompts: the next opens when you roll or cancel the current one, so no damage roll is ever replaced by the next.
+- Per player: turn it off in Configure Settings (**Roll damage after a hit**), for example as a GM rolling NPC attacks.
+
 ## NPC Deck (GMs)
 
 The Flight Deck is a cockpit for one mech; a GM runs a whole enemy force. The NPC Deck is

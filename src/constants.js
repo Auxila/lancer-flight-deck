@@ -25,6 +25,7 @@ export const SETTINGS = Object.freeze({
   ART_FX_WORLD: "artEffects",
   JAMMED_SOURCE: "jammedEffectSource",
   SPEND_ACTIONS: "spendActions",
+  AUTO_DAMAGE: "autoDamage",
   NPC_DECK: "npcDeck",
   NPC_DECK_SIDE: "npcDeckSide",
   NPC_DECK_COLLAPSED: "npcDeckCollapsed",

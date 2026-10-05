@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.1
+
+**Damage after a hit**
+- When an attack you make hits or crits, LANCER's damage roll prompt opens by itself, every target pre-set to Crit, Hit or Miss. Area attacks open one prompt; a Barrage's prompts queue so none is lost. Per-player setting, on by default.
+
+**Fixes**
+- Weapon tags are read from the weapon's profiles (where LANCER keeps them): an unloaded Loading weapon now shows as Unloaded in the weapon picker, and Limited uses and Heat (Self) on weapons show correctly.
+
 ## 0.6.0
 
 Rules: weapon mounts and running several NPCs at once.

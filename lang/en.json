@@ -97,6 +97,10 @@
       "NpcDeckScale": {
         "Name": "NPC Deck size",
         "Hint": "Scale the whole NPC Deck. You can also drag its corner grip."
+      },
+      "AutoDamage": {
+        "Name": "Roll damage after a hit",
+        "Hint": "When an attack you make hits or crits at least one target, LANCER's damage roll opens by itself, as if you'd pressed ROLL DAMAGE on the attack card. Works for attacks from anywhere: the HUD, the sheet, macros. The button stays on the card for re-rolls."
       }
     },
     "Keybinding": {

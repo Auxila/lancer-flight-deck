@@ -163,6 +163,14 @@ export function registerSettings(manager) {
     onChange: () => TokenEffects.instance.refreshAll(),
   });
 
+  client(SETTINGS.AUTO_DAMAGE, {
+    name: "LFD.Settings.AutoDamage.Name",
+    hint: "LFD.Settings.AutoDamage.Hint",
+    config: true,
+    type: Boolean,
+    default: true,
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.SPEND_ACTIONS, {
     name: "LFD.Settings.SpendActions.Name",
     hint: "LFD.Settings.SpendActions.Hint",
