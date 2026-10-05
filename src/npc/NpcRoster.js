@@ -1,5 +1,7 @@
 import { conditionCard } from "../core/ConditionInfo.js";
 import { STATUS } from "../constants.js";
+import { conditionLook } from "../ui/components/MasterCautionGrid.js";
+import { CHECKS } from "../ui/components/HullReadout.js";
 
 /**
  * The NPC Deck's data: which NPCs are in play, and a compact, JSON-safe view of each.
@@ -83,7 +85,7 @@ function conditions(actor) {
     const cfg = CONFIG.statusEffects.find(s => s.id === id);
     if (!cfg) continue;
     const label = game.i18n.localize(cfg.name ?? cfg.label ?? id);
-    out.push({ id, label, img: cfg.img ?? cfg.icon ?? null, lockon: id === STATUS.LOCK_ON, tip: conditionCard(id, { title: label }) });
+    out.push({ id, label, ...conditionLook(id, label), img: cfg.img ?? cfg.icon ?? null, lockon: id === STATUS.LOCK_ON, tip: conditionCard(id, { title: label }) });
   }
   return out;
 }
@@ -335,9 +337,15 @@ export function readStats(actor) {
     ["SPD", s.speed],
     ["SENS", s.sensor_range],
     ["SAVE", s.save],
-    ["HULL", s.hull],
-    ["AGI", s.agi],
-    ["SYS", s.sys],
-    ["ENG", s.eng],
   ].map(([label, value]) => ({ label, value: num(value) }));
+}
+
+/** HULL / AGI / SYS / ENG as roll keys, like the panel's: the bonus and the formula LANCER rolls. */
+export function readChecks(actor) {
+  const s = actor.system ?? {};
+  const signed = n => (n >= 0 ? `+${n}` : `${n}`);
+  return CHECKS.map(({ id, key }) => {
+    const bonus = num(s[id]);
+    return { id, key, bonus: signed(bonus), formula: `1d20${bonus ? signed(bonus) : ""}` };
+  });
 }

@@ -77,9 +77,9 @@
     </div>
     <div class="lfd-npc-conds" aria-label="{{localize 'LFD.Npc.Conditions'}}" data-tooltip-class="{{tipClass}}">
       {{#each batch.quick}}
-      <button type="button" class="{{#if (eq state 'all')}}is-on{{/if}} {{#if (eq state 'some')}}is-some{{/if}}" data-action="batchCondition" data-cond="{{id}}"
+      <button type="button" class="lfd-npc-ctile k-{{kind}} {{#if (eq state 'all')}}is-on{{/if}} {{#if (eq state 'some')}}is-some{{/if}}" data-action="batchCondition" data-cond="{{id}}"
               data-tooltip-html="{{tip}}" aria-label="{{label}}" aria-pressed="{{#if (eq state 'all')}}true{{else if (eq state 'some')}}mixed{{else}}false{{/if}}">
-        <img src="{{img}}" alt="{{label}}">
+        <img src="{{img}}" alt=""><span>{{short}}</span>
       </button>
       {{/each}}
     </div>
@@ -125,7 +125,7 @@
 
       {{#if hasChips}}
       <div class="lfd-npc-chips" data-tooltip-class="{{@root.tipClass}}">
-        {{#each conditions}}<img src="{{img}}" alt="{{label}}" {{#if tip}}data-tooltip-html="{{tip}}"{{else}}data-tooltip="{{label}}"{{/if}} class="{{#if lockon}}is-lockon{{/if}}">{{/each}}
+        {{#each conditions}}<span class="lfd-npc-cond k-{{kind}} {{#if lockon}}is-lockon{{/if}}" {{#if tip}}data-tooltip-html="{{tip}}"{{else}}data-tooltip="{{label}}"{{/if}}>{{#if img}}<img src="{{img}}" alt="">{{/if}}{{short}}</span>{{/each}}
         {{#if burn}}<span class="lfd-npc-chip is-burn" data-tooltip="LFD.Npc.Burn">{{localize "LFD.Npc.BurnShort" n=burn}}</span>{{/if}}
         {{#if overshield}}<span class="lfd-npc-chip is-os" data-tooltip="LFD.Npc.Overshield">{{localize "LFD.Npc.OverShort" n=overshield}}</span>{{/if}}
       </div>
@@ -136,6 +136,17 @@
         <dl class="lfd-npc-stats">
           {{#each stats}}<div><dt>{{label}}</dt><dd>{{value}}</dd></div>{{/each}}
         </dl>
+
+        <div class="lfd-checks" role="group" aria-label="{{localize 'LFD.Check.Group'}}" data-tooltip-class="{{@root.tipClass}}">
+          {{#each checks}}
+          <button type="button" class="lfd-check lfd-check-{{id}}" data-action="rollCheck" data-check="{{id}}"
+                  data-tooltip-html="{{localize 'LFD.Check.Tip' name=(localize (concat 'LFD.Check.' key '.Name')) formula=formula use=(localize (concat 'LFD.Check.' key '.Use'))}}"
+                  aria-label="{{localize 'LFD.Check.Aria' name=(localize (concat 'LFD.Check.' key '.Name')) formula=formula}}">
+            <span class="lfd-check-name">{{localize (concat 'LFD.Check.' key '.Short')}}</span>
+            <span class="lfd-check-bonus">{{bonus}}</span>
+          </button>
+          {{/each}}
+        </div>
 
         <div class="lfd-npc-adjust">
           <span class="lfd-npc-adjust-label">HP</span>
@@ -149,6 +160,14 @@
           <button type="button" data-action="adjust" data-resource="heat" data-delta="1">+1</button>
           <button type="button" data-action="adjust" data-resource="heat" data-delta="2">+2</button>
           {{/if}}
+        </div>
+
+        <div class="lfd-npc-conds" aria-label="{{localize 'LFD.Npc.Conditions'}}" data-tooltip-class="{{@root.tipClass}}">
+          {{#each quick}}
+          <button type="button" class="lfd-npc-ctile k-{{kind}} {{#if on}}is-on{{/if}}" data-action="condition" data-cond="{{id}}" {{#if tip}}data-tooltip-html="{{tip}}"{{else}}data-tooltip="{{label}}"{{/if}} aria-label="{{label}}" aria-pressed="{{#if on}}true{{else}}false{{/if}}">
+            <img src="{{img}}" alt=""><span>{{short}}</span>
+          </button>
+          {{/each}}
         </div>
 
         {{#each features}}
@@ -165,14 +184,6 @@
           </div>
         </section>
         {{/each}}
-
-        <div class="lfd-npc-conds" aria-label="{{localize 'LFD.Npc.Conditions'}}" data-tooltip-class="{{@root.tipClass}}">
-          {{#each quick}}
-          <button type="button" class="{{#if on}}is-on{{/if}}" data-action="condition" data-cond="{{id}}" {{#if tip}}data-tooltip-html="{{tip}}"{{else}}data-tooltip="{{label}}"{{/if}} aria-label="{{label}}" aria-pressed="{{#if on}}true{{else}}false{{/if}}">
-            <img src="{{img}}" alt="{{label}}">
-          </button>
-          {{/each}}
-        </div>
 
         <div class="lfd-npc-cmds">
           {{#if inCombat}}

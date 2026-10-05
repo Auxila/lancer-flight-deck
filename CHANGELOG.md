@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.5
+
+**NPC Deck**
+- The open row (selecting an NPC's token opens it) shows its conditions as a grid of labelled tiles, lit in the panel's annunciator colours when on: red for Stunned, Exposed and Shredded; amber for Lock On, Jammed, Impaired, Slowed, Immobile and Prone; green for Hidden. They sit right under the stats instead of below the features, and a click still toggles one.
+- **HULL / AGI / SYS / ENG** keys under the open row's stats, colour-coded like the panel's: hover for the check's card, click to roll it through LANCER for that NPC.
+- Every row's active conditions are badges with their names in the same colours, not bare icons. On the open row, the badges list only what the tiles don't cover.
+- The batch bar's condition buttons are the same labelled tiles, half-lit when only some of the selection have it.
+
 ## 0.6.4
 
 - NPC Deck: hovering an NPC's row puts the same animated "look here" marker on its token as hovering its initiative portrait.

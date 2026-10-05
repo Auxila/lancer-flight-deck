@@ -7,7 +7,9 @@ import { HoverCards } from "../ui/HoverCards.js";
 import { LookHere } from "./LookHere.js";
 import { conditionCard } from "../core/ConditionInfo.js";
 import { keyHints } from "../ui/keyHints.js";
-import { QUICK_CONDITIONS, featureTip, isGenericArt, isNpc, isVideoArt, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
+import { QUICK_CONDITIONS, featureTip, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
+import { conditionLook } from "../ui/components/MasterCautionGrid.js";
+import { CHECKS } from "../ui/components/HullReadout.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -51,6 +53,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       adjust: NpcDeck.#onAdjust,
       feature: { handler: NpcDeck.#onFeature, buttons: [0, 2] },
       condition: NpcDeck.#onCondition,
+      rollCheck: NpcDeck.#onRollCheck,
       batchAdjust: NpcDeck.#onBatchAdjust,
       batchCondition: NpcDeck.#onBatchCondition,
       batchRelease: NpcDeck.#onBatchRelease,
@@ -268,6 +271,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       if (row.expanded) {
         const actor = token.actor;
         row.stats = readStats(actor);
+        row.checks = readChecks(actor);
         row.features = readFeatures(actor);
         row.anyUncharged = row.features.some(g => g.items.some(f => f.state === "uncharged"));
         row.quick = QUICK_CONDITIONS.map(id => {
@@ -275,8 +279,12 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
           if (!cfg) return null;
           const label = game.i18n.localize(cfg.name ?? id);
           const on = !!actor.statuses?.has(id);
-          return { id, label, img: cfg.img, on, tip: conditionCard(id, { title: label, hint: game.i18n.localize(on ? "LFD.Npc.CondRemove" : "LFD.Npc.CondApply") }) };
+          const hint = game.i18n.localize(on ? "LFD.Npc.CondRemove" : "LFD.Npc.CondApply");
+          return { id, label, ...conditionLook(id, label), img: cfg.img, on, tip: conditionCard(id, { title: label, hint }) };
         }).filter(Boolean);
+        // The open row's tiles light its quick conditions; its chips keep only the rest
+        row.conditions = row.conditions.filter(c => !QUICK_CONDITIONS.includes(c.id));
+        row.hasChips = row.conditions.length > 0 || row.burn > 0 || row.overshield > 0;
         row.inCombat = !!combat && !!row.combatantId;
       }
       return row;
@@ -630,7 +638,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
         const have = picked.filter(t => t.actor.statuses?.has(id)).length;
         const state = have === 0 ? "none" : have === n ? "all" : "some";
         const hint = i18n.format(state === "all" ? "LFD.Npc.Batch.Remove" : "LFD.Npc.Batch.Apply", { n, have });
-        return { id, label, img: cfg.img, state, tip: conditionCard(id, { title: label, detail: `${have}/${n}`, hint }) };
+        return { id, label, ...conditionLook(id, label), img: cfg.img, state, tip: conditionCard(id, { title: label, detail: `${have}/${n}`, hint }) };
       }).filter(Boolean),
     };
   }
@@ -685,6 +693,19 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     const id = target.dataset.cond;
     if (!actor || !id) return;
     await setStatus([actor], id, !actor.statuses?.has(id));
+  }
+
+  /** HULL / AGI / SYS / ENG: LANCER's own check for this NPC, exactly as from its sheet. */
+  static async #onRollCheck(event, target) {
+    const actor = NpcDeck.#tokenDoc(target)?.actor;
+    const id = target.dataset.check;
+    if (!actor || !CHECKS.some(c => c.id === id)) return;
+    try {
+      await actor.beginStatFlow(`system.${id}`);
+    } catch (err) {
+      console.error("Flight Deck |", err);
+      ui.notifications.error(game.i18n.localize("LFD.Error.Action"));
+    }
   }
 
   /** LANCER's popcorn initiative: start this NPC's turn. */

@@ -31,6 +31,22 @@ export const TILES = [
 
 const GLYPH = { warning: "▲", caution: "◆", advisory: "●" };
 
+/** Status ids whose annunciator tile has another id. */
+const TILE_OF = { slow: "slowed", invisible: "hidden", reactor_meltdown: "meltdown" };
+
+/**
+ * How a status reads outside the panel (the NPC Deck): its tile's kind (warning / caution / advisory)
+ * and short legend ("Immobile", "Lock On"), else caution and the status's own name.
+ * @param {string} id        Status id
+ * @param {string} fallback  Localized status name
+ */
+export function conditionLook(id, fallback) {
+  const tileId = TILE_OF[id] ?? id;
+  const tile = TILES.find(t => t.id === tileId);
+  const legend = { hidden: "LFD.Tile.Hidden", invisible: "LFD.Tile.Invisible" }[id] ?? `LFD.Tile.${tileId}`;
+  return { kind: tile?.kind ?? "caution", short: game.i18n.has(legend) ? game.i18n.localize(legend) : fallback };
+}
+
 function hiddenLabel(t) {
   const hidden = t.flags[STATUS.HIDDEN];
   const invisible = t.flags[STATUS.INVISIBLE];

@@ -515,15 +515,15 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   font-weight: 700;
 }
 
-/* HASE check keys under the stat strip: one colour per check, the label carries it too */
-#lancer-flight-deck .lfd-checks {
+/* HASE check keys under the stat strip (panel and NPC Deck): one colour per check, the label carries it too */
+:is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-checks {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 3px;
   margin: 3px 0 0;
 }
 
-#lancer-flight-deck .lfd-check {
+:is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-check {
   --chk: var(--lfd-ink);
   display: flex;
   align-items: baseline;
@@ -546,36 +546,36 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   transition: background 120ms ease, box-shadow 120ms ease, transform 80ms ease;
 }
 
-#lancer-flight-deck .lfd-check-bonus {
+:is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-check-bonus {
   font-family: var(--lfd-font-data);
   font-size: 11px;
   letter-spacing: 0;
   color: var(--lfd-ink);
 }
 
-#lancer-flight-deck .lfd-check:hover:not(:disabled) {
+:is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-check:hover:not(:disabled) {
   background: color-mix(in srgb, var(--chk) 28%, #0d0d0f);
   box-shadow: 0 0 8px color-mix(in srgb, var(--chk) 45%, transparent);
 }
 
-#lancer-flight-deck .lfd-check:active:not(:disabled) {
+:is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-check:active:not(:disabled) {
   transform: translateY(1px);
 }
 
-#lancer-flight-deck .lfd-check:focus-visible {
+:is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-check:focus-visible {
   outline: 1px solid var(--chk);
   outline-offset: 1px;
 }
 
-#lancer-flight-deck .lfd-check:disabled {
+:is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-check:disabled {
   opacity: 0.45;
   cursor: default;
 }
 
-#lancer-flight-deck .lfd-check-hull { --chk: #e5484d; }
-#lancer-flight-deck .lfd-check-agi { --chk: #3ec98b; }
-#lancer-flight-deck .lfd-check-sys { --chk: #4aa3ff; }
-#lancer-flight-deck .lfd-check-eng { --chk: #f0a32f; }
+:is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-check-hull { --chk: #e5484d; }
+:is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-check-agi { --chk: #3ec98b; }
+:is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-check-sys { --chk: #4aa3ff; }
+:is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-check-eng { --chk: #f0a32f; }
 
 /* --------------------------------------------------------------------------
    Heat

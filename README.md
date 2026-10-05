@@ -229,15 +229,24 @@ collapses and expands it). Players never see it.
   (70–160%, double-click to reset, arrow keys when focused). Layout is saved per GM.
 - **Each row:** a disposition stripe (hostile, neutral, friendly, secret), name, tier and
   template, HP and heat bars, structure and stress pips when it has more than one,
-  condition icons with Burn and Overshield, LANCER activations left this round, and a
+  its conditions as lit badges in the panel's colours (red for Stunned, Exposed and Shredded;
+  amber for Lock On, Jammed, Slowed and the like; green for Hidden), Burn and Overshield,
+  LANCER activations left this round, and a
   crosshair with a marker in each player's colour for **every player targeting it**.
   Hovering a row puts the same "look here" marker on its token as hovering its portrait.
   Whoever's turn it is glows; NPCs that have already acted this round dim. A row flashes
   red when its NPC takes damage, and kicks when it loses structure.
-- **One row opens at a time**, whoever's turn it is unless you open another: its stats,
-  HP / heat steppers, its features as buttons (Weapons, Tech, Systems, Reactions, Traits,
-  with Recharge and Limited state), condition toggles, **Activate** / **End turn** (LANCER's
-  popcorn initiative), Recharge, and the sheet.
+- **One row opens at a time** (selecting an NPC's token opens its row), whoever's turn it is
+  unless you open another:
+  - its stats, and **HULL / AGI / SYS / ENG** keys in the panel's colours that roll the
+    check through LANCER, as from the sheet;
+  - HP / heat steppers;
+  - a grid of labelled condition tiles (Lock On, Jammed, Impaired, Slowed, Immobile, Stunned,
+    Exposed, Shredded, Prone, Hidden). They light like the panel's annunciator when on, and a
+    click toggles one;
+  - its features as buttons (Weapons, Tech, Systems, Reactions, Traits, with Recharge and
+    Limited state);
+  - **Activate** / **End turn** (LANCER's popcorn initiative), Recharge, and the sheet.
 - **Features:** hover for the full text with its numbers at the NPC's tier (attack,
   accuracy, range, damage). Click to use it through LANCER's own flows (attack, tech attack,
   or its card, with Limited, Recharge and heat handled by the system); right-click posts its
@@ -250,7 +259,7 @@ collapses and expands it). Players never see it.
 Select two or more NPC tokens on the map (drag a box, or shift-click tokens or initiative portraits) and a **batch bar** appears at the top of the deck:
 
 - HP and heat steps apply to every selected NPC, each one exactly as if you'd stepped its own row. When several NPCs drop to 0 HP (or go over their heat cap) at once, their structure (or overheat) checks open one after another, since LANCER only keeps one such prompt open; a notice says whose check is next.
-- Condition buttons show whether none, some (half-lit) or all of the selection have it. A click gives it to the ones without it; when all have it, a click removes it from all. The hover card says how many have it.
+- Condition tiles show whether none, some (half-lit) or all of the selection have it. A click gives it to the ones without it; when all have it, a click removes it from all. The hover card says how many have it.
 - The × clears the selection.
 
 ### Several targets
