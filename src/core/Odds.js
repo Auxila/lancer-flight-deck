@@ -28,13 +28,32 @@ export function checkBands(n) {
 /**
  * What the NEXT structure check looks like, given the mech's current structure.
  * @param {{value:number, max:number}} structure
+ * @param {{rules?: "core"|"alt"}} [options]  "alt": the tables of the LANCER Alternative Structure module
  */
-export function nextStructureCheck({ value, max }) {
+export function nextStructureCheck({ value, max }, { rules = "core" } = {}) {
   if (!(max > 0) || value <= 0) return { state: "destroyed" };
   if (value === 1) return { state: "lethal", destroy: 1, destroyCertain: true };
   const remaining = value - 1;
   const dice = max - remaining;
   const b = checkBands(dice);
+  if (rules === "alt") {
+    // Same dice, gentler table: a Direct Hit never destroys (a HULL check at 2 or 1 remaining),
+    // and a Crushing Hit is a HULL check that destroys only on a failure.
+    return {
+      state: "check",
+      dice,
+      remaining,
+      rules,
+      bands: [
+        { key: "glancing", p: b.high, kind: "ok" },
+        { key: "trauma", p: b.mid, kind: "caution" },
+        { key: "direct", p: b.one, kind: "warning", check: remaining <= 2 },
+        { key: "crushing", p: b.multi, kind: "warning", check: true },
+      ],
+      destroy: 0,
+      destroyOnFailedCheck: b.multi,
+    };
+  }
   // Direct Hit: 3+ remaining stuns, 2 remaining means a HULL check, 1 or less destroys.
   const directLethal = remaining <= 1;
   const directCheck = remaining === 2;
@@ -58,14 +77,33 @@ export function nextStructureCheck({ value, max }) {
 /**
  * What the NEXT overheat (stress) check looks like, given the mech's current stress.
  * @param {{value:number, max:number}} stress
+ * @param {{rules?: "core"|"alt"}} [options]  "alt": the tables of the LANCER Alternative Structure module
  */
-export function nextOverheatCheck({ value, max }) {
+export function nextOverheatCheck({ value, max }, { rules = "core" } = {}) {
   if (!(max > 0) || value <= 0) return { state: "destroyed" };
   // Losing the last point of stress ends the mech (the system's noStressRemaining step).
   if (value === 1) return { state: "lethal", destroy: 1, destroyCertain: true };
   const remaining = value - 1;
   const dice = max - remaining;
   const b = checkBands(dice);
+  if (rules === "alt") {
+    // Every 1 is an ENGINEERING check; a meltdown only follows a failure (after 1d3 turns at 2 or 1
+    // remaining), and a Critical Reactor Failure's meltdown can be stopped by Stabilize or a check.
+    return {
+      state: "check",
+      dice,
+      remaining,
+      rules,
+      bands: [
+        { key: "shunt", p: b.high, kind: "ok" },
+        { key: "powerFail", p: b.mid, kind: "caution" },
+        { key: "meltdown", p: b.one, kind: "warning", check: true },
+        { key: "criticalFail", p: b.multi, kind: "warning", check: true },
+      ],
+      destroy: 0,
+      destroyOnFailedCheck: (remaining <= 2 ? b.one : 0) + b.multi,
+    };
+  }
   // Meltdown: 3+ remaining is Exposed, 2 means an ENGINEERING check, 1 is a meltdown next turn.
   const meltdownLethal = remaining <= 1;
   const meltdownCheck = remaining === 2;

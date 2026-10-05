@@ -14,13 +14,13 @@
       <span class="lfd-apply-name">{{#if caution.applyTo.lockOnName}}{{caution.applyTo.lockOnName}}{{else}}{{localize "LFD.Apply.None"}}{{/if}}</span>
     </span>
   </div>
-  <div class="lfd-annunciator" role="group" aria-label="{{localize 'LFD.Caution.Title'}}">
+  <div class="lfd-annunciator" role="group" aria-label="{{localize 'LFD.Caution.Title'}}" data-tooltip-class="{{tipClass}}" {{#if tipDirection}}data-tooltip-direction="{{tipDirection}}"{{/if}}>
     {{#each caution.tiles}}
     <button type="button" class="lfd-tile lfd-k-{{kind}} {{#if lit}}is-lit{{/if}} {{#if fresh}}is-fresh{{/if}} {{#if sel}}has-sel sel-{{sel}}{{/if}}"
-            data-action="tile" data-tile="{{id}}" data-tooltip="{{tooltip}}"
+            data-action="tile" data-tile="{{id}}" data-tooltip-html="{{tooltip}}"
             {{#if fresh}}style="animation-delay:{{alertDelay}}ms"{{/if}}
             aria-pressed="{{#if lit}}true{{else}}false{{/if}}"
-            aria-label="{{localize label}}{{#if detail}} {{detail}}{{/if}}: {{#if lit}}{{localize 'LFD.Caution.On'}}{{else}}{{localize 'LFD.Caution.Off'}}{{/if}}. {{tooltip}}">
+            aria-label="{{aria}}">
       <span class="lfd-tile-glyph" aria-hidden="true">{{glyph}}</span>
       <span class="lfd-tile-label">{{localize label}}</span>
       {{#if detail}}<span class="lfd-tile-detail">{{detail}}</span>{{/if}}

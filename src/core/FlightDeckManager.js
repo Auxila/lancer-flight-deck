@@ -7,12 +7,14 @@ import { HudMenu } from "../ui/HudMenu.js";
 import { buildActions } from "../ui/components/ActionBus.js";
 import { systemsSummary } from "../ui/components/SystemsBay.js";
 import { buildHeat } from "../ui/components/HeatReactorGauge.js";
-import { buildHull } from "../ui/components/HullReadout.js";
+import { CHECKS, buildHull } from "../ui/components/HullReadout.js";
 import { buildIntegrity } from "../ui/components/IntegrityMatrix.js";
 import { buildCaution, litTiles } from "../ui/components/MasterCautionGrid.js";
 import { applyTile, targetsFor, tileActiveOn } from "./ConditionControl.js";
 import { SynthesizerEngine } from "./SynthesizerEngine.js";
 import { TelemetryAdapter } from "./TelemetryAdapter.js";
+
+const OFFER_ID = "lancer-flight-deck-offer";
 
 /**
  * Orchestrates the panel's lifecycle: which mech it shows, when it re-renders, and how
@@ -90,6 +92,23 @@ export class FlightDeckManager {
       },
       precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL,
     });
+    // A toggle in the token controls: the one-click way back after hiding the panel
+    Hooks.on("getSceneControlButtons", controls => {
+      const tokens = controls?.tokens;
+      if (!tokens?.tools) return;
+      tokens.tools["lfd-flight-deck"] = {
+        name: "lfd-flight-deck",
+        title: "LFD.ToolTitle",
+        icon: "fa-solid fa-gauge-high",
+        order: Object.keys(tokens.tools).length,
+        toggle: true,
+        active: this.enabled,
+        visible: true,
+        onChange: (_event, active) => {
+          if (active !== this.enabled) setSetting(SETTINGS.ENABLED, active);
+        },
+      };
+    });
     // One unbound shortcut per HUD menu; players pick their own keys in Configure Controls
     for (const menu of ["invade", "move", "quick", "full", "reaction", "core", "systems"]) {
       game.keybindings.register(MODULE_ID, `menu-${menu}`, {
@@ -139,8 +158,35 @@ export class FlightDeckManager {
   }
 
   async setEnabled(enabled) {
+    // Turned on some other way (Alt+C, settings, toolbar): the first-login offer has nothing left to ask
+    if (enabled) foundry.applications.instances.get(OFFER_ID)?.close();
     if (enabled) await this.open();
     else await this.close();
+    ui.controls?.render?.(); // keep the toolbar toggle in step
+  }
+
+  /** The header's hide button: off until the toolbar toggle or Alt+C brings it back. */
+  async hide() {
+    await setSetting(SETTINGS.ENABLED, false);
+    ui.notifications.info(game.i18n.localize("LFD.Header.Hidden"));
+  }
+
+  /**
+   * Roll a HASE check (Hull, Agility, Systems, Engineering) through LANCER's own stat flow,
+   * exactly as the mech sheet does: accuracy/difficulty prompt, roll, chat card.
+   * @param {string} id  "hull" | "agi" | "sys" | "eng"
+   */
+  async rollCheck(id) {
+    if (!CHECKS.some(c => c.id === id)) return;
+    const actor = this.ownedActor();
+    if (!actor) return;
+    this.synth.play("hud");
+    try {
+      await actor.beginStatFlow(`system.${id}`);
+    } catch (err) {
+      console.error("Flight Deck |", err);
+      ui.notifications.error(game.i18n.localize("LFD.Error.Action"));
+    }
   }
 
   async open() {
@@ -568,6 +614,9 @@ export class FlightDeckManager {
     const theme = this.theme;
     const base = {
       themeId: theme.id,
+      // Hover cards (condition tiles) wear the cockpit theme and open away from the docked edge
+      tipClass: `lfd-hud-tip lfd-themed ${theme.cssClass}`,
+      tipDirection: this.floating ? null : this.dockSide === "right" ? "LEFT" : "RIGHT",
       standby: !t,
       header: {
         badge: theme.badge,
@@ -707,6 +756,7 @@ export class FlightDeckManager {
     if (!TelemetryAdapter.resolveActor()) return;
     await setSetting(SETTINGS.PROMPTED, true);
     const accept = await foundry.applications.api.DialogV2.confirm({
+      id: OFFER_ID,
       window: { title: "LFD.Offer.Title", icon: "fa-solid fa-gauge-high" },
       content: `<p>${game.i18n.localize("LFD.Offer.Body")}</p>`,
       yes: { label: "LFD.Offer.Yes" },

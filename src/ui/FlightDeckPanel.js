@@ -35,6 +35,8 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     actions: {
       toggleCollapse: FlightDeckPanel.#onToggleCollapse,
       toggleMute: FlightDeckPanel.#onToggleMute,
+      hidePanel: FlightDeckPanel.#onHidePanel,
+      rollCheck: FlightDeckPanel.#onRollCheck,
       overcharge: FlightDeckPanel.#onOvercharge,
       stabilize: FlightDeckPanel.#onStabilize,
       corePower: FlightDeckPanel.#onCorePower,
@@ -442,6 +444,14 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static #onToggleMute() {
     this.manager.toggleMute();
+  }
+
+  static #onHidePanel() {
+    this.manager.hide();
+  }
+
+  static #onRollCheck(_event, target) {
+    this.manager.rollCheck(target.dataset.check);
   }
 
   static #onAdjust(_event, target) {

@@ -55,9 +55,12 @@ export class TokenEffects {
     Hooks.on("updateActiveEffect", fromEffect);
     Hooks.on("deleteActiveEffect", fromEffect);
     Hooks.on("updateActor", actor => fromActor(actor));
-    // QoL adds its Jammed filter on the applying client, possibly after we reconciled; catch it
     Hooks.on("updateToken", (doc, changes) => {
-      if (!foundry.utils.hasProperty(changes, "flags.tokenmagic") || !doc.object) return;
+      if (!doc.object) return;
+      // Lancer QoL wrecks and repairs tokens by flag: effects come off the wreck and back after a repair
+      if (foundry.utils.hasProperty(changes, "flags.csm-lancer-qol.isDead")) return this.#queue(doc.object, { intro: false, reconcile: true });
+      // QoL adds its Jammed filter on the applying client, possibly after we reconciled; catch it
+      if (!foundry.utils.hasProperty(changes, "flags.tokenmagic")) return;
       // globalThis: with Token Magic FX absent, a bare `TokenMagic` is a ReferenceError (?. doesn't help)
       if (doc.actor?.statuses?.has("jammed") && globalThis.TokenMagic?.hasFilterId?.(doc.object, QOL_JAMMED)) {
         this.#queue(doc.object, { intro: false, reconcile: true });
@@ -156,7 +159,7 @@ export class TokenEffects {
     if (token.destroyed || !token.actor) return this.#drop(token);
     const actor = token.actor;
     const statuses = actor.statuses ?? new Set();
-    const wrecked = statuses.has("destroyed") || statuses.has(CONFIG.specialStatusEffects.DEFEATED);
+    const wrecked = isWrecked(token);
 
     // Local overlays and prone
     if (this.enabled && !wrecked) {
@@ -274,10 +277,25 @@ export class TokenEffects {
 /**
  * Per-token container for local overlays, plus the prone rotation of the token's art.
  */
+/**
+ * Wrecked or destroyed: the remains get no condition effects. That's LANCER's destroyed status, Foundry's
+ * defeated, a mech or NPC at 0 structure, or a Lancer QoL wreck (flagged; read raw, as getFlag throws
+ * for a module that isn't active).
+ */
+function isWrecked(token) {
+  const actor = token.actor;
+  const statuses = actor?.statuses ?? new Set();
+  if (statuses.has("destroyed") || statuses.has(CONFIG.specialStatusEffects.DEFEATED)) return true;
+  if (foundry.utils.getProperty(token.document, "flags.csm-lancer-qol.isDead")) return true;
+  const structure = actor?.system?.structure;
+  return (actor?.type === "mech" || actor?.type === "npc") && Number(structure?.max) > 0 && Number(structure?.value) <= 0;
+}
+
 class TokenRig {
   constructor(token) {
     this.token = token;
     this.root = new PIXI.Container();
+    this.root.name = "lfd-condition-overlays";
     this.root.zIndex = -2; // above the art (which lives in the primary group), under bars and icons
     this.root.eventMode = "none";
     this.root.interactiveChildren = false;

@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.5.0
+
+Safe for the table: easier to hide, checked against the usual LANCER modules, tested on small screens.
+
+**Flight Deck**
+- Mech check buttons under the stat strip: HULL, AGI, SYS and ENG, each in its own colour with its bonus. A click rolls the check through LANCER's own prompt and chat card; hovering shows the formula and what the check is for.
+- A hide button in the panel header, next to mute, and a **Flight Deck** toggle in Token Controls to bring the panel back (Alt+C still works).
+- The first-login offer closes itself if the panel is turned on another way.
+- HUD menus stay clear of the hotbar, players list and chat input on small screens such as 1280x720; tall menus scroll.
+
+**Compatibility**
+- LANCER Alternative Structure: structure and stress odds follow its tables, tagged ALT TABLE.
+- Notes for Lancer QoL, Token Action HUD and others in the README's Compatibility section; no conflicts with Alternative Sheets, Enhanced Status Effects, Weapon FX, Speed Provider or Ilysen's NPC rebake.
+
+**Fixes**
+- Overwatch fired from the weapon list now marks the reaction used for the round.
+- The GM-side Lock On request only accepts visible tokens in play.
+- Token effects skip updates while a scene is changing; damage effects stop once the panel closes.
+- Wrecks stay clean: condition effects come off a token at 0 structure, destroyed, defeated, or wrecked by Lancer QoL, and Flight Deck no longer puts back the Token Magic filters QoL clears from a wreck.
+
+**Development**
+- `npm run smoke`: a live two-seat smoke test against a running world.
+
 ## 0.4.0
 
 First public release. Foundry v13 (verified 13.351), LANCER 3.1+ (verified 3.1.3).

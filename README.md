@@ -8,6 +8,10 @@ reacts to the rules as they happen, and makes short synthesized sounds that only
 - **Assets:** none. The visuals are CSS and inline SVG, and every sound is synthesized with the Web Audio API.
 - **Optional:** [Token Magic FX](https://foundryvtt.com/packages/tokenmagic) for the silhouette effects of Exposed, Shredded, Jammed and Impaired. Everything else works without it.
 
+| The panel with the QUICK menu | After structure and stress damage | The GM's NPC Deck |
+|---|---|---|
+| ![Flight Deck docked on the left with the QUICK actions menu open beside it](docs/panel-hud.png) | ![The same panel cracked after losing two structure, with the odds tagged ALT TABLE](docs/battle-damage.png) | ![The NPC Deck listing the scene's NPCs, one row opened to show stats and features](docs/npc-deck.png) |
+
 ## Install
 
 1. In Foundry's setup screen, open **Add-on Modules** and click **Install Module**.
@@ -21,12 +25,25 @@ Hosted servers (The Forge, Molten and others) take the same manifest URL. Foundr
 
 The panel is opt-in for each player: the first time a player logs in with a mech, they're asked once. Anyone can turn it on later with **Alt+C** or in **Configure Settings**. GMs get the NPC Deck from the chessboard button in the token controls, or with **Alt+N**.
 
+## Before your first session
+
+Ten minutes in a copy of your world (or a test world) shows everything a cautious GM wants to see:
+
+1. Enable **Flight Deck** in **Game Settings → Manage Modules**. Nothing appears for players yet: the panel is off until each player turns it on.
+2. Log in as a player (or ask one), select their mech and accept the offer, or press **Alt+C**. The boot sound plays if audio is on.
+3. Roll a **HULL** check from the panel and open a HUD menu, such as **QUICK**, and run **Search**. Both go through LANCER's own prompts and chat cards.
+4. As GM, take one structure off that mech: the player's panel cracks. Put it back.
+5. Click the eye-slash button in the panel header to hide it, then bring it back with the gauge button in **Token Controls**. Every player can do this mid-session.
+6. Open the mech sheet: it's untouched. Flight Deck reads the actor and runs LANCER's flows; it doesn't replace anything.
+
+**Removing it cleanly.** Apart from ordinary game changes you make through it (HP, heat, conditions, the action tracker), Flight Deck saves only two things: Token Magic filters on tokens (ids starting `lfd-`) and a small flag recording which reactions were used this round. Turn off the world setting **Condition effects on token art** first to remove the filters, then untick Flight Deck in **Manage Modules**.
+
 ## What it shows
 
 | Section | Contents |
 |---|---|
 | Header | Manufacturer badge, mech and frame, pilot callsign, comms link status, your activation |
-| Hull | HP with overshield, armor, burn, and Evasion / E-Def / Speed / Sensors / Save / Tech |
+| Hull | HP with overshield, armor, burn, Evasion / E-Def / Speed / Sensors / Save / Tech, and HULL / AGI / SYS / ENG check buttons |
 | Reactor heat | One segment per point of heat, the Danger Zone boundary, the Overcharge ladder, and the odds that the next Overcharge pushes you over your Heat Cap |
 | Integrity | Structure and stress pips. Each track shows the next check's dice, the exact chance of every outcome, and the chance of losing the mech |
 | Master caution | 16 fixed annunciator tiles: warnings ▲, cautions ◆, advisories ●. Shape and border style repeat the colour's meaning |
@@ -143,6 +160,12 @@ Two LANCER quirks the HUD works around: LANCER's basic attack flow titles every 
 against Evasion. Grapple, Ram, Improvised Attack and Fragment Signal get their real titles
 and the right defence, without changing LANCER's flows for anyone else.
 
+## Mech checks
+
+Under the stat strip (EVA, E-DEF, SPD, SENS, SAVE, TECH) sit four check buttons: **HULL** (red), **AGI** (green), **SYS** (blue) and **ENG** (amber). Each shows the mech's bonus, such as `HULL +2`, and carries its label, so colour is never the only cue.
+
+Clicking one rolls that check through LANCER's own check flow, exactly like the mech sheet: LANCER's accuracy and difficulty prompt opens, then the roll posts to chat. Hovering shows the formula and what the check is for. The buttons are disabled on mechs you don't own.
+
 ## NPC Deck (GMs)
 
 The Flight Deck is a cockpit for one mech; a GM runs a whole enemy force. The NPC Deck is
@@ -257,11 +280,24 @@ Every condition has its own look on the token itself. Three techniques, each mat
 ## Controls and settings
 
 - **Alt+C** turns the panel on, then collapses and expands it. You can rebind it in Configure Controls.
-- The speaker button in the panel header mutes audio.
+- **Panel header:** the speaker button mutes audio, the eye-slash button hides the panel completely, and the chevrons collapse it to a slim tab that still shows heat and structure.
+- **Token Controls:** the **Flight Deck** toggle (gauge icon) turns the panel on and off for every player. It's the one-click way back after hiding it.
 - Client settings, which are per player: show panel, dock side, theme, panel size, opacity, reduce motion, cold boot, audio, volume, and Danger Zone afterglow.
 - World settings: offer the panel to each player once when they first log in with a mech (opt-in; nobody is forced), whether players can Lock On tokens they don't own, and when HUD menus spend actions.
 
 The panel follows the last mech token you control. If you aren't controlling one, it falls back to your assigned character (or your pilot's active mech).
+
+## Compatibility
+
+Checked against the modules LANCER tables commonly run, by testing and by reading their code:
+
+- **LANCER Alternative Structure:** while it's active, the structure and stress odds use its tables and carry an **ALT TABLE** tag. Under those tables no single roll destroys the mech; a failed HULL or ENGINEERING check decides, shown as `+x% more if the check fails`. Losing the last point still ends the mech.
+- **Lancer QoL:** its wreck automation deletes a destroyed NPC's token and combatant, so that NPC leaves the NPC Deck and the initiative strip. Wrecking also clears Token Magic filters, Flight Deck's included. QoL keeps its own Danger Zone visuals; the world setting **Jammed effect** picks Flight Deck's or QoL's Jammed.
+- **Token Action HUD:** works alongside. Actions run from Token Action HUD don't spend slots on LANCER's action tracker (neither does the sheet); actions run from Flight Deck's HUD menus do, as the world setting says. Its default bar position sits behind a left-docked panel, so drag it elsewhere.
+- **LANCER Weapon FX:** animations play for attacks made from Flight Deck.
+- **Lancer Speed Provider:** its extra movement modes appear in the MOVE menu.
+- **LANCER Alternative Sheets, Enhanced LANCER Status Effects, Ilysen's NPC rebake:** no conflicts found.
+- **Token Magic FX:** optional.
 
 ## Layout
 
@@ -343,6 +379,14 @@ Canon manufacturer colours from Massif's lancer-data:
 ```bash
 npm test
 ```
+
+`npm run smoke` drives a running world in a headless browser: a player seat and a GM seat exercise the panel, every HUD menu, the check buttons, hiding, the NPC Deck and battle damage, then put back everything they changed. Use a test world, close the seats it logs into, and point it at your server:
+
+```bash
+FD_URL=http://localhost:30000 FD_GM="Gamemaster" FD_PLAYER="Player" FD_MECH="Everest" npm run smoke
+```
+
+It needs `playwright-core` (`PLAYWRIGHT_CORE` can point at an existing install) and a browser (`FD_EXECUTABLE`, `FD_BROWSER=firefox`). A step fails only on errors thrown from Flight Deck's own code: errors from other modules are counted but don't fail anything, and errors that name no package are listed for you to look at.
 
 The tests cover the odds maths against brute-force enumeration, the action-economy rules, the fracture geometry and damage levels, NPC feature states and token portraits. The UI was verified in a real Foundry 13.351 server with LANCER 3.1.3, in Chromium and Firefox, with no other modules active.
 

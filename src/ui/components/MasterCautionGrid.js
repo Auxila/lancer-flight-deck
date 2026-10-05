@@ -1,4 +1,5 @@
 import { STATUS } from "../../constants.js";
+import { conditionCard, conditionText } from "../../core/ConditionInfo.js";
 
 /**
  * Annunciator tiles. Positions are fixed, like a real panel: every legend is always
@@ -94,6 +95,13 @@ export function buildCaution(t, pending, targets, activeOn) {
     const action = set.name
       ? i18n.format(HINT[tile.id] ?? "LFD.Apply.HintToggle", { condition: i18n.localize(label), target: set.name })
       : i18n.localize(tile.id === "lockon" ? "LFD.Apply.NoTarget" : "LFD.Apply.NoSelection");
+    const detail = lit && tile.detail ? tile.detail(t) : null;
+    // The hidden tile stands for Hidden, Invisible or both
+    const hidden = t.flags[STATUS.HIDDEN];
+    const invisible = t.flags[STATUS.INVISIBLE];
+    const condition = tile.id === "hidden" && invisible && !hidden ? "invisible" : tile.id;
+    const also = tile.id === "hidden" && invisible && hidden ? ["invisible"] : [];
+    const name = i18n.localize(label);
     return {
       id: tile.id,
       kind: tile.kind,
@@ -103,9 +111,10 @@ export function buildCaution(t, pending, targets, activeOn) {
       fresh,
       // Negative delay resumes the 10 s fade where it is, even after a re-render
       alertDelay: fresh ? -(Date.now() - since) : 0,
-      detail: lit && tile.detail ? tile.detail(t) : null,
+      detail,
       sel,
-      tooltip: action,
+      tooltip: conditionCard(condition, { title: name, detail, hint: action, also }),
+      aria: [`${name}${detail ? ` ${detail}` : ""}: ${i18n.localize(lit ? "LFD.Caution.On" : "LFD.Caution.Off")}.`, conditionText(condition), action].filter(Boolean).join(" "),
     };
   });
   return {

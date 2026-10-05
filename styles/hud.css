@@ -1048,6 +1048,13 @@
   color: var(--lfd-warning);
 }
 
+/* How long a condition lasts: secondary, not an alarm */
+#tooltip.lfd-hud-tip .lfd-tip-ends {
+  font-size: 10px;
+  font-style: italic;
+  color: var(--lfd-ink-dim);
+}
+
 #tooltip.lfd-hud-tip .lfd-tip-tags {
   font-size: 10px;
   color: var(--lfd-ink-dim);

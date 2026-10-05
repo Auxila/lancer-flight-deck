@@ -95,8 +95,8 @@
       </div>
 
       {{#if hasChips}}
-      <div class="lfd-npc-chips">
-        {{#each conditions}}<img src="{{img}}" alt="{{label}}" data-tooltip="{{label}}" class="{{#if lockon}}is-lockon{{/if}}">{{/each}}
+      <div class="lfd-npc-chips" data-tooltip-class="{{@root.tipClass}}">
+        {{#each conditions}}<img src="{{img}}" alt="{{label}}" {{#if tip}}data-tooltip-html="{{tip}}"{{else}}data-tooltip="{{label}}"{{/if}} class="{{#if lockon}}is-lockon{{/if}}">{{/each}}
         {{#if burn}}<span class="lfd-npc-chip is-burn" data-tooltip="LFD.Npc.Burn">{{localize "LFD.Npc.BurnShort" n=burn}}</span>{{/if}}
         {{#if overshield}}<span class="lfd-npc-chip is-os" data-tooltip="LFD.Npc.Overshield">{{localize "LFD.Npc.OverShort" n=overshield}}</span>{{/if}}
       </div>
@@ -137,9 +137,9 @@
         </section>
         {{/each}}
 
-        <div class="lfd-npc-conds" aria-label="{{localize 'LFD.Npc.Conditions'}}">
+        <div class="lfd-npc-conds" aria-label="{{localize 'LFD.Npc.Conditions'}}" data-tooltip-class="{{@root.tipClass}}">
           {{#each quick}}
-          <button type="button" class="{{#if on}}is-on{{/if}}" data-action="condition" data-cond="{{id}}" data-tooltip="{{label}}" aria-pressed="{{#if on}}true{{else}}false{{/if}}">
+          <button type="button" class="{{#if on}}is-on{{/if}}" data-action="condition" data-cond="{{id}}" {{#if tip}}data-tooltip-html="{{tip}}"{{else}}data-tooltip="{{label}}"{{/if}} aria-label="{{label}}" aria-pressed="{{#if on}}true{{else}}false{{/if}}">
             <img src="{{img}}" alt="{{label}}">
           </button>
           {{/each}}

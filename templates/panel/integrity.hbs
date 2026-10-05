@@ -13,8 +13,8 @@
     {{#if segments}}
     <div class="lfd-odds" data-tooltip-html="{{tooltip}}" data-tooltip-direction="RIGHT">
       <div class="lfd-odds-head">
-        <span>{{localize "LFD.Integrity.NextCheck" dice=dice}}</span>
-        <span class="lfd-odds-loss">{{localize "LFD.Integrity.Loss" pct=destroyPct}}</span>
+        <span>{{localize "LFD.Integrity.NextCheck" dice=dice}}{{#if altRules}} <span class="lfd-odds-alt">{{localize "LFD.Integrity.AltRules"}}</span>{{/if}}</span>
+        <span class="lfd-odds-loss {{#if lossOnCheck}}is-check{{/if}}">{{loss}}</span>
       </div>
       <div class="lfd-odds-bar">
         {{#each segments}}<span class="lfd-band lfd-band-{{kind}} {{#if check}}is-check{{/if}}" style="flex-basis:{{width}}%"></span>{{/each}}

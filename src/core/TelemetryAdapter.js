@@ -1,6 +1,9 @@
 import { DEFAULT_OVERCHARGE_SEQUENCE, STATUS } from "../constants.js";
 import { nextOverchargeCost, nextOverheatCheck, nextStructureCheck, overchargeOdds } from "./Odds.js";
 
+/** Which structure/overheat tables are in play: LANCER Alternative Structure replaces the core ones. */
+const checkRules = () => (game.modules.get("lancer-alt-structure")?.active ? "alt" : "core");
+
 /**
  * Reads LANCER mech actors into plain telemetry snapshots, diffs snapshots into
  * cockpit events, and tells the manager when anything relevant changes.
@@ -122,9 +125,9 @@ export class TelemetryAdapter {
     const ocOdds = oc.cost ? overchargeOdds({ heat: heatValue, cap: heatMax, formula: oc.cost }) : null;
 
     const structure = { value: num(sys.structure?.value), max: num(sys.structure?.max) };
-    structure.next = nextStructureCheck(structure);
+    structure.next = nextStructureCheck(structure, { rules: checkRules() });
     const stress = { value: num(sys.stress?.value), max: num(sys.stress?.max) };
-    stress.next = nextOverheatCheck(stress);
+    stress.next = nextOverheatCheck(stress, { rules: checkRules() });
 
     const tracker = sys.action_tracker ?? {};
     const meltdownTimer = Number.isInteger(sys.meltdown_timer) ? sys.meltdown_timer : null;
@@ -156,6 +159,8 @@ export class TelemetryAdapter {
         save: num(sys.save),
         tech: num(sys.tech_attack),
       },
+      // HASE check bonuses (a mech's Hull / Agility / Systems / Engineering)
+      checks: { hull: num(sys.hull), agi: num(sys.agi), sys: num(sys.sys), eng: num(sys.eng) },
       heat,
       overcharge: { level: num(sys.overcharge), rungs: oc.rungs, index: oc.index, cost: oc.cost, odds: ocOdds },
       structure,

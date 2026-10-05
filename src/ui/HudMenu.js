@@ -6,6 +6,12 @@ import { HoverCards } from "./HoverCards.js";
 const HUD_ID = `${MODULE_ID}-hud`;
 /** Space between the panel and the HUD, and the HUD and the screen edges (CSS px). */
 const GAP = 6;
+/** Foundry UI the HUD never covers when it shares a column with it (as the docked panel). */
+const OBSTACLES = ["hotbar", "players", "chat-message"];
+/** UI along the top the HUD stays below when they share a column: LANCER's action bar. */
+const CEILINGS = ["action-manager"];
+/** The least height worth keeping the HUD under LANCER's action bar for. */
+const MIN_ROOM = 240;
 /** How long a tile reads SENT after it fires. */
 const SENT_MS = 1100;
 
@@ -184,16 +190,14 @@ export class HudMenu {
     const panel = this.manager.panel?.element;
     if (!el || !panel) return;
     const box = panel.getBoundingClientRect();
-    el.hidden = !box.width;
-    if (!box.width) return;
+    el.hidden = !box.width || !window.innerHeight;
+    if (el.hidden) return;
     const zoom = box.width / panel.offsetWidth || 1; // UI scale and panel size combined
     el.style.zoom = String(zoom);
-    el.style.setProperty("--lfd-hud-max", `${Math.floor((window.innerHeight - 2 * GAP * zoom) / zoom)}px`);
     const anchor = panel.querySelector(".lfd-actions")?.getBoundingClientRect();
     // The panel scrolls: never align to the part of the plate that's scrolled out of view
     const bottom = Math.min(anchor?.height ? anchor.bottom : box.bottom, box.bottom);
     const width = el.offsetWidth * zoom;
-    const height = el.offsetHeight * zoom;
     const gap = GAP * zoom;
     const sidebar = document.getElementById("sidebar")?.getBoundingClientRect();
     const limit = sidebar?.width && sidebar.left >= box.right ? sidebar.left : window.innerWidth;
@@ -203,7 +207,14 @@ export class HudMenu {
       side = "left";
       left = box.left - gap - width;
     }
-    const top = Math.max(gap, Math.min(bottom - height, window.innerHeight - height - gap));
+    // Stop above Foundry UI in the HUD's column (the hotbar on laptop screens); taller menus scroll
+    const floor = HudMenu.#floor(left, width, gap);
+    // On a short window, room for the menu beats clearing LANCER's action bar
+    let ceiling = HudMenu.#ceiling(left, width, gap);
+    if (floor - ceiling < MIN_ROOM * zoom) ceiling = gap;
+    el.style.setProperty("--lfd-hud-max", `${Math.max(0, Math.floor((floor - ceiling) / zoom))}px`);
+    const height = el.offsetHeight * zoom;
+    const top = Math.max(ceiling, Math.min(bottom - height, floor - height));
     this.side = side;
     el.classList.toggle("is-left", side === "left");
     el.style.left = `${Math.round(left / zoom)}px`;
@@ -216,6 +227,28 @@ export class HudMenu {
     }
     // The panel side shows which way the HUD opened (chevrons, light notches)
     panel.classList.toggle("lfd-hud-left", side === "left");
+  }
+
+  /** The lowest the HUD may reach between `left` and `left + width`: the window, or the top of Foundry UI below it. */
+  static #floor(left, width, gap) {
+    let floor = window.innerHeight - gap;
+    for (const id of OBSTACLES) {
+      const r = document.getElementById(id)?.getBoundingClientRect();
+      if (!r?.width || !r.height || r.top <= gap * 4) continue;
+      if (r.left < left + width && r.right > left) floor = Math.min(floor, r.top - gap);
+    }
+    return floor;
+  }
+
+  /** The highest the HUD may reach between `left` and `left + width`: below LANCER's action bar if it's there. */
+  static #ceiling(left, width, gap) {
+    let ceiling = gap;
+    for (const id of CEILINGS) {
+      const r = document.getElementById(id)?.getBoundingClientRect();
+      if (!r?.width || !r.height || r.top > window.innerHeight / 2) continue;
+      if (r.left < left + width && r.right > left) ceiling = Math.max(ceiling, r.bottom + gap);
+    }
+    return ceiling;
   }
 
   #opener() {

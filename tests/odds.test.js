@@ -101,3 +101,34 @@ test("formatPct edge cases", () => {
   assert.equal(formatPct(0.0004), "<0.1%");
   assert.equal(formatPct(0.4213), "42.1%");
 });
+
+/* LANCER Alternative Structure (module "lancer-alt-structure"): same dice, different outcomes */
+
+test("alt structure: no roll destroys outright; a failed HULL check on a Crushing Hit does", () => {
+  for (const [value, max] of [[4, 4], [3, 4], [2, 4]]) {
+    const core = nextStructureCheck({ value, max });
+    const alt = nextStructureCheck({ value, max }, { rules: "alt" });
+    assert.equal(alt.dice, core.dice);
+    assert.equal(alt.destroy, 0);
+    const b = checkBands(alt.dice);
+    assert.ok(Math.abs(alt.destroyOnFailedCheck - b.multi) < 1e-12);
+    assert.deepEqual(alt.bands.map(x => x.key), ["glancing", "trauma", "direct", "crushing"]);
+    assert.ok(Math.abs(alt.bands.reduce((s, x) => s + x.p, 0) - 1) < 1e-12);
+    assert.ok(alt.bands.every(x => x.kind !== "lethal"));
+    // A Direct Hit asks for a HULL check once 2 or fewer structure remain
+    assert.equal(alt.bands[2].check, value - 1 <= 2);
+  }
+  // Losing the last point still ends the mech
+  assert.equal(nextStructureCheck({ value: 1, max: 4 }, { rules: "alt" }).state, "lethal");
+});
+
+test("alt stress: meltdowns hinge on ENGINEERING checks; the last point still ends the mech", () => {
+  const alt = nextOverheatCheck({ value: 3, max: 4 }, { rules: "alt" }); // 2 remain after the hit
+  const b = checkBands(alt.dice);
+  assert.equal(alt.destroy, 0);
+  assert.ok(Math.abs(alt.destroyOnFailedCheck - (b.one + b.multi)) < 1e-12);
+  assert.deepEqual(alt.bands.map(x => x.key), ["shunt", "powerFail", "meltdown", "criticalFail"]);
+  const early = nextOverheatCheck({ value: 4, max: 4 }, { rules: "alt" }); // 3 remain: a 1 can't melt down
+  assert.ok(Math.abs(early.destroyOnFailedCheck - checkBands(early.dice).multi) < 1e-12);
+  assert.equal(nextOverheatCheck({ value: 1, max: 4 }, { rules: "alt" }).state, "lethal");
+});

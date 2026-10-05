@@ -37,6 +37,9 @@
               aria-pressed="{{#if header.muted}}true{{else}}false{{/if}}">
         <i class="fa-solid {{#if header.muted}}fa-volume-xmark{{else}}fa-volume-low{{/if}}"></i>
       </button>
+      <button type="button" class="lfd-icon-btn" data-action="hidePanel" data-tooltip="LFD.Header.Hide" aria-label="{{localize 'LFD.Header.Hide'}}">
+        <i class="fa-solid fa-eye-slash"></i>
+      </button>
       <button type="button" class="lfd-icon-btn" data-action="toggleCollapse" data-tooltip="LFD.Header.Collapse" aria-label="{{localize 'LFD.Header.Collapse'}}">
         <i class="fa-solid fa-angles-left lfd-collapse-icon"></i>
       </button>

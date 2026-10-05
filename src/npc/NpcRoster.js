@@ -1,3 +1,4 @@
+import { conditionCard } from "../core/ConditionInfo.js";
 import { STATUS } from "../constants.js";
 
 /**
@@ -81,7 +82,8 @@ function conditions(actor) {
   for (const id of actor.statuses ?? []) {
     const cfg = CONFIG.statusEffects.find(s => s.id === id);
     if (!cfg) continue;
-    out.push({ id, label: game.i18n.localize(cfg.name ?? cfg.label ?? id), img: cfg.img ?? cfg.icon ?? null, lockon: id === STATUS.LOCK_ON });
+    const label = game.i18n.localize(cfg.name ?? cfg.label ?? id);
+    out.push({ id, label, img: cfg.img ?? cfg.icon ?? null, lockon: id === STATUS.LOCK_ON, tip: conditionCard(id, { title: label }) });
   }
   return out;
 }

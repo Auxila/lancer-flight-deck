@@ -482,6 +482,68 @@
   font-weight: 700;
 }
 
+/* HASE check keys under the stat strip: one colour per check, the label carries it too */
+#lancer-flight-deck .lfd-checks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+  margin: 3px 0 0;
+}
+
+#lancer-flight-deck .lfd-check {
+  --chk: var(--lfd-ink);
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 3px 4px 2px;
+  font: 700 9px/1.25 var(--lfd-font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--chk);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--chk) 16%, #0d0d0f), #0d0d0f 75%);
+  border: 1px solid color-mix(in srgb, var(--chk) 35%, transparent);
+  border-bottom: 2px solid var(--chk);
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 120ms ease, box-shadow 120ms ease, transform 80ms ease;
+}
+
+#lancer-flight-deck .lfd-check-bonus {
+  font-family: var(--lfd-font-data);
+  font-size: 11px;
+  letter-spacing: 0;
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck .lfd-check:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--chk) 28%, #0d0d0f);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--chk) 45%, transparent);
+}
+
+#lancer-flight-deck .lfd-check:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+#lancer-flight-deck .lfd-check:focus-visible {
+  outline: 1px solid var(--chk);
+  outline-offset: 1px;
+}
+
+#lancer-flight-deck .lfd-check:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+#lancer-flight-deck .lfd-check-hull { --chk: #e5484d; }
+#lancer-flight-deck .lfd-check-agi { --chk: #3ec98b; }
+#lancer-flight-deck .lfd-check-sys { --chk: #4aa3ff; }
+#lancer-flight-deck .lfd-check-eng { --chk: #f0a32f; }
+
 /* --------------------------------------------------------------------------
    Heat
    -------------------------------------------------------------------------- */
@@ -722,6 +784,21 @@
 #lancer-flight-deck .lfd-odds-loss {
   font-weight: 700;
   color: var(--lfd-warning);
+}
+
+/* The only way to lose the mech is a failed check */
+#lancer-flight-deck .lfd-odds-loss.is-check {
+  color: var(--lfd-caution);
+}
+
+/* Odds from the LANCER Alternative Structure tables */
+#lancer-flight-deck .lfd-odds-alt {
+  margin-left: 4px;
+  padding: 0 3px;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: var(--lfd-caution);
+  border: 1px solid color-mix(in srgb, var(--lfd-caution) 55%, transparent);
 }
 
 #lancer-flight-deck .lfd-odds-bar {

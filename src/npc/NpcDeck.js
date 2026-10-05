@@ -5,6 +5,7 @@ import { resolveTheme } from "../themes/registry.js";
 import { DeckFrame } from "../ui/DeckFrame.js";
 import { HoverCards } from "../ui/HoverCards.js";
 import { LookHere } from "./LookHere.js";
+import { conditionCard } from "../core/ConditionInfo.js";
 import { QUICK_CONDITIONS, featureTip, isGenericArt, isNpc, isVideoArt, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -267,7 +268,10 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
         row.anyUncharged = row.features.some(g => g.items.some(f => f.state === "uncharged"));
         row.quick = QUICK_CONDITIONS.map(id => {
           const cfg = CONFIG.statusEffects.find(s => s.id === id);
-          return cfg ? { id, label: game.i18n.localize(cfg.name ?? id), img: cfg.img, on: actor.statuses?.has(id) } : null;
+          if (!cfg) return null;
+          const label = game.i18n.localize(cfg.name ?? id);
+          const on = !!actor.statuses?.has(id);
+          return { id, label, img: cfg.img, on, tip: conditionCard(id, { title: label, hint: game.i18n.localize(on ? "LFD.Npc.CondRemove" : "LFD.Npc.CondApply") }) };
         }).filter(Boolean);
         row.inCombat = !!combat && !!row.combatantId;
       }
@@ -280,6 +284,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     if (initiative && initiative.firstDone >= 0) initiative.entries[initiative.firstDone].divider = true;
     if (initiative) await this.#stillFrames(initiative.entries);
     return {
+      tipClass: `lfd-hud-tip lfd-themed ${this.#theme().cssClass}`,
       collapsed: !!getSetting(SETTINGS.NPC_DECK_COLLAPSED),
       floating: this.frame.floating,
       rows,

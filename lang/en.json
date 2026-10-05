@@ -1,6 +1,7 @@
 {
   "LFD": {
     "Title": "Flight Deck",
+    "ToolTitle": "Flight Deck (Alt+C)",
     "Theme": {
       "Base": "Base",
       "GMS": "GMS: General Massive Systems"
@@ -137,7 +138,9 @@
       "Expand": "Expand Flight Deck (Alt+C)",
       "LinkOk": "Link nominal",
       "LinkJammed": "Link jammed",
-      "Activation": "Activation"
+      "Activation": "Activation",
+      "Hide": "Hide Flight Deck (bring it back from Token Controls or Alt+C)",
+      "Hidden": "Flight Deck hidden. Bring it back with the gauge button in Token Controls, or Alt+C."
     },
     "Hull": {
       "Title": "Hull",
@@ -181,7 +184,10 @@
       "LethalTipStructure": "One structure left: the next structure damage destroys the mech, no roll.",
       "LethalTipStress": "One stress left: the next stress damage ends the mech, no roll.",
       "FrameLost": "Mech destroyed",
-      "ReactorLost": "Reactor lost"
+      "ReactorLost": "Reactor lost",
+      "AltRules": "Alt table",
+      "AltRulesTip": "LANCER Alternative Structure is active: these odds use its tables. No single roll destroys the mech; a failed check decides.",
+      "LossOnCheck": "{pct} if {stat} fails"
     },
     "Bands": {
       "glancing": "Glancing Blow",
@@ -191,7 +197,9 @@
       "shunt": "Emergency Shunt",
       "destabilized": "Destabilized Power Plant",
       "meltdown": "Meltdown",
-      "irreversible": "Irreversible Meltdown"
+      "irreversible": "Irreversible Meltdown",
+      "powerFail": "Power Failure",
+      "criticalFail": "Critical Reactor Failure"
     },
     "Caution": {
       "Title": "Master caution panel",
@@ -217,6 +225,89 @@
       "Invisible": "Invisible",
       "HiddenInvisible": "Hid + Invis",
       "shutdown": "Shut Down"
+    },
+    "Conditions": {
+      "exposed": {
+        "Name": "Exposed",
+        "Text": "Kinetic, explosive and energy damage it takes is <strong>doubled</strong>, before any reductions.",
+        "Ends": "Clears when the mech Stabilizes, or shuts down."
+      },
+      "shredded": {
+        "Name": "Shredded",
+        "Text": "It gets no benefit from <strong>Armor</strong> or <strong>Resistance</strong>.",
+        "Ends": "Usually until the end of its next turn; the effect that caused it says."
+      },
+      "stunned": {
+        "Name": "Stunned",
+        "Text": "It can't move, Overcharge or take any actions, free actions and reactions included. Its Evasion is capped at 5 and it automatically fails <strong>HULL</strong> and <strong>AGILITY</strong> checks and saves. The pilot can still mount, dismount or eject.",
+        "Ends": "Usually until the end of its next turn."
+      },
+      "meltdown": {
+        "Name": "Reactor meltdown",
+        "Text": "The reactor is going critical. When the countdown runs out, the mech is destroyed in a reactor explosion that also hits everything nearby. Time to eject or get clear.",
+        "Alt": "Alternative Structure: Stabilizing, or passing an <strong>ENGINEERING</strong> check as a quick action, ends the countdown."
+      },
+      "lockon": {
+        "Name": "Lock On",
+        "Text": "Hostiles can consume Lock On for <strong>+1 Accuracy</strong> on their next attack against it. Some talents and systems need a Locked On target.",
+        "Ends": "Lasts until someone consumes it."
+      },
+      "jammed": {
+        "Name": "Jammed",
+        "Text": "No comms, no reactions, and no tech actions, taken or benefited from. Its only attacks are Improvised Attacks, Grapple and Ram.",
+        "Ends": "Usually until the end of its next turn."
+      },
+      "impaired": {
+        "Name": "Impaired",
+        "Text": "<strong>+1 Difficulty</strong> on all attacks, saves and checks.",
+        "Ends": "Usually until the end of its next turn."
+      },
+      "dangerzone": {
+        "Name": "Danger Zone",
+        "Text": "Heat is at half the Heat Cap or more. It isn't a penalty in itself, but some weapons, systems and talents switch on or get stronger in the Danger Zone, and the next overheat is closer.",
+        "Ends": "Ends when heat drops below half the cap."
+      },
+      "slowed": {
+        "Name": "Slowed",
+        "Text": "Its only movement is its standard move on its own turn: no Boost, and no special moves from talents, systems or weapons.",
+        "Ends": "Usually until the end of its next turn."
+      },
+      "immobilized": {
+        "Name": "Immobilized",
+        "Text": "It can't move of its own accord at all, though it can still be pushed, pulled or knocked back.",
+        "Ends": "Usually until the end of its next turn."
+      },
+      "engaged": {
+        "Name": "Engaged",
+        "Text": "It's adjacent to a hostile character, and both are Engaged. Ranged attacks it makes take <strong>+1 Difficulty</strong>, and if it becomes Engaged mid-move by something its size or bigger, it stops and loses the rest of the move.",
+        "Ends": "Ends when it's no longer adjacent to a hostile."
+      },
+      "prone": {
+        "Name": "Prone",
+        "Text": "Attacks against it gain <strong>+1 Accuracy</strong>. It's Slowed and moves as if through difficult terrain.",
+        "Ends": "Standing up takes its standard move (not while Immobilized) and doesn't count as movement."
+      },
+      "burn": {
+        "Name": "Burn",
+        "Text": "Burn deals its damage (ignoring Armor) when it lands and adds to this counter. At the end of each turn it rolls <strong>ENGINEERING</strong>: a success clears all Burn, a failure deals damage equal to the counter again."
+      },
+      "overshield": {
+        "Name": "Overshield",
+        "Text": "Temporary hit points that soak damage before HP. Overshield doesn't stack: only the highest value counts."
+      },
+      "hidden": {
+        "Name": "Hidden",
+        "Text": "Hostiles can't target it with attacks or actions, it doesn't cause engagement, and enemies only know roughly where it is. Attacking, forcing a save, taking a reaction, Boosting or losing cover ends Hidden; a Search can find it."
+      },
+      "invisible": {
+        "Name": "Invisible",
+        "Text": "Every attack against it, area effects included, has a flat <strong>50% chance to miss</strong> before anything is rolled. It can Hide even without cover."
+      },
+      "shutdown": {
+        "Name": "Shut Down",
+        "Text": "The reactor is offline. Heat and Exposed are cleared, cascading NHPs are stabilised, and statuses from tech actions (such as Lock On) end. It's immune to all tech actions and attacks, even friendly ones, and Stunned until it boots up.",
+        "Ends": "Boot Up (a full action) brings it back online."
+      }
     },
     "Action": {
       "Title": "Actions",
@@ -293,7 +384,30 @@
     },
     "Check": {
       "SentToPlayer": "Flight Deck: the {kind} check prompt went to {players}, who owns {name}.",
-      "AutomationOff": "Flight Deck: LANCER's structure automation is off, so no {kind} check was started."
+      "AutomationOff": "Flight Deck: LANCER's structure automation is off, so no {kind} check was started.",
+      "Group": "Mech checks",
+      "Tip": "<strong>{name}</strong> · {formula}<br>{use}<br><em>Click to roll</em>",
+      "Aria": "Roll a {name} check, {formula}",
+      "Hull": {
+        "Name": "Hull",
+        "Short": "Hull",
+        "Use": "Toughness and brute force: resisting being knocked down or shoved, lifting and smashing."
+      },
+      "Agility": {
+        "Name": "Agility",
+        "Short": "Agi",
+        "Use": "Speed and evasion: dodging blasts and hazards, slipping out of grabs."
+      },
+      "Systems": {
+        "Name": "Systems",
+        "Short": "Sys",
+        "Use": "Electronics and sensors: shrugging off jamming, hacking and other electronic effects."
+      },
+      "Engineering": {
+        "Name": "Engineering",
+        "Short": "Eng",
+        "Use": "Reactor and power: handling heat and keeping the reactor stable."
+      }
     },
     "Systems": {
       "Title": "Systems available",
@@ -674,7 +788,9 @@
           "done": "<b>{name}</b>: done this round<br>Hover: look here · Click: select · Double-click: look at it",
           "defeated": "<b>{name}</b>: defeated<br>Hover: look here · Click: select"
         }
-      }
+      },
+      "CondApply": "Click to apply",
+      "CondRemove": "Click to remove"
     }
   }
 }

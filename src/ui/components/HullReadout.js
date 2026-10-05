@@ -19,8 +19,20 @@ export function buildHull(t, { editable = false } = {}) {
       { key: "LFD.Stat.Save", value: t.stats.save },
       { key: "LFD.Stat.Tech", value: signed(t.stats.tech) },
     ],
+    checks: CHECKS.map(({ id, key }) => {
+      const bonus = t.checks?.[id] ?? 0;
+      return { id, key, bonus: signed(bonus), formula: `1d20${bonus ? signed(bonus) : ""}` };
+    }),
   };
 }
+
+/** LANCER's four mech checks, in the book's HASE order. `id` is the system field (system.hull...). */
+export const CHECKS = [
+  { id: "hull", key: "Hull" },
+  { id: "agi", key: "Agility" },
+  { id: "sys", key: "Systems" },
+  { id: "eng", key: "Engineering" },
+];
 
 function clampPct(n) {
   return Math.round(Math.min(100, Math.max(0, n)) * 10) / 10;
