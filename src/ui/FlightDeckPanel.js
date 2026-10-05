@@ -551,7 +551,8 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const secondary = event.button === 2 || event.type === "contextmenu";
     if (secondary) {
       event.preventDefault();
-      this.manager.toggleSlot(target.dataset.menu);
+      const menu = target.dataset.menu;
+      this.manager.toggleSlot(menu === "reaction" && event.shiftKey ? "protocol" : menu);
     } else this.manager.toggleMenu(target.dataset.menu);
   }
 

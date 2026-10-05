@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.6
+
+**Protocols & reactions**
+- The REACT light opens **Protocols & reactions**: every protocol your frame, systems and talents give you on top (marked PROTOCOL READY or USED), then Brace and Overwatch, then every reaction from your gear, traits and talents (marked REACTION READY or USED). Protocols left the Frame & core menu.
+- The light keeps its lamp for the reaction and gains a PROTO line that lights while the protocol is still available. Right-click marks the reaction spent or available, Shift+right-click the protocol.
+
 ## 0.6.5
 
 **NPC Deck**

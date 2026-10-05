@@ -118,7 +118,7 @@
         "move": "HUD: Movement",
         "quick": "HUD: Quick actions",
         "full": "HUD: Full actions",
-        "reaction": "HUD: Reactions",
+        "reaction": "HUD: Protocols & reactions",
         "core": "HUD: Frame & core",
         "systems": "HUD: Systems available"
       },
@@ -328,6 +328,7 @@
       "Quick": "Quick",
       "Full": "Full",
       "Reaction": "React",
+      "Protocol": "Proto",
       "Core": "Core",
       "Overcharge": "Overcharge",
       "Stabilize": "Stabilize",
@@ -336,7 +337,8 @@
       "NoCore": "No frame",
       "Invade": "Invade",
       "HintOpen": "Click: open menu",
-      "HintToggle": "Click: open menu · Right-click: mark spent / available"
+      "HintToggle": "Click: open menu · Right-click: mark spent / available",
+      "HintReaction": "Click: open menu · Right-click: mark the reaction spent / available · Shift+right-click: the protocol"
     },
     "Boot": {
       "Skip": "Click to skip",
@@ -449,12 +451,13 @@
         "move": "Movement",
         "quick": "Quick actions",
         "full": "Full actions",
-        "reaction": "Reactions",
+        "reaction": "Protocols & reactions",
         "core": "Frame & core",
         "systems": "Systems available"
       },
       "Section": {
         "basic": "Basic",
+        "basicReaction": "Basic reactions",
         "quickTech": "Quick tech",
         "fullTech": "Full tech",
         "techGear": {
@@ -550,6 +553,8 @@
       "Trait": "Frame trait",
       "ProtocolReady": "Protocol ready",
       "ProtocolSpent": "Protocol used",
+      "ReactionReady": "Reaction ready",
+      "ReactionSpent": "Reaction used",
       "Activation": {
         "quick": "Quick action",
         "full": "Full action",

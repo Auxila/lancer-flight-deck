@@ -482,7 +482,7 @@ export class FlightDeckManager {
     const t = this.telemetry;
     if (!actor || !t) return;
     const a = t.actions;
-    const has = { quick: a.full || a.quick, full: a.full, reaction: a.reaction, move: a.move > 0 }[id];
+    const has = { quick: a.full || a.quick, full: a.full, reaction: a.reaction, protocol: a.protocol, move: a.move > 0 }[id];
     if (has === undefined) return;
     const kind = id === "quick" && !has ? "full" : id; // refreshing quick brings back both halves
     const next = trackerChange(actor.system?.action_tracker ?? {}, kind, has, a.speed);

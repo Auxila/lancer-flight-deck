@@ -4,7 +4,8 @@ import { STATUS } from "../../constants.js";
  * Action economy lights (from the system's action tracker) and the quick-action buttons.
  * Every light opens its HUD menu; right-click marks the slot spent or available again.
  * INVADE sits where PROTOCOL used to: it lights while a quick action is left, since an
- * Invade is a quick tech action. Protocols moved into the Frame menu.
+ * Invade is a quick tech action. Protocols share REACT: its menu lists them first, its lamp is
+ * the reaction and its PROTO line the protocol (Shift+right-click marks that one).
  *
  * @param {object} t  Telemetry snapshot
  * @param {{systems: {total: number, ready: number}, open: string|null, owner: boolean}} hud
@@ -28,7 +29,10 @@ export function buildActions(t, { systems, open, owner }) {
       light("move", "LFD.Action.Move", a.move > 0, { detail: `${a.move}/${a.speed}` }),
       light("quick", "LFD.Action.Quick", quickLeft > 0, { pips: [{ on: quickLeft > 0 }, { on: quickLeft > 1 }] }),
       light("full", "LFD.Action.Full", a.full),
-      light("reaction", "LFD.Action.Reaction", a.reaction),
+      light("reaction", "LFD.Action.Reaction", a.reaction, {
+        sub: { label: "LFD.Action.Protocol", on: !!a.protocol },
+        hint: owner ? "LFD.Action.HintReaction" : null,
+      }),
       light("core", "LFD.Action.Core", t.core.available && t.core.ready),
     ],
     overcharge: { cost: t.overcharge.cost ?? "—", disabled: shutdown || down },

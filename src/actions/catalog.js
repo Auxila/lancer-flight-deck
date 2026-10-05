@@ -18,7 +18,7 @@ export const ACTIVATION_MENU = {
   "Full Tech": ["full", "techItems"],
   Reaction: ["reaction", "items"],
   Invade: ["invade", "items"],
-  Protocol: ["core", "protocol"],
+  Protocol: ["reaction", "protocol"],
   Free: ["core", "free"],
 };
 

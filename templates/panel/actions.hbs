@@ -5,8 +5,8 @@
     <li>
       <button type="button" class="lfd-light lfd-light-{{id}} {{#if on}}is-on{{/if}} {{#if open}}is-open{{/if}}"
               data-action="menu" data-menu="{{id}}" aria-haspopup="dialog" aria-expanded="{{#if open}}true{{else}}false{{/if}}"
-              aria-label="{{localize label}}: {{#if on}}{{localize 'LFD.Action.Ready'}}{{else}}{{localize 'LFD.Action.Spent'}}{{/if}}"
-              data-tooltip="{{#if toggle}}LFD.Action.HintToggle{{else}}LFD.Action.HintOpen{{/if}}">
+              aria-label="{{localize label}}: {{#if on}}{{localize 'LFD.Action.Ready'}}{{else}}{{localize 'LFD.Action.Spent'}}{{/if}}{{#if sub}}, {{localize sub.label}}: {{#if sub.on}}{{localize 'LFD.Action.Ready'}}{{else}}{{localize 'LFD.Action.Spent'}}{{/if}}{{/if}}"
+              data-tooltip="{{#if hint}}{{hint}}{{else if toggle}}LFD.Action.HintToggle{{else}}LFD.Action.HintOpen{{/if}}">
         {{#if invade}}
         <span class="lfd-invade-rain" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
         <span class="lfd-invade-scan" aria-hidden="true"></span>
@@ -14,6 +14,7 @@
         <span class="lfd-light-lamp" aria-hidden="true"></span>
         <span class="lfd-light-label" {{#if invade}}data-text="{{localize label}}"{{/if}}>{{localize label}}</span>
         {{#if detail}}<span class="lfd-light-detail">{{detail}}</span>
+        {{else if sub}}<span class="lfd-light-sub {{#if sub.on}}is-on{{/if}}">{{localize sub.label}}</span>
         {{else if pips}}<span class="lfd-light-pips" aria-hidden="true">{{#each pips}}<i class="{{#if on}}is-on{{/if}}"></i>{{/each}}</span>{{/if}}
       </button>
     </li>

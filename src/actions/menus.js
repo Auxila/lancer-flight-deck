@@ -162,7 +162,7 @@ function section(id, layout, items, extra = {}) {
   return { id, layout, title: loc(`LFD.Hud.Section.${id}`), items, ...extra };
 }
 
-/** Quick, Full, Reaction and Invade: basic actions as tiles, then gear actions as rows. */
+/** Quick, Full, Reaction and Invade: basic actions as tiles, then gear actions as rows. Reaction opens with protocols. */
 function actionView(vm, entries, menu, ctx) {
   const { actor, t } = ctx;
   const statuses = actor.statuses ?? new Set();
@@ -189,6 +189,27 @@ function actionView(vm, entries, menu, ctx) {
     );
     vm.sections.push(section("invadeBasic", "tiles", tiles("basic")));
     vm.sections.push(section("invadeGear", "rows", rows("items")));
+    return;
+  }
+  if (menu === "reaction") {
+    // Protocols first (start of your turn, before anything else), then every reaction you have.
+    // Two slots, so each section carries its own state and the header keeps room for the title.
+    const a = t.actions;
+    vm.economy = null;
+    vm.sections.push(
+      section("protocol", "rows", rows("protocol"), {
+        note: loc(a.protocol ? "LFD.Hud.ProtocolReady" : "LFD.Hud.ProtocolSpent"),
+        noteState: a.protocol ? "ready" : "spent",
+      })
+    );
+    vm.sections.push(
+      section("basic", "tiles", tiles("basic"), {
+        title: loc("LFD.Hud.Section.basicReaction"),
+        note: loc(a.reaction ? "LFD.Hud.ReactionReady" : "LFD.Hud.ReactionSpent"),
+        noteState: a.reaction ? "ready" : "spent",
+      })
+    );
+    vm.sections.push(section("gear", "rows", rows("items"), { title: loc("LFD.Hud.Section.gear.reaction") }));
     return;
   }
   vm.sections.push(section("basic", "tiles", tiles("basic")));
@@ -228,7 +249,7 @@ function moveView(vm, entries, ctx) {
   );
 }
 
-/** Frame: core power and passive, traits, protocols, free actions. */
+/** Frame: core power and passive, traits, free actions. (Protocols open with the reactions.) */
 function coreView(vm, entries, ctx, frame) {
   const { actor, t } = ctx;
   const gear = itemActions(actor);
@@ -278,12 +299,6 @@ function coreView(vm, entries, ctx, frame) {
     return { key, icon: "cci cci-trait", label: trait.name, sub: frame.name, state: "ready" };
   });
   vm.sections.push(section("traits", "rows", traits));
-  vm.sections.push(
-    section("protocol", "rows", gear.filter(e => e.section === "protocol").map(e => actionRow(e, entries)), {
-      note: loc(t.actions.protocol ? "LFD.Hud.ProtocolReady" : "LFD.Hud.ProtocolSpent"),
-      noteState: t.actions.protocol ? "ready" : "spent",
-    })
-  );
   vm.sections.push(section("free", "rows", gear.filter(e => e.section === "free").map(e => actionRow(e, entries))));
 }
 

@@ -125,7 +125,7 @@ The panel wears the mech's damage, and it stays there until it's repaired.
 Every light on the action bus is a button. Click one and a translucent HUD opens beside the
 panel's bottom plate, in the current theme's colours. One menu is open at a time; click the
 light again, press Esc or use × to close it. Right-click a light (QUICK, FULL, REACT, MOVE)
-to mark that slot spent, or available again.
+to mark that slot spent, or available again; Shift+right-click REACT does the same for the protocol.
 
 | Light | Menu |
 |---|---|
@@ -133,8 +133,8 @@ to mark that slot spent, or available again.
 | MOVE | Movement modes your token can use (walk, climb, jump, teleport…), set on the token so the ruler measures them, plus Boost, Disengage and a movement reset |
 | QUICK | Skirmish, Boost, Grapple, Ram, Hide, Search, Prepare, Eject, Shut Down, Self-Destruct; quick tech (Bolster, Lock On, Scan, Invade); then every quick and quick-tech action from your gear |
 | FULL | Barrage, Improvised Attack, Stabilize, Disengage, Boot Up, Mount, Jockey, Full Tech; then every full and full-tech action from your gear |
-| REACT | Brace and Overwatch, then every reaction your frame, systems, weapons, talents and core bonuses give you |
-| CORE | Core power and passive, frame traits, protocols (PROTOCOL moved here from the action bus), and free actions including Overcharge |
+| REACT | Protocols and reactions. On top, every protocol your frame, systems and talents give you, marked PROTOCOL READY or USED. Below, Brace and Overwatch, then every reaction your frame, systems, weapons, talents and core bonuses give you. The light's lamp is your reaction; its PROTO line lights while the protocol is still available this turn. |
+| CORE | Core power and passive, frame traits, and free actions including Overcharge |
 
 **SYSTEMS AVAILABLE**, under the Overcharge / Stabilize / Core Power buttons, opens the same
 HUD listing every installed system with its state (ready, Limited uses, destroyed, cascading).

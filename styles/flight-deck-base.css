@@ -1047,6 +1047,19 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   color: var(--lfd-ink-dim);
 }
 
+/* REACT's second slot: PROTO, lit while the protocol is still available this turn */
+#lancer-flight-deck .lfd-light-sub {
+  font: 700 6px/1 var(--lfd-font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--lfd-ink-dim) 60%, transparent);
+}
+
+#lancer-flight-deck .lfd-light-sub.is-on {
+  color: var(--lfd-ok);
+  text-shadow: 0 0 4px color-mix(in srgb, var(--lfd-ok) 60%, transparent);
+}
+
 #lancer-flight-deck .lfd-buttons {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr);
