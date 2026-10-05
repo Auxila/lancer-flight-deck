@@ -1093,61 +1093,445 @@
   animation: lfd-shake 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-/* Cold boot overlay */
+/* --------------------------------------------------------------------------
+   Cold boot (FlightDeckPanel.playBoot): power-on line, terminal pour, cut,
+   the MAIN SYSTEM / COMBAT MODE / ENGAGED finish, then blast doors open.
+   Each phase class (is-stream, is-fast, is-cut, is-finish, is-engaged, is-exit)
+   moves things on; every element's resting state is its finished look, so
+   with reduced motion (no animation) the overlay is simply the title card.
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-booting {
+  overflow: hidden !important;
+}
+
 #lancer-flight-deck .lfd-boot {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  padding: 18px;
+  overflow: hidden;
+  color: var(--lfd-ink);
   background:
-    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.03) 0 1px, transparent 1px 3px),
-    rgb(6 6 8 / 0.97);
+    radial-gradient(130% 75% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.6)),
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 3px),
+    #050507;
   cursor: pointer;
-  animation: lfd-fade-in 120ms ease-out;
+  /* Two halves meeting in the middle: the exit pulls them apart like blast doors */
+  clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%, 0 50%, 100% 50%, 100% 100%, 0 100%);
+  transition: clip-path 230ms cubic-bezier(0.7, 0, 0.84, 0);
 }
 
-#lancer-flight-deck .lfd-boot.is-ending {
-  opacity: 0;
-  transition: opacity 200ms ease;
+#lancer-flight-deck .lfd-boot.is-exit {
+  clip-path: polygon(0 0, 100% 0, 100% 0, 0 0, 0 100%, 100% 100%, 100% 100%, 0 100%);
+  pointer-events: none;
 }
+
+/* Power-on: a CRT line snaps across the middle, then blooms open */
+#lancer-flight-deck .lfd-boot-power {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: #fff;
+  box-shadow: 0 0 14px var(--lfd-accent), 0 0 3px #fff;
+  opacity: 0;
+  transform: translateY(-50%);
+  animation: lfd-boot-power 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+@keyframes lfd-boot-power {
+  0% { opacity: 1; transform: translateY(-50%) scaleX(0); }
+  35% { opacity: 1; transform: translateY(-50%) scaleX(1) scaleY(1); }
+  100% { opacity: 0; transform: translateY(-50%) scaleX(1) scaleY(40); }
+}
+
+/* Header strip: manufacturer, firmware, mech, and a counter that races to 100% */
+#lancer-flight-deck .lfd-boot-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  font: 700 9px/1 var(--lfd-font-display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #0c0c10, #070709);
+  border-bottom: 1px solid color-mix(in srgb, var(--lfd-accent) 50%, transparent);
+  opacity: 0;
+  transition: opacity 100ms ease;
+}
+
+#lancer-flight-deck .lfd-boot.is-stream .lfd-boot-head { opacity: 1; }
+#lancer-flight-deck .lfd-boot.is-finish .lfd-boot-head { opacity: 0; }
 
 #lancer-flight-deck .lfd-boot-badge {
-  align-self: flex-start;
-  margin-bottom: 10px;
-  padding: 4px 10px;
-  background: var(--lfd-accent);
+  padding: 2px 5px;
+  font-weight: 900;
   color: var(--lfd-accent-ink);
-  font-family: var(--lfd-font-display);
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
+  background: var(--lfd-accent);
 }
 
-#lancer-flight-deck .lfd-boot-line {
-  font-size: 11.5px;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
+#lancer-flight-deck .lfd-boot-id {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
-  clip-path: inset(0 100% 0 0);
-  animation: lfd-type 280ms steps(18) forwards;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--lfd-ink-dim);
 }
 
-#lancer-flight-deck .lfd-boot-line:last-of-type {
-  color: var(--lfd-ok);
+#lancer-flight-deck .lfd-boot-pct {
+  font-family: var(--lfd-font-data);
+  font-variant-numeric: tabular-nums;
+  color: var(--lfd-accent);
 }
+
+/* The pour: two copies of the log slide down, looping seamlessly, faster after is-fast */
+#lancer-flight-deck .lfd-boot-stream {
+  position: absolute;
+  inset: 22px 0 0;
+  overflow: hidden;
+  padding: 0 8px;
+  font: 500 9.5px/12px var(--lfd-font-data);
+  letter-spacing: 0.02em;
+  white-space: pre;
+  clip-path: inset(50% 0 50% 0);
+  -webkit-mask-image: linear-gradient(180deg, #000, rgb(0 0 0 / 0.8) 55%, rgb(0 0 0 / 0.2));
+  mask-image: linear-gradient(180deg, #000, rgb(0 0 0 / 0.8) 55%, rgb(0 0 0 / 0.2));
+  transition: clip-path 160ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 120ms ease;
+}
+
+/* The write head: where the new lines come in */
+#lancer-flight-deck .lfd-boot-stream::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  height: 16px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lfd-accent) 40%, transparent), transparent);
+  pointer-events: none;
+}
+
+#lancer-flight-deck .lfd-boot.is-stream .lfd-boot-stream { clip-path: inset(0); }
+#lancer-flight-deck .lfd-boot.is-finish .lfd-boot-stream { opacity: 0; }
+
+#lancer-flight-deck .lfd-boot-reel {
+  animation: lfd-boot-pour 520ms linear infinite;
+  will-change: transform;
+}
+
+#lancer-flight-deck .lfd-boot.is-fast .lfd-boot-reel {
+  animation-duration: 210ms;
+  filter: blur(0.35px);
+}
+
+#lancer-flight-deck .lfd-boot.is-cut .lfd-boot-reel {
+  animation-play-state: paused;
+  filter: brightness(1.9);
+}
+
+@keyframes lfd-boot-pour {
+  from { transform: translateY(-50%); }
+  to { transform: translateY(0); }
+}
+
+#lancer-flight-deck .lfd-boot-row {
+  height: 12px;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--lfd-ink) 75%, transparent);
+  text-shadow: 0 0 6px color-mix(in srgb, var(--lfd-accent) 25%, transparent);
+}
+
+#lancer-flight-deck .lfd-boot-row.is-hex { color: color-mix(in srgb, var(--lfd-ink-dim) 70%, transparent); }
+#lancer-flight-deck .lfd-boot-row.is-dim { color: var(--lfd-ink-dim); }
+#lancer-flight-deck .lfd-boot-row.is-ok { color: color-mix(in srgb, var(--lfd-ok) 80%, var(--lfd-ink)); }
+#lancer-flight-deck .lfd-boot-row.is-accent { color: var(--lfd-accent); font-weight: 700; }
+#lancer-flight-deck .lfd-boot-row.is-warn { color: var(--lfd-caution); }
+
+/* The cut: a white flash and a scanline sweeping down */
+#lancer-flight-deck .lfd-boot-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#lancer-flight-deck .lfd-boot.is-cut .lfd-boot-flash {
+  animation: lfd-boot-flash 150ms ease-out;
+}
+
+@keyframes lfd-boot-flash {
+  0% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+#lancer-flight-deck .lfd-boot::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 4;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--lfd-accent) 20%, #fff 50%, var(--lfd-accent) 80%, transparent);
+  box-shadow: 0 0 10px var(--lfd-accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+#lancer-flight-deck .lfd-boot.is-cut::after {
+  animation: lfd-boot-scan 320ms cubic-bezier(0.5, 0, 0.5, 1);
+}
+
+@keyframes lfd-boot-scan {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0.6; transform: translateY(var(--lfd-boot-h, 600px)); }
+}
+
+/* The finish: MAIN SYSTEM / COMBAT MODE / ENGAGED */
+#lancer-flight-deck .lfd-boot-finish {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#lancer-flight-deck .lfd-boot.is-finish .lfd-boot-finish { opacity: 1; }
+
+#lancer-flight-deck .lfd-boot-frame {
+  position: relative;
+  display: grid;
+  gap: 7px;
+  width: calc(100% - 36px);
+  padding: 14px 12px 12px;
+}
+
+#lancer-flight-deck .lfd-boot.is-engaged .lfd-boot-frame {
+  animation: lfd-boot-punch 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes lfd-boot-punch {
+  0% { transform: scale(1.04); filter: brightness(1.9); }
+  100% { transform: scale(1); filter: none; }
+}
+
+#lancer-flight-deck .lfd-boot-rule {
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--lfd-accent) 12%, var(--lfd-accent) 88%, transparent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--lfd-accent) 60%, transparent);
+  transform: scaleX(0);
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#lancer-flight-deck .lfd-boot.is-finish .lfd-boot-rule { transform: scaleX(1); }
+
+#lancer-flight-deck .lfd-boot-caption {
+  font: 700 9.5px/1 var(--lfd-font-display);
+  letter-spacing: 0.62em;
+  text-transform: uppercase;
+  color: var(--lfd-accent);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 240ms steps(11) 70ms;
+}
+
+#lancer-flight-deck .lfd-boot.is-finish .lfd-boot-caption { clip-path: inset(0); }
+
+#lancer-flight-deck .lfd-boot-title {
+  position: relative;
+  font: 900 26px/1 var(--lfd-font-display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #f4f4f6;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--lfd-accent) 55%, transparent);
+}
+
+#lancer-flight-deck .lfd-boot.is-finish .lfd-boot-title {
+  animation:
+    lfd-boot-track 440ms cubic-bezier(0.16, 1, 0.3, 1) 50ms backwards,
+    lfd-boot-flicker 440ms steps(1) 50ms;
+}
+
+@keyframes lfd-boot-track {
+  0% { letter-spacing: 0.9em; opacity: 0; filter: blur(3px); }
+  40% { opacity: 1; }
+  100% { letter-spacing: 0.14em; filter: blur(0); }
+}
+
+@keyframes lfd-boot-flicker {
+  0% { opacity: 0; }
+  8% { opacity: 1; }
+  14% { opacity: 0.25; }
+  20% { opacity: 1; }
+  46% { opacity: 0.6; }
+  52% { opacity: 1; }
+}
+
+/* Chromatic split that converges as the letters lock */
+#lancer-flight-deck .lfd-boot-title::before,
+#lancer-flight-deck .lfd-boot-title::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+#lancer-flight-deck .lfd-boot-title::before { color: #ff2d55; }
+#lancer-flight-deck .lfd-boot-title::after { color: #22e4ff; }
+
+#lancer-flight-deck .lfd-boot.is-finish .lfd-boot-title::before {
+  animation: lfd-boot-split-l 540ms cubic-bezier(0.16, 1, 0.3, 1) 50ms;
+}
+
+#lancer-flight-deck .lfd-boot.is-finish .lfd-boot-title::after {
+  animation: lfd-boot-split-r 540ms cubic-bezier(0.16, 1, 0.3, 1) 50ms;
+}
+
+@keyframes lfd-boot-split-l {
+  0% { opacity: 0.9; transform: translateX(-7px); }
+  100% { opacity: 0; transform: translateX(0); }
+}
+
+@keyframes lfd-boot-split-r {
+  0% { opacity: 0.9; transform: translateX(7px); }
+  100% { opacity: 0; transform: translateX(0); }
+}
+
+#lancer-flight-deck .lfd-boot-bar {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  height: 5px;
+}
+
+#lancer-flight-deck .lfd-boot-bar i {
+  background: color-mix(in srgb, var(--lfd-accent) 14%, transparent);
+  transition: background 60ms linear, box-shadow 60ms linear;
+}
+
+#lancer-flight-deck .lfd-boot.is-finish .lfd-boot-bar i {
+  background: var(--lfd-accent);
+  box-shadow: 0 0 6px var(--lfd-accent);
+}
+
+#lancer-flight-deck .lfd-boot-bar i:nth-child(1) { transition-delay: 140ms; }
+#lancer-flight-deck .lfd-boot-bar i:nth-child(2) { transition-delay: 166ms; }
+#lancer-flight-deck .lfd-boot-bar i:nth-child(3) { transition-delay: 192ms; }
+#lancer-flight-deck .lfd-boot-bar i:nth-child(4) { transition-delay: 218ms; }
+#lancer-flight-deck .lfd-boot-bar i:nth-child(5) { transition-delay: 244ms; }
+#lancer-flight-deck .lfd-boot-bar i:nth-child(6) { transition-delay: 270ms; }
+#lancer-flight-deck .lfd-boot-bar i:nth-child(7) { transition-delay: 296ms; }
+#lancer-flight-deck .lfd-boot-bar i:nth-child(8) { transition-delay: 322ms; }
+#lancer-flight-deck .lfd-boot-bar i:nth-child(9) { transition-delay: 348ms; }
+#lancer-flight-deck .lfd-boot-bar i:nth-child(10) { transition-delay: 374ms; }
+#lancer-flight-deck .lfd-boot-bar i:nth-child(11) { transition-delay: 400ms; }
+#lancer-flight-deck .lfd-boot-bar i:nth-child(12) { transition-delay: 426ms; }
+
+#lancer-flight-deck .lfd-boot-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font: 600 8.5px/1 var(--lfd-font-display);
+  letter-spacing: 0.14em;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck .lfd-boot-meta > span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+#lancer-flight-deck .lfd-boot-stamp {
+  flex: none;
+  padding: 3px 7px;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--lfd-accent-ink);
+  background: var(--lfd-accent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--lfd-accent) 70%, transparent);
+  opacity: 0;
+  transform: scale(1.7);
+  transition: opacity 90ms linear, transform 170ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#lancer-flight-deck .lfd-boot.is-engaged .lfd-boot-stamp { opacity: 1; transform: scale(1); }
+
+/* Corner brackets snapping in around the title */
+#lancer-flight-deck .lfd-boot-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--lfd-accent);
+  opacity: 0;
+  transition: opacity 120ms linear, transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#lancer-flight-deck .lfd-boot-corner.is-tl { top: 0; left: 0; border-right: 0; border-bottom: 0; transform: translate(-9px, -9px); }
+#lancer-flight-deck .lfd-boot-corner.is-tr { top: 0; right: 0; border-left: 0; border-bottom: 0; transform: translate(9px, -9px); }
+#lancer-flight-deck .lfd-boot-corner.is-bl { bottom: 0; left: 0; border-right: 0; border-top: 0; transform: translate(-9px, 9px); }
+#lancer-flight-deck .lfd-boot-corner.is-br { bottom: 0; right: 0; border-left: 0; border-top: 0; transform: translate(9px, 9px); }
+#lancer-flight-deck .lfd-boot.is-finish .lfd-boot-corner { opacity: 1; transform: none; }
 
 #lancer-flight-deck .lfd-boot-skip {
   position: absolute;
-  bottom: 10px;
-  right: 14px;
-  font-size: 9.5px;
-  letter-spacing: 0.1em;
+  right: 10px;
+  bottom: 8px;
+  z-index: 5;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--lfd-ink-dim);
+  opacity: 0.55;
+}
+
+/* After the doors open, the plates power on top to bottom */
+#lancer-flight-deck.lfd-boot-reveal .lfd-plate {
+  animation: lfd-plate-on 420ms ease-out backwards;
+}
+
+#lancer-flight-deck.lfd-boot-reveal > :nth-child(1) .lfd-plate,
+#lancer-flight-deck.lfd-boot-reveal > .lfd-plate:nth-child(1) { animation-delay: 0ms; }
+#lancer-flight-deck.lfd-boot-reveal > :nth-child(2) .lfd-plate,
+#lancer-flight-deck.lfd-boot-reveal > .lfd-plate:nth-child(2) { animation-delay: 45ms; }
+#lancer-flight-deck.lfd-boot-reveal > :nth-child(3) .lfd-plate,
+#lancer-flight-deck.lfd-boot-reveal > .lfd-plate:nth-child(3) { animation-delay: 90ms; }
+#lancer-flight-deck.lfd-boot-reveal > :nth-child(4) .lfd-plate,
+#lancer-flight-deck.lfd-boot-reveal > .lfd-plate:nth-child(4) { animation-delay: 135ms; }
+#lancer-flight-deck.lfd-boot-reveal > :nth-child(5) .lfd-plate,
+#lancer-flight-deck.lfd-boot-reveal > .lfd-plate:nth-child(5) { animation-delay: 180ms; }
+#lancer-flight-deck.lfd-boot-reveal > :nth-child(6) .lfd-plate,
+#lancer-flight-deck.lfd-boot-reveal > .lfd-plate:nth-child(6) { animation-delay: 225ms; }
+#lancer-flight-deck.lfd-boot-reveal > :nth-child(7) .lfd-plate,
+#lancer-flight-deck.lfd-boot-reveal > .lfd-plate:nth-child(7) { animation-delay: 270ms; }
+#lancer-flight-deck.lfd-boot-reveal > :nth-child(8) .lfd-plate,
+#lancer-flight-deck.lfd-boot-reveal > .lfd-plate:nth-child(8) { animation-delay: 315ms; }
+
+@keyframes lfd-plate-on {
+  0% { opacity: 0.15; filter: brightness(2.2) saturate(0); }
+  35% { opacity: 1; }
+  100% { opacity: 1; filter: none; }
 }
 
 /* Banner (CORE ONLINE / SIGNAL LOST) */
@@ -1186,10 +1570,6 @@
 #lancer-flight-deck.lfd-reduce-motion {
   animation: none !important;
   transition: none !important;
-}
-
-#lancer-flight-deck.lfd-reduce-motion .lfd-boot-line {
-  clip-path: none;
 }
 
 #lancer-flight-deck.lfd-reduce-motion .lfd-tile.is-fresh {

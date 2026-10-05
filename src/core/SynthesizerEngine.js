@@ -75,7 +75,7 @@ export class SynthesizerEngine {
         case "chime": this.#chime(ctx, opts.freqs ?? [800, 600]); break;
         case "klaxon": this.#klaxon(ctx, opts.freqs ?? [520, 740]); break;
         case "thud": this.#thud(ctx); break;
-        case "boot": this.#boot(ctx, opts.freqs ?? [660, 880, 1320]); break;
+        case "boot": this.#boot(ctx, opts.freqs ?? [660, 880, 1320], !!opts.reduce); break;
         case "core": this.#core(ctx); break;
         case "hud": this.#hud(ctx, opts.freq ?? 1760); break;
         case "crack": this.#crack(ctx); break;
@@ -367,32 +367,81 @@ export class SynthesizerEngine {
     this.#voice(ctx, { sources: [grit], nodes: [lp], out: gritOut });
   }
 
-  /** Cold boot: a relay tick and three rising blips. */
-  #boot(ctx, freqs) {
-    const t = ctx.currentTime + 0.02;
-    const tick = ctx.createBufferSource();
-    tick.buffer = this.#noiseBuffer(ctx);
-    const hp = this.#filter(ctx, "highpass", 2500, 0.7);
-    const tickOut = this.#gain(ctx, 0);
-    tickOut.gain.setValueAtTime(0.25, t);
-    tickOut.gain.exponentialRampToValueAtTime(0.001, t + 0.012);
-    tick.connect(hp).connect(tickOut);
-    tick.start(t);
-    tick.stop(t + 0.02);
-    this.#voice(ctx, { sources: [tick], nodes: [hp], out: tickOut });
+  /**
+   * Cold boot, on the overlay's timeline (FlightDeckPanel.playBoot): data chatter while the terminal
+   * pours (0.06-0.96 s), a thunk on the cut (0.98 s), a rising sweep under the title, and a two-tone
+   * system chime with a detuned shimmer on ENGAGED (1.52 s). Reduced motion: the chime alone.
+   */
+  #boot(ctx, freqs, reduce) {
+    const t0 = ctx.currentTime + 0.02;
+    const [lo, mid, hi] = freqs;
+    if (!reduce) {
+      // Chatter: one noise source through a bandpass that jumps about, gated into ticks that speed up
+      const src = ctx.createBufferSource();
+      src.buffer = this.#noiseBuffer(ctx);
+      src.loop = true;
+      const bp = this.#filter(ctx, "bandpass", 3200, 6);
+      const chatter = this.#gain(ctx, 0);
+      let at = t0 + 0.06;
+      while (at < t0 + 0.96) {
+        chatter.gain.setValueAtTime(0.05 + Math.random() * 0.05, at);
+        chatter.gain.exponentialRampToValueAtTime(0.001, at + 0.012);
+        bp.frequency.setValueAtTime(1800 + Math.random() * 4200, at);
+        at += 0.034 - ((at - t0) / 0.96) * 0.02 + Math.random() * 0.01;
+      }
+      chatter.gain.setValueAtTime(0, at);
+      src.connect(bp).connect(chatter);
+      src.start(t0);
+      src.stop(t0 + 1);
+      this.#voice(ctx, { sources: [src], nodes: [bp], out: chatter });
 
-    freqs.forEach((freq, i) => {
-      const at = t + 0.12 + i * 0.09;
-      const blip = this.#osc(ctx, "sine", freq);
-      const out = this.#gain(ctx, 0);
-      out.gain.setValueAtTime(0, at);
-      out.gain.linearRampToValueAtTime(0.16, at + 0.006);
-      out.gain.exponentialRampToValueAtTime(0.001, at + 0.07);
-      blip.connect(out);
-      blip.start(at);
-      blip.stop(at + 0.08);
-      this.#voice(ctx, { sources: [blip], out });
-    });
+      // The cut: a low thunk
+      const cut = t0 + 0.98;
+      const thunk = this.#osc(ctx, "sine", 90);
+      thunk.frequency.setValueAtTime(90, cut);
+      thunk.frequency.exponentialRampToValueAtTime(42, cut + 0.18);
+      const thunkOut = this.#gain(ctx, 0);
+      thunkOut.gain.setValueAtTime(0.3, cut);
+      thunkOut.gain.exponentialRampToValueAtTime(0.001, cut + 0.22);
+      thunk.connect(thunkOut);
+      thunk.start(cut);
+      thunk.stop(cut + 0.24);
+      this.#voice(ctx, { sources: [thunk], out: thunkOut });
+
+      // The finish: a sweep rising under the title
+      const sweep = t0 + 1.04;
+      const saw = this.#osc(ctx, "sawtooth", lo / 6);
+      saw.frequency.setValueAtTime(lo / 6, sweep);
+      saw.frequency.exponentialRampToValueAtTime(lo / 1.5, sweep + 0.46);
+      const lp = this.#filter(ctx, "lowpass", 300, 1.2);
+      lp.frequency.setValueAtTime(300, sweep);
+      lp.frequency.exponentialRampToValueAtTime(2600, sweep + 0.46);
+      const sweepOut = this.#gain(ctx, 0);
+      sweepOut.gain.setValueAtTime(0, sweep);
+      sweepOut.gain.linearRampToValueAtTime(0.07, sweep + 0.3);
+      sweepOut.gain.exponentialRampToValueAtTime(0.001, sweep + 0.5);
+      saw.connect(lp).connect(sweepOut);
+      saw.start(sweep);
+      saw.stop(sweep + 0.52);
+      this.#voice(ctx, { sources: [saw], nodes: [lp], out: sweepOut });
+    }
+
+    // ENGAGED: two tones, each with a slightly detuned twin for a metallic shimmer
+    const chime = reduce ? t0 : t0 + 1.52;
+    for (const [freq, delay] of [[mid, 0], [hi, 0.075]]) {
+      for (const detune of [0, 7]) {
+        const tone = this.#osc(ctx, "sine", freq);
+        tone.detune.value = detune;
+        const out = this.#gain(ctx, 0);
+        out.gain.setValueAtTime(0, chime + delay);
+        out.gain.linearRampToValueAtTime(detune ? 0.05 : 0.14, chime + delay + 0.008);
+        out.gain.exponentialRampToValueAtTime(0.001, chime + delay + 0.42);
+        tone.connect(out);
+        tone.start(chime + delay);
+        tone.stop(chime + delay + 0.45);
+        this.#voice(ctx, { sources: [tone], out });
+      }
+    }
   }
 
   /** Structure lost: glass giving way, a burst of sharp ticks that dies off over ~0.25 s. */

@@ -132,9 +132,12 @@ export function registerSettings(manager) {
     config: false,
     type: Boolean,
     default: false,
-    onChange: () => {
+    onChange: collapsed => {
+      // Collapsing mid-boot ends the boot; expanding plays it
+      if (collapsed) manager.panel?.endBoot({ immediate: true });
       manager.applyAppearance();
       manager.panel?.fitHeight();
+      if (!collapsed) manager.expanded();
     },
   });
   client(SETTINGS.PROMPTED, { config: false, type: Boolean, default: false });

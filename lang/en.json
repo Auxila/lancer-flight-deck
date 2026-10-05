@@ -35,7 +35,7 @@
       },
       "Boot": {
         "Name": "Cold boot sequence",
-        "Hint": "A two-second, skippable boot screen when your mech first links, when combat starts, and after a Shut Down ends."
+        "Hint": "A quick, skippable boot sequence (about two seconds) whenever the panel opens or expands, when combat starts, and after a Shut Down ends."
       },
       "Audio": {
         "Name": "Cockpit audio",
@@ -333,7 +333,11 @@
       "HintToggle": "Click: open menu · Right-click: mark spent / available"
     },
     "Boot": {
-      "Skip": "Click to skip"
+      "Skip": "Click to skip",
+      "Caption": "Main system",
+      "Title": "Combat mode",
+      "Stamp": "Engaged",
+      "Firmware": "Field firmware"
     },
     "Banner": {
       "CoreOnline": "Core online",

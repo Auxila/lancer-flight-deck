@@ -3,6 +3,7 @@ import { getSetting, registerSettings, setSetting } from "../settings.js";
 import { resolveTheme } from "../themes/registry.js";
 import { FlightDeckPanel, PART_IDS } from "../ui/FlightDeckPanel.js";
 import { inActiveCombat, recordReaction, runEntry, trackerChange } from "../actions/runner.js";
+import { mountedWeapons } from "../actions/catalog.js";
 import { HudMenu } from "../ui/HudMenu.js";
 import { buildActions } from "../ui/components/ActionBus.js";
 import { systemsSummary } from "../ui/components/SystemsBay.js";
@@ -732,17 +733,48 @@ export class FlightDeckManager {
     if (has("destroyed")) panel?.flashBanner(game.i18n.localize("LFD.Banner.SignalLost"), "lost", 2600);
   }
 
-  /** Cold boot: on first link this session, at combat start, and after a Shut Down ends. */
+  /** The panel was expanded from its collapsed tab: boot it. */
+  expanded() {
+    this.#maybeBoot("expand");
+  }
+
+  /**
+   * Cold boot: every time the panel opens or expands, at combat start, and after a Shut Down ends.
+   * Selecting another mech boots it once a session, so clicking between tokens doesn't replay it.
+   */
   #maybeBoot(reason) {
     const t = this.telemetry;
     if (!t || !this.panel?.rendered || this.collapsed || !getSetting(SETTINGS.BOOT)) return;
-    if ((reason === "open" || reason === "link") && this.#booted.has(t.uuid)) return;
+    if (reason === "link" && this.#booted.has(t.uuid)) return;
     this.#booted.add(t.uuid);
     // A timer, not requestAnimationFrame: rAF stalls while the window is hidden or resizing
     setTimeout(() => {
-      this.panel?.playBoot(this.theme.bootLines(t), { badge: this.theme.badge });
-      this.synth.play("boot", { freqs: this.theme.audio.boot });
+      const reduce = !!this.panel?.element?.classList.contains("lfd-reduce-motion");
+      this.panel?.playBoot(this.#bootData(t), { reduce });
+      this.synth.play("boot", { freqs: this.theme.audio.boot, reduce });
     }, 0);
+  }
+
+  /** What the boot stream reads out: this mech's frame, loadout, tracks and pilot. */
+  #bootData(t) {
+    const actor = this.actor;
+    return {
+      mech: actor?.name ?? "",
+      frame: t.frame?.name ?? "",
+      manufacturer: this.theme.badge ?? t.manufacturer ?? "",
+      pilot: t.callsign ?? t.pilotName ?? "",
+      weapons: mountedWeapons(actor).map(w => ({ mount: w.mount ?? "", name: w.weapon.name })),
+      systems: (actor?.items ?? []).filter(i => i.type === "mech_system").map(i => i.name),
+      tracks: {
+        hp: [t.hp.value, t.hp.max],
+        heat: [t.heat.value, t.heat.max],
+        structure: [t.structure.value, t.structure.max],
+        stress: [t.stress.value, t.stress.max],
+      },
+      stats: { evasion: t.stats.evasion, edef: t.stats.edef, sensors: t.stats.sensors, speed: t.stats.speed },
+      danger: !!t.heat.inDanger,
+      flavour: this.theme.bootLines(t).slice(0, 2),
+    };
   }
 
   #inCombat(combat) {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.3
+
+**Cold boot, rebuilt**
+- A two-second boot every time the panel opens or expands from its collapsed tab: CRT power-on, a fast terminal log pouring down the panel (generated from the mech: weapons, systems, reactor, structure, pilot), a hard cut, then an Armored Core-style MAIN SYSTEM / COMBAT MODE / ENGAGED finish before the overlay splits open and the plates power on.
+- Synthesized sound on the same timeline. Skippable with a click; a still title card with reduced motion; collapsing mid-boot ends it cleanly.
+
 ## 0.6.2
 
 Fixes from a bug hunt (with Gemini reviewing alongside):

@@ -51,6 +51,20 @@ Ten minutes in a copy of your world (or a test world) shows everything a cautiou
 
 Example: a mech at 2/4 structure shows `Next check 3d6 · Loss 42.1%`. The breakdown is 34.7% Direct Hit and 7.4% Crushing Hit; a Direct Hit is fatal with one structure left. `npm test` checks these numbers against brute-force enumeration.
 
+## Cold boot
+
+Every time the panel opens or expands from its collapsed tab (and at combat start, and after Boot Up), it boots, in about two seconds:
+
+![The cold boot: terminal pour, cut, COMBAT MODE / ENGAGED, blast doors](docs/cold-boot.gif)
+
+1. A CRT power-on line snaps across the middle.
+2. A terminal log pours down the panel, faster and faster: this mech's firmware, POST checks, every mounted weapon (ARMED), every system (ONLINE), reactor and heat cap, structure and stress, pilot handshake, between memory dumps, with a counter racing to 100%.
+3. A hard cut: white flash and a scanline sweep.
+4. The finish: **MAIN SYSTEM** / **COMBAT MODE** tracking in with a chromatic split, a segment bar, corner brackets, and an **ENGAGED** stamp.
+5. The overlay parts like blast doors and the plates power on top to bottom.
+
+Synthesized sound follows the same timeline: data chatter, a thunk on the cut, a rising sweep and a two-tone chime on ENGAGED. Selecting another mech boots it once a session. A click skips it, **Cold boot sequence** in Configure Settings turns it off, and with reduced motion it's a still title card for a moment.
+
 ## Cockpit events
 
 | Event | Visual | Sound |
@@ -61,7 +75,7 @@ Example: a mech at 2/4 structure shows `Next check 3d6 · Loss 42.1%`. The break
 | Lock On, Exposed, Stunned, Shredded | Tiles light and flash | Two-tone caution chime |
 | Reactor meltdown (`meltdown_timer` or the Reactor Meltdown status) | Tile shows `T-n` | One klaxon cycle |
 | Jammed | Static and scanlines over the comms strip | — |
-| Shut Down / Boot Up | Instruments drop to emergency power / skippable boot sequence | Boot blips |
+| Shut Down / Boot Up | Instruments drop to emergency power / the cold boot | Data chatter, then the ENGAGED chime |
 | Core Power spent | CORE ONLINE banner | Rising sweep |
 
 New alerts flash hard for about 4 seconds, then ease off by 10 seconds and settle to steady lit for as long as the condition lasts. Re-renders don't restart the fade. With the panel collapsed, the tab shows a ▲ or ◆ that fades the same way.
@@ -384,7 +398,7 @@ Each section is an ApplicationV2 part, and only the parts whose data changed re-
 
 1. Subclass `BaseTheme` with `id`, `label`, `badge`, `manufacturers` (frame manufacturer codes, for example `["HA"]`), `audio` and `bootLines()`.
 2. Add `styles/themes/<id>.css` that sets the `--lfd-*` variables on `.lfd-theme-<id>`, then list it in `module.json`.
-3. Register it in `themes/registry.js`, or from another module with `api.registerTheme(MyTheme)`.
+3. Register it in `themes/registry.js`, or from another module with `api.registerTheme(MyTheme)`. Its `bootLines()` lead the cold boot's terminal stream, and `audio.boot` tunes the ENGAGED chime.
 4. Optionally override individual part templates with `static templates = { heat: "..." }`.
 
 Frames whose manufacturer has no theme use GMS.
