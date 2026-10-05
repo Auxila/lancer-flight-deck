@@ -13,6 +13,9 @@ import { CHECKS } from "../ui/components/HullReadout.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
+/** Token fields a move writes. An update touching only these needs no redraw. */
+const MOVEMENT_KEYS = new Set(["_id", "x", "y", "elevation", "rotation", "sort", "_movementHistory", "_regions"]);
+
 export const NPC_DECK_ID = `${MODULE_ID}-npc`;
 /** How long a row flashes after taking damage. */
 const HIT_MS = { hp: 900, structure: 1400 };
@@ -221,9 +224,13 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const hook of ["updateActor", "createActiveEffect", "updateActiveEffect", "deleteActiveEffect", "createItem", "updateItem", "deleteItem"]) {
       Hooks.on(hook, ifNpc);
     }
-    for (const hook of ["createToken", "updateToken", "deleteToken", "createCombat", "updateCombat", "deleteCombat", "createCombatant", "updateCombatant", "deleteCombatant", "targetToken"]) {
+    for (const hook of ["createToken", "deleteToken", "createCombat", "updateCombat", "deleteCombat", "createCombatant", "updateCombatant", "deleteCombatant", "targetToken"]) {
       Hooks.on(hook, () => this.queue());
     }
+    // A token that only moved (anyone's, every step in combat) changes nothing the deck shows
+    Hooks.on("updateToken", (doc, changes) => {
+      if (!Object.keys(changes ?? {}).every(key => MOVEMENT_KEYS.has(key))) this.queue();
+    });
     // The GM selects an NPC on the map: its row opens and comes into view
     Hooks.on("controlToken", (token, controlled) => {
       if (controlled && isNpc(token?.actor)) {

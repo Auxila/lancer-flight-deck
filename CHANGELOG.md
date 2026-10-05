@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.9
+
+**Performance** (from a profiling pass: idle cost, redraw timings, a leak check)
+- NPC Deck: a token that only moved (anyone's, every step in combat) no longer redraws the whole deck; about 14 ms of the GM's time saved per move. Any other token change still redraws it.
+- The INVADE button's scan line moves by transform instead of `top`, so the open panel no longer forces a layout and repaint every frame; the panel's idle cost is now within noise of having it off.
+- The acting initiative portrait's glow was a filter cut away by the portrait's hex clip: repainted every frame, never visible. It's now a soft halo behind the hex that breathes on opacity, so it shows, and costs no repaints.
+
 ## 0.6.8
 
 **Every action your gear gives you**

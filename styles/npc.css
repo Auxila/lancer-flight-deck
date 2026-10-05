@@ -939,10 +939,30 @@
   border-radius: 50%;
 }
 
-/* Acting now: lit up and breathing */
+/* Acting now: lit up and breathing. The halo sits behind the hex portrait (a filter on the portrait
+   itself would be cut away by its clip-path) and breathes on opacity, which costs no repaint. */
+#lancer-flight-deck-npc .lfd-init-unit.is-acting {
+  position: relative;
+  isolation: isolate;
+}
+
+#lancer-flight-deck-npc .lfd-init-unit.is-acting::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  z-index: -1;
+  width: calc(var(--lfd-init-size, 36px) + 12px);
+  aspect-ratio: 1;
+  translate: -50% 0;
+  pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--lfd-accent) 85%, transparent) 55%, transparent);
+  opacity: 0.3;
+  animation: lfd-init-acting 1.6s ease-in-out infinite;
+}
+
 #lancer-flight-deck-npc .lfd-init-unit.is-acting .lfd-init-portrait {
   background: var(--lfd-accent);
-  animation: lfd-init-acting 1.6s ease-in-out infinite;
 }
 
 #lancer-flight-deck-npc .lfd-init-unit.is-acting .lfd-init-badge {
@@ -1025,8 +1045,8 @@
 }
 
 @keyframes lfd-init-acting {
-  0%, 100% { filter: drop-shadow(0 0 0 var(--lfd-accent)); }
-  50% { filter: drop-shadow(0 0 5px var(--lfd-accent)); }
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.85; }
 }
 
 /* Not in the combat (selected on the map) */
@@ -1036,7 +1056,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #lancer-flight-deck-npc .lfd-init-unit.is-acting .lfd-init-portrait,
+  #lancer-flight-deck-npc .lfd-init-unit.is-acting::before,
   #lancer-flight-deck-npc .lfd-npc-row {
     animation: none !important;
   }
@@ -1090,6 +1110,7 @@
 }
 
 #lancer-flight-deck-npc .lfd-init-strip.is-crowded .lfd-init-unit {
+  --lfd-init-size: 29px;
   width: 32px;
 }
 

@@ -153,15 +153,14 @@
 #lancer-flight-deck .lfd-invade-rain i:nth-child(6)::before { content: "C\A 4\A A\A 7\A 0\A 9\A 3\A F\A 1\A E\A 6\A 2"; animation-duration: 2.3s; animation-delay: -0.2s; }
 #lancer-flight-deck .lfd-invade-rain i:nth-child(7)::before { content: "9\A 2\A E\A 6\A B\A 0\A 5\A 8\A D\A 1\A 7\A 4"; animation-duration: 2.9s; animation-delay: -1.5s; }
 
+/* Full-height so translateY(100%) spans the button; the line is its top pixel. Moved by transform,
+   which the compositor animates without relayout or repaint. */
 #lancer-flight-deck .lfd-invade-scan {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 1px;
+  inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, var(--lfd-tech), transparent);
+  background: linear-gradient(90deg, transparent, var(--lfd-tech), transparent) top / 100% 1px no-repeat;
   opacity: 0.55;
   animation: lfd-invade-scan 3.8s ease-in-out infinite;
 }
@@ -184,10 +183,10 @@
 }
 
 @keyframes lfd-invade-scan {
-  0% { top: -2px; opacity: 0; }
+  0% { transform: translateY(-2px); opacity: 0; }
   12% { opacity: 0.55; }
-  60% { top: 100%; opacity: 0.4; }
-  61%, 100% { top: 100%; opacity: 0; }
+  60% { transform: translateY(100%); opacity: 0.4; }
+  61%, 100% { transform: translateY(100%); opacity: 0; }
 }
 
 @keyframes lfd-invade-lamp {
