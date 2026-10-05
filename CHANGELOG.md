@@ -12,6 +12,7 @@ Safe for the table: easier to hide, checked against the usual LANCER modules, te
 
 **Compatibility**
 - LANCER Alternative Structure: structure and stress odds follow its tables, tagged ALT TABLE.
+- Lancer QoL: while its heat automation is on, the Danger Zone tile is display-only, since QoL sets and clears that status from heat.
 - Notes for Lancer QoL, Token Action HUD and others in the README's Compatibility section; no conflicts with Alternative Sheets, Enhanced Status Effects, Weapon FX, Speed Provider or Ilysen's NPC rebake.
 
 **Fixes**

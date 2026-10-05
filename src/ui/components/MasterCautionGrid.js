@@ -1,5 +1,6 @@
 import { STATUS } from "../../constants.js";
 import { conditionCard, conditionText } from "../../core/ConditionInfo.js";
+import { qolManagesDangerZone } from "../../core/ConditionControl.js";
 
 /**
  * Annunciator tiles. Positions are fixed, like a real panel: every legend is always
@@ -92,9 +93,11 @@ export function buildCaution(t, pending, targets, activeOn) {
       const count = set.actors.filter(a => activeOn(tile.id, a)).length;
       sel = count === 0 ? null : count === set.actors.length ? "all" : "some";
     }
-    const action = set.name
-      ? i18n.format(HINT[tile.id] ?? "LFD.Apply.HintToggle", { condition: i18n.localize(label), target: set.name })
-      : i18n.localize(tile.id === "lockon" ? "LFD.Apply.NoTarget" : "LFD.Apply.NoSelection");
+    const action = tile.id === "dangerzone" && qolManagesDangerZone()
+      ? i18n.localize("LFD.Apply.DangerZoneQol")
+      : set.name
+        ? i18n.format(HINT[tile.id] ?? "LFD.Apply.HintToggle", { condition: i18n.localize(label), target: set.name })
+        : i18n.localize(tile.id === "lockon" ? "LFD.Apply.NoTarget" : "LFD.Apply.NoSelection");
     const detail = lit && tile.detail ? tile.detail(t) : null;
     // The hidden tile stands for Hidden, Invisible or both
     const hidden = t.flags[STATUS.HIDDEN];

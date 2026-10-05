@@ -374,7 +374,8 @@
       "None": "none",
       "NotOwned": "you can only apply this condition to tokens you own",
       "ConditionsHint": "Conditions apply to your selected token(s), or to the mech on this panel when nothing is selected.",
-      "LockOnHint": "Lock On applies to your target(s) (press T over a token), or to your selection when nothing is targeted."
+      "LockOnHint": "Lock On applies to your target(s) (press T over a token), or to your selection when nothing is targeted.",
+      "DangerZoneQol": "Follows heat: Lancer QoL sets and clears Danger Zone automatically."
     },
     "Meltdown": {
       "Title": "Reactor meltdown",

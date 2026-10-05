@@ -180,6 +180,11 @@ function isRemoteLockOn(op) {
  * @returns {Promise<{applied: number, failed: number}>}
  */
 export async function applyTile(tileId, input = {}, panelActor = null) {
+  // Lancer QoL sets Danger Zone from heat; a hand toggle would only fight it
+  if (tileId === "dangerzone" && qolManagesDangerZone()) {
+    ui.notifications.info(game.i18n.localize("LFD.Apply.DangerZoneQol"));
+    return { applied: 0, failed: 0 };
+  }
   const { actors } = targetsFor(tileId, panelActor);
   if (!actors.length) {
     ui.notifications.warn(game.i18n.localize(tileId === LOCK_ON_TILE ? "LFD.Apply.NoTarget" : "LFD.Apply.NoSelection"));
@@ -188,6 +193,16 @@ export async function applyTile(tileId, input = {}, panelActor = null) {
   const op = await planOperation(tileId, actors, input);
   if (!op) return { applied: 0, failed: 0 };
   return applyOperation(op, actors, tileId);
+}
+
+/** Lancer QoL's heat automation adds and removes the Danger Zone status itself. */
+export function qolManagesDangerZone() {
+  if (!game.modules.get("csm-lancer-qol")?.active) return false;
+  try {
+    return !!game.settings.get("csm-lancer-qol", "enableAutomation");
+  } catch {
+    return false;
+  }
 }
 
 /**
