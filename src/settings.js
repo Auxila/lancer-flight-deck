@@ -59,6 +59,16 @@ export function registerSettings(manager) {
     onChange: () => manager.applyAppearance(),
   });
 
+  // Only offered when Token Action HUD is installed and on
+  client(SETTINGS.HIDE_TAH, {
+    name: "LFD.Settings.HideTah.Name",
+    hint: "LFD.Settings.HideTah.Hint",
+    config: !!game.modules.get("token-action-hud-core")?.active,
+    type: Boolean,
+    default: true,
+    onChange: () => manager.syncTokenActionHud(),
+  });
+
   client(SETTINGS.REDUCE_MOTION, {
     name: "LFD.Settings.ReduceMotion.Name",
     hint: "LFD.Settings.ReduceMotion.Hint",

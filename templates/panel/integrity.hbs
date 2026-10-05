@@ -11,7 +11,7 @@
       <span class="lfd-readout">{{value}}<small>/{{max}}</small></span>
     </div>
     {{#if segments}}
-    <div class="lfd-odds" data-tooltip-html="{{tooltip}}" data-tooltip-direction="RIGHT">
+    <div class="lfd-odds" data-tooltip-html="{{tooltip}}" data-tooltip-class="{{@root.tipClass}}" {{#if @root.tipDirection}}data-tooltip-direction="{{@root.tipDirection}}"{{/if}}>
       <div class="lfd-odds-head">
         <span>{{localize "LFD.Integrity.NextCheck" dice=dice}}{{#if altRules}} <span class="lfd-odds-alt">{{localize "LFD.Integrity.AltRules"}}</span>{{/if}}</span>
         <span class="lfd-odds-loss {{#if lossOnCheck}}is-check{{/if}}">{{loss}}</span>
@@ -21,7 +21,7 @@
       </div>
     </div>
     {{else if headline}}
-    <div class="lfd-odds lfd-odds-final" {{#if tooltip}}data-tooltip="{{tooltip}}"{{/if}}>
+    <div class="lfd-odds lfd-odds-final" {{#if tooltip}}data-tooltip-html="{{tooltip}}" data-tooltip-class="{{@root.tipClass}}" {{#if @root.tipDirection}}data-tooltip-direction="{{@root.tipDirection}}"{{/if}}{{/if}}>
       <span class="lfd-k-warning">{{headline}}</span>
     </div>
     {{/if}}

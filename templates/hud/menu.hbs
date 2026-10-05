@@ -63,5 +63,5 @@
     {{/each}}
   </div>
 
-  <footer class="lfd-hud-foot">{{footer}}</footer>
+  <footer class="lfd-hud-foot">{{#each footer}}<span>{{#if key}}<b>{{key}}</b> {{/if}}{{action}}</span>{{/each}}</footer>
 </div>

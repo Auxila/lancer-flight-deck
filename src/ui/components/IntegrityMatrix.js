@@ -26,7 +26,9 @@ function track(kind, { value, max, next }) {
   if (next.state === "lethal") {
     view.headline = i18n.localize(isStructure ? "LFD.Integrity.NextHitLethal" : "LFD.Integrity.NextOverheatLethal");
     view.destroyPct = "100%";
-    view.tooltip = i18n.localize(isStructure ? "LFD.Integrity.LethalTipStructure" : "LFD.Integrity.LethalTipStress");
+    view.tooltip =
+      `<div class="lfd-tip"><header><strong>${i18n.localize(view.label)}</strong></header>` +
+      `<p>${i18n.localize(isStructure ? "LFD.Integrity.LethalTipStructure" : "LFD.Integrity.LethalTipStress")}</p></div>`;
     return view;
   }
 
@@ -60,10 +62,14 @@ function track(kind, { value, max, next }) {
   const rows = segments
     .map(s => `<div class="lfd-tip-row lfd-k-${s.kind}"><span>${s.label}</span><b>${s.pct}</b></div>`)
     .join("");
+  const title = i18n.localize(isStructure ? "LFD.Integrity.StructureCheck" : "LFD.Integrity.StressCheck");
+  // Several dice only once more than one box is marked; then the lowest decides
+  const dice = next.dice > 1 ? i18n.format("LFD.Integrity.TipDiceLowest", { dice: view.dice }) : view.dice;
   view.tooltip =
-    `<div class="lfd-tip"><header>${i18n.format("LFD.Integrity.TipHeader", { dice: view.dice })}</header>${rows}` +
-    (view.altRules ? `<footer>${i18n.localize("LFD.Integrity.AltRulesTip")}</footer>` : "") +
-    (view.checkNote ? `<footer>${view.checkNote}</footer>` : "") +
+    `<div class="lfd-tip lfd-tip-odds"><header><strong>${title}</strong><span>${dice}</span></header>` +
+    `<div class="lfd-tip-rows">${rows}</div>` +
+    (view.checkNote ? `<p class="lfd-tip-note">${view.checkNote}</p>` : "") +
+    (view.altRules ? `<p class="lfd-tip-aside">${i18n.localize("LFD.Integrity.AltRulesTip")}</p>` : "") +
     `</div>`;
   return view;
 }

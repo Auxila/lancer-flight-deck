@@ -8,7 +8,7 @@
     </div>
     <div class="lfd-npc-count" aria-label="{{localize 'LFD.Npc.CountLabel' alive=header.alive total=header.total}}">
       <b>{{header.alive}}<small>/{{header.total}}</small></b>
-      {{#if header.toAct}}<span>{{localize "LFD.Npc.ToAct" n=header.toAct}}</span>{{/if}}
+      {{#if header.toAct}}<span>{{header.toAct}}</span>{{/if}}
     </div>
     {{#if floating}}
     <button type="button" class="lfd-npc-ctl" data-action="dock" data-tooltip="LFD.Move.Dock" aria-label="{{localize 'LFD.Move.Dock'}}">
@@ -38,7 +38,7 @@
       {{#if divider}}<li class="lfd-init-divider" aria-hidden="true"><span>{{localize "LFD.Npc.Init.DoneLabel"}}</span></li>{{/if}}
       <li class="lfd-init-unit side-{{side}} is-{{state}} {{#if hidden}}is-hidden{{/if}}" data-combatant="{{id}}" data-init-token="{{tokenId}}">
         <button type="button" class="lfd-init-portrait" data-action="initSelect"
-                data-tooltip="{{localize (concat 'LFD.Npc.Init.Tip.' state) name=name left=left max=max}}"
+                data-tooltip-html="{{tip}}" data-tooltip-class="{{@root.tipClass}}"
                 aria-label="{{name}}: {{localize (concat 'LFD.Npc.Init.State.' state)}}">
           {{#if generic}}
           <span class="lfd-init-glyph" aria-hidden="true"><i class="cci {{#if isPlayer}}cci-frame{{else}}cci-npc-class{{/if}}"></i></span>
@@ -193,6 +193,6 @@
     {{/each}}
   </ol>
   {{/if}}
-  <footer class="lfd-npc-foot">{{localize "LFD.Npc.Footer"}}</footer>
+  <footer class="lfd-npc-foot">{{#each footer}}<span>{{#if key}}<b>{{key}}</b> {{/if}}{{action}}</span>{{/each}}</footer>
   {{/unless}}
 </div>

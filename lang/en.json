@@ -26,6 +26,10 @@
         "Name": "Panel opacity",
         "Hint": "How solid the panel looks while the mouse is elsewhere. It becomes fully solid on hover."
       },
+      "HideTah": {
+        "Name": "Hide Token Action HUD while open",
+        "Hint": "Token Action HUD's bar sits behind the docked panel and shows through it. While the panel is open on your mech, the bar is hidden; collapse or hide the panel to bring it back. Token Action HUD's own settings aren't touched."
+      },
       "ReduceMotion": {
         "Name": "Reduce motion",
         "Hint": "Stops flashing, shaking and scanline effects. Auto follows your operating system setting.",
@@ -35,7 +39,7 @@
       },
       "Boot": {
         "Name": "Cold boot sequence",
-        "Hint": "A quick, skippable boot sequence (about two seconds) whenever the panel opens or expands, when combat starts, and after a Shut Down ends."
+        "Hint": "A quick, skippable boot sequence (about three seconds) whenever the panel opens or expands, when combat starts, and after a Shut Down ends."
       },
       "Audio": {
         "Name": "Cockpit audio",
@@ -181,7 +185,9 @@
       "Stress": "Stress",
       "NextCheck": "Next check {dice}",
       "Loss": "Loss {pct}",
-      "TipHeader": "Next check: {dice}, lowest die counts",
+      "StructureCheck": "Next structure check",
+      "StressCheck": "Next stress check",
+      "TipDiceLowest": "{dice} · lowest die",
       "CheckNote": "+{pct} more if the {stat} check fails",
       "NextHitLethal": "Next structure loss destroys the mech",
       "NextOverheatLethal": "Next stress loss destroys the mech",
@@ -370,7 +376,7 @@
       "NoSelection": "Select your token to apply conditions.",
       "ToSelected": "Apply to",
       "Many": "{n} tokens",
-      "HintToggle": "Click: toggle {condition} on {target}",
+      "HintToggle": "Click: toggle on {target}",
       "HintCounter": "{condition} on {target}: click +1 · right-click −1 · Shift+click clears",
       "HintHidden": "{target}: click toggles Hidden · right-click toggles Invisible",
       "HintMeltdown": "{target}: click starts or clears a meltdown countdown · right-click ticks it down",
@@ -395,7 +401,7 @@
       "SentToPlayer": "Flight Deck: the {kind} check prompt went to {players}, who owns {name}.",
       "AutomationOff": "Flight Deck: LANCER's structure automation is off, so no {kind} check was started.",
       "Group": "Mech checks",
-      "Tip": "<strong>{name}</strong> · {formula}<br>{use}<br><em>Click to roll</em>",
+      "Tip": "<div class=\"lfd-tip\"><header><strong>{name}</strong><span>{formula}</span></header><p>{use}</p><footer>Click: roll the check</footer></div>",
       "Aria": "Roll a {name} check, {formula}",
       "Hull": {
         "Name": "Hull",
@@ -558,9 +564,9 @@
       },
       "NoWeapons": "No weapons mounted.",
       "Footer": {
-        "actions": "Hover ▸ detail · Click ▸ execute · Esc ▸ close",
-        "systems": "Hover ▸ rules · Click ▸ post full text to chat",
-        "weapons": "Click ▸ roll attack · Esc ▸ back"
+        "actions": "Hover: detail · Click: execute · Esc: close",
+        "systems": "Hover: rules · Click: post full text to chat",
+        "weapons": "Click: roll attack · Esc: back"
       },
       "Empty": "Nothing here for this mech.",
       "Back": "Back",
@@ -759,7 +765,8 @@
       "Round": "Round {n}",
       "Scene": "Scene",
       "CountLabel": "{alive} of {total} NPCs still up",
-      "ToAct": "{n} to act",
+      "ToAct": "{n} NPCs to act",
+      "ToActOne": "1 NPC to act",
       "Expand": "Expand the NPC Deck (Alt+N)",
       "Collapse": "Collapse the NPC Deck (Alt+N)",
       "Empty": "No NPCs in the combat or on this scene.",
@@ -778,7 +785,7 @@
       "EndTurn": "End turn",
       "Recharge": "Recharge",
       "Sheet": "Sheet",
-      "Footer": "Click a row ▸ details · Hover a feature ▸ full text · Click ▸ use · Right-click ▸ post",
+      "Footer": "Click a row: details · Hover a feature: full text · Click: use · Right-click: post",
       "Attack": "Attack",
       "Accuracy": "Accuracy",
       "Difficulty": "Difficulty",
@@ -815,10 +822,18 @@
           "defeated": "defeated"
         },
         "Tip": {
-          "acting": "<b>{name}</b> is acting<br>Hover: look here · Click: select · Double-click: look at it",
-          "ready": "<b>{name}</b>: {left}/{max} activations left<br>Hover: look here · Click: select · Double-click: look at it · Right-click: start their turn",
-          "done": "<b>{name}</b>: done this round<br>Hover: look here · Click: select · Double-click: look at it",
-          "defeated": "<b>{name}</b>: defeated<br>Hover: look here · Click: select"
+          "Status": {
+            "acting": "Acting now",
+            "ready": "{left}/{max} activations left",
+            "done": "Done this round",
+            "defeated": "Defeated"
+          },
+          "Hints": {
+            "acting": "Hover: look here · Click: select · Double-click: look at it",
+            "ready": "Hover: look here · Click: select · Double-click: look at it · Right-click: start their turn",
+            "done": "Hover: look here · Click: select · Double-click: look at it",
+            "defeated": "Hover: look here · Click: select"
+          }
         }
       },
       "CondApply": "Click to apply",

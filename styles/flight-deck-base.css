@@ -93,6 +93,13 @@
   outline-offset: 1px;
 }
 
+/* Token Action HUD's bar shares the top-left corner and shows through between the plates: it steps
+   aside while the panel is open on a mech (FlightDeckManager.syncTokenActionHud). Visual only. */
+body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hud-popover) {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 /* --------------------------------------------------------------------------
    Plates
    -------------------------------------------------------------------------- */
@@ -166,6 +173,32 @@
 
 #lancer-flight-deck .lfd-header {
   padding-bottom: 6px;
+}
+
+/* Short screens: the header (name, mute, hide, collapse) stays put while the plates scroll under it.
+   Below the damage layer, so cracks still run across it. */
+#lancer-flight-deck.lfd-panel > .lfd-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+/* More below the fold: a fade and a chevron on the bottom edge (FlightDeckPanel.updateScrollCue) */
+#lancer-flight-deck.lfd-panel.has-more:not(.is-collapsed):not(.lfd-booting)::after {
+  --cue-stroke: transparent calc(50% - 1px), var(--lfd-accent) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px);
+  content: "";
+  position: sticky;
+  bottom: 0;
+  z-index: 7;
+  flex: none;
+  height: 30px;
+  margin-top: -34px; /* its height plus the column gap: it overlays the last plate and adds no height */
+  pointer-events: none;
+  background:
+    linear-gradient(to top right, var(--cue-stroke)) calc(50% - 5px) 78% / 10px 6px no-repeat,
+    linear-gradient(to top left, var(--cue-stroke)) calc(50% + 5px) 78% / 10px 6px no-repeat,
+    linear-gradient(180deg, transparent, rgb(0 0 0 / 0.88) 80%);
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--lfd-accent) 60%, transparent));
 }
 
 #lancer-flight-deck .lfd-header-main {
@@ -885,7 +918,7 @@
   padding: 2px 4px 2px 7px;
   background: #0a0a0c;
   border: 1px solid #26272c;
-  color: color-mix(in srgb, var(--k) 26%, #3a3a3a);
+  color: color-mix(in srgb, var(--k) 36%, #5c5c5c);
   font-family: var(--lfd-font-display);
   font-size: 8px;
   font-weight: 700;
@@ -1478,6 +1511,52 @@
 
 #lancer-flight-deck .lfd-boot.is-engaged .lfd-boot-stamp { opacity: 1; transform: scale(1); }
 
+/* The hold: a light runs along the bar, the stamp pulses, the brackets breathe */
+#lancer-flight-deck .lfd-boot-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+#lancer-flight-deck .lfd-boot-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 22%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.75), transparent);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform: translateX(-120%);
+}
+
+#lancer-flight-deck .lfd-boot.is-holding .lfd-boot-bar::after {
+  animation: lfd-boot-sweep 700ms cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes lfd-boot-sweep {
+  0% { opacity: 1; transform: translateX(-120%); }
+  100% { opacity: 1; transform: translateX(480%); }
+}
+
+#lancer-flight-deck .lfd-boot.is-holding .lfd-boot-stamp {
+  animation: lfd-boot-stamp-pulse 900ms ease-in-out infinite;
+}
+
+@keyframes lfd-boot-stamp-pulse {
+  0%, 100% { box-shadow: 0 0 14px color-mix(in srgb, var(--lfd-accent) 70%, transparent); }
+  50% { box-shadow: 0 0 26px var(--lfd-accent), 0 0 4px #fff; }
+}
+
+#lancer-flight-deck .lfd-boot.is-holding .lfd-boot-corner {
+  animation: lfd-boot-breathe 900ms ease-in-out infinite;
+}
+
+@keyframes lfd-boot-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
 /* Corner brackets snapping in around the title */
 #lancer-flight-deck .lfd-boot-corner {
   position: absolute;
@@ -1814,7 +1893,7 @@
 
 #lancer-flight-deck button.lfd-tile:hover {
   border-color: color-mix(in srgb, var(--k) 70%, #26272c);
-  color: color-mix(in srgb, var(--k) 55%, #3a3a3a);
+  color: color-mix(in srgb, var(--k) 66%, #5c5c5c);
   filter: brightness(1.15);
 }
 

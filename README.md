@@ -53,14 +53,14 @@ Example: a mech at 2/4 structure shows `Next check 3d6 · Loss 42.1%`. The break
 
 ## Cold boot
 
-Every time the panel opens or expands from its collapsed tab (and at combat start, and after Boot Up), it boots, in about two seconds:
+Every time the panel opens or expands from its collapsed tab (and at combat start, and after Boot Up), it boots, in about three seconds:
 
 ![The cold boot: terminal pour, cut, COMBAT MODE / ENGAGED, blast doors](docs/cold-boot.gif)
 
 1. A CRT power-on line snaps across the middle.
 2. A terminal log pours down the panel, faster and faster: this mech's firmware, POST checks, every mounted weapon (ARMED), every system (ONLINE), reactor and heat cap, structure and stress, pilot handshake, between memory dumps, with a counter racing to 100%.
 3. A hard cut: white flash and a scanline sweep.
-4. The finish: **MAIN SYSTEM** / **COMBAT MODE** tracking in with a chromatic split, a segment bar, corner brackets, and an **ENGAGED** stamp.
+4. The finish: **MAIN SYSTEM** / **COMBAT MODE** tracking in with a chromatic split, a segment bar, corner brackets, and an **ENGAGED** stamp. It holds for a beat, a light running along the bar and the stamp pulsing.
 5. The overlay parts like blast doors and the plates power on top to bottom.
 
 Synthesized sound follows the same timeline: data chatter, a thunk on the cut, a rising sweep and a two-tone chime on ENGAGED. Selecting another mech boots it once a session. A click skips it, **Cold boot sequence** in Configure Settings turns it off, and with reduced motion it's a still title card for a moment.
@@ -231,6 +231,7 @@ collapses and expands it). Players never see it.
   template, HP and heat bars, structure and stress pips when it has more than one,
   condition icons with Burn and Overshield, LANCER activations left this round, and a
   crosshair with a marker in each player's colour for **every player targeting it**.
+  Hovering a row puts the same "look here" marker on its token as hovering its portrait.
   Whoever's turn it is glows; NPCs that have already acted this round dim. A row flashes
   red when its NPC takes damage, and kicks when it loses structure.
 - **One row opens at a time**, whoever's turn it is unless you open another: its stats,
@@ -332,7 +333,7 @@ Checked against the modules LANCER tables commonly run, by testing and by readin
 
 - **LANCER Alternative Structure:** while it's active, the structure and stress odds use its tables and carry an **ALT TABLE** tag. Under those tables no single roll destroys the mech; a failed HULL or ENGINEERING check decides, shown as `+x% more if the check fails`. Losing the last point still ends the mech.
 - **Lancer QoL:** its wreck automation deletes a destroyed NPC's token and combatant, so that NPC leaves the NPC Deck and the initiative strip. Wrecking also clears Token Magic filters, Flight Deck's included. QoL keeps its own Danger Zone visuals; the world setting **Jammed effect** picks Flight Deck's or QoL's Jammed.
-- **Token Action HUD:** works alongside. Actions run from Token Action HUD don't spend slots on LANCER's action tracker (neither does the sheet); actions run from Flight Deck's HUD menus do, as the world setting says. Its default bar position sits behind a left-docked panel, so drag it elsewhere.
+- **Token Action HUD:** works alongside. Actions run from Token Action HUD don't spend slots on LANCER's action tracker (neither does the sheet); actions run from Flight Deck's HUD menus do, as the world setting says. Its bar sits behind a left-docked panel, so while the panel is open on your mech the bar is hidden; collapse or hide the panel and it's back. **Hide Token Action HUD while open** in Configure Settings turns that off (then drag the bar somewhere clear).
 - **LANCER Weapon FX:** animations play for attacks made from Flight Deck.
 - **Lancer Speed Provider:** its extra movement modes appear in the MOVE menu.
 - **LANCER Alternative Sheets, Enhanced LANCER Status Effects, Ilysen's NPC rebake:** no conflicts found.

@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.6.4
+
+- NPC Deck: hovering an NPC's row puts the same animated "look here" marker on its token as hovering its initiative portrait.
+- Cold boot: the COMBAT MODE / ENGAGED finish holds a second longer before the doors open, with a light running along the bar, the stamp pulsing and the brackets breathing (about three seconds in all).
+
+**Visual polish**
+- Hover cards: the body text of condition, system, weapon and NPC feature cards no longer sits flush against the card's edge.
+- The structure / stress odds card, the HULL / AGI / SYS / ENG check card and the NPC Deck's initiative portrait cards now use the cockpit card style like every other card. The odds card is titled (NEXT STRUCTURE CHECK, 3D6 · LOWEST DIE) and sets the failed-check odds apart from the alternative-structure note.
+- After docking to the other side, condition, odds and check cards open away from the new edge straight away.
+- HUD menus: section headers (BASIC, TECH SYSTEMS, SYSTEMS & GEAR...) are brighter, readouts are uppercase like the rest of the instruments (WALK, NONE), and footers light each key: **HOVER** detail, **CLICK** execute, **ESC** close. Same in the NPC Deck footer.
+- NPC Deck: the header's count reads "12 NPCs to act", so it isn't mistaken for the initiative strip's count of every side.
+- A condition card's hint no longer repeats its name ("Click: toggle on Kitbash").
+- HUD menus are smoked glass in the panel's plate tone instead of half-transparent, so they stay dark and legible over light maps; entries sit in them as recessed wells like the panel's buttons.
+- Short screens: the panel's header stays pinned while the plates scroll under it, and a fade with a chevron on the bottom edge shows there's more below.
+- Condition tiles that are off read more clearly (still unlit: no fill, border or glow).
+
+**Token Action HUD**
+- While the panel is open on your mech, Token Action HUD's bar (which sits behind a left-docked panel and showed through it) is hidden. Collapsing or hiding the panel brings it back. Visual only: nothing of Token Action HUD's changes. Client setting **Hide Token Action HUD while open**, on by default, shown when Token Action HUD is active.
+
 ## 0.6.3
 
 **Cold boot, rebuilt**

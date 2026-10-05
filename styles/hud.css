@@ -1,6 +1,6 @@
 /* ==========================================================================
    Flight Deck HUD: the action-bus buttons (with the INVADE terminal), the
-   SYSTEMS AVAILABLE button, the translucent HUD menus beside the panel, and
+   SYSTEMS AVAILABLE button, the smoked-glass HUD menus beside the panel, and
    their hover cards. Colours come from the theme palette (--lfd-*), so every
    manufacturer theme restyles the HUD too.
    ========================================================================== */
@@ -297,11 +297,12 @@
   line-height: 1.25;
   pointer-events: auto;
   user-select: none;
+  /* Smoked glass the same tone as the panel's plates: readable over light maps as well as dark ones */
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--lfd-accent) 10%, transparent), transparent 52px),
-    color-mix(in srgb, var(--lfd-bg) 50%, transparent);
-  -webkit-backdrop-filter: blur(8px) saturate(1.3) brightness(0.82);
-  backdrop-filter: blur(8px) saturate(1.3) brightness(0.82);
+    color-mix(in srgb, var(--lfd-plate) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1) brightness(0.5);
+  backdrop-filter: blur(10px) saturate(1.1) brightness(0.5);
   border: 1px solid var(--hud-line);
   box-shadow: 0 10px 30px rgb(0 0 0 / 0.45), inset 0 0 0 1px rgb(255 255 255 / 0.03);
 }
@@ -534,7 +535,7 @@
   margin: 0;
   padding: 4px 9px 5px;
   border-bottom: 1px solid var(--hud-line);
-  background: rgb(0 0 0 / 0.18);
+  background: rgb(0 0 0 / 0.28);
 }
 
 #lancer-flight-deck-hud .lfd-hud-readouts div {
@@ -558,6 +559,7 @@
   overflow: hidden;
   font: 700 11px/1.2 var(--lfd-font-data);
   text-overflow: ellipsis;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -596,10 +598,11 @@
   margin: 0 0 4px;
   padding: 0;
   border: none;
-  font: 600 7.5px/1.2 var(--lfd-font-display);
+  font: 700 7.5px/1.2 var(--lfd-font-display);
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--lfd-accent);
+  color: color-mix(in srgb, var(--lfd-accent) 70%, #ffffff);
+  text-shadow: 0 0 4px rgb(0 0 0 / 0.7);
 }
 
 #lancer-flight-deck-hud .lfd-hud-section-title::after {
@@ -757,7 +760,7 @@
   gap: 4px;
   min-height: 58px;
   padding: 7px 2px 5px;
-  background: rgb(0 0 0 / 0.18);
+  background: rgb(0 0 0 / 0.34);
   border: 1px solid rgb(255 255 255 / 0.07);
 }
 
@@ -793,7 +796,7 @@
 
 #lancer-flight-deck-hud .lfd-hud-tiles .lfd-hud-item:hover,
 #lancer-flight-deck-hud .lfd-hud-tiles .lfd-hud-item:focus-visible {
-  background: color-mix(in srgb, var(--lfd-accent) 14%, rgb(0 0 0 / 0.3));
+  background: color-mix(in srgb, var(--lfd-accent) 16%, rgb(0 0 0 / 0.4));
   border-color: color-mix(in srgb, var(--lfd-accent) 60%, transparent);
 }
 
@@ -805,7 +808,7 @@
   min-height: 30px;
   padding: 4px 7px 4px 5px;
   text-align: left;
-  background: rgb(0 0 0 / 0.2);
+  background: rgb(0 0 0 / 0.34);
   border-left: 2px solid color-mix(in srgb, var(--lfd-accent) 40%, transparent);
 }
 
@@ -815,7 +818,7 @@
 
 #lancer-flight-deck-hud .lfd-hud-rows .lfd-hud-item:hover,
 #lancer-flight-deck-hud .lfd-hud-rows .lfd-hud-item:focus-visible {
-  background: color-mix(in srgb, var(--lfd-accent) 14%, rgb(0 0 0 / 0.3));
+  background: color-mix(in srgb, var(--lfd-accent) 16%, rgb(0 0 0 / 0.4));
   border-left-color: var(--lfd-accent);
   transform: translateX(1px);
 }
@@ -913,13 +916,22 @@
 }
 
 #lancer-flight-deck-hud .lfd-hud-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
   padding: 4px 9px 5px;
   font: 600 7px/1.2 var(--lfd-font-display);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--lfd-ink-dim);
   border-top: 1px solid var(--hud-line);
-  background: rgb(0 0 0 / 0.2);
+  background: rgb(0 0 0 / 0.3);
+}
+
+#lancer-flight-deck-hud .lfd-hud-foot b,
+#lancer-flight-deck-npc .lfd-npc-foot b {
+  font-weight: 700;
+  color: color-mix(in srgb, var(--lfd-accent) 55%, var(--lfd-ink));
 }
 
 /* The Invade menu runs in the electronic-warfare colour */
@@ -1022,13 +1034,22 @@
   color: var(--lfd-ink-dim);
 }
 
-#tooltip.lfd-hud-tip .lfd-tip > p,
-#tooltip.lfd-hud-tip .lfd-tip > div {
+#tooltip.lfd-hud-tip .lfd-tip p {
+  margin: 0 0 4px;
+}
+
+/* Top-level lines keep the header's inset; nested paragraphs (rules text) keep the rhythm above */
+#tooltip.lfd-hud-tip .lfd-tip > p {
+  margin: 4px 9px;
+}
+
+#tooltip.lfd-hud-tip .lfd-tip > div,
+#tooltip.lfd-hud-tip .lfd-tip > header + p {
   margin: 6px 9px;
 }
 
-#tooltip.lfd-hud-tip .lfd-tip p {
-  margin: 0 0 4px;
+#tooltip.lfd-hud-tip .lfd-tip > :is(p, div):last-child {
+  margin-bottom: 8px;
 }
 
 #tooltip.lfd-hud-tip .lfd-tip ul {
@@ -1055,10 +1076,27 @@
   color: var(--lfd-ink-dim);
 }
 
-#tooltip.lfd-hud-tip .lfd-tip-tags {
+#tooltip.lfd-hud-tip .lfd-tip-tags,
+#tooltip.lfd-hud-tip .lfd-tip-aside {
   font-size: 10px;
   color: var(--lfd-ink-dim);
 }
+
+/* Structure / stress odds: one row per outcome */
+#tooltip.lfd-hud-tip .lfd-tip-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#tooltip.lfd-hud-tip .lfd-tip-row b {
+  font-family: var(--lfd-font-data);
+  font-variant-numeric: tabular-nums;
+}
+
+#tooltip.lfd-hud-tip .lfd-tip-row.lfd-k-caution b { color: var(--lfd-caution); }
+#tooltip.lfd-hud-tip .lfd-tip-row.lfd-k-warning b,
+#tooltip.lfd-hud-tip .lfd-tip-row.lfd-k-lethal b { color: var(--lfd-warning); }
 
 #tooltip.lfd-hud-tip .lfd-tip-tags b {
   color: var(--lfd-ink);

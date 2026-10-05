@@ -206,7 +206,23 @@ export class FlightDeckManager {
     const panel = this.panel;
     this.panel = null;
     this.hud.close();
+    this.syncTokenActionHud();
     await panel?.close({ animate: false });
+  }
+
+  /**
+   * Token Action HUD's bar sits behind the docked panel and shows through it. While the panel is open
+   * on a mech, a class on <body> hides the bar; collapsing, hiding or closing the panel (or standby,
+   * where TAH may be driving an NPC) brings it back. Nothing of Token Action HUD's is changed.
+   */
+  syncTokenActionHud() {
+    const hide =
+      !!this.panel?.element &&
+      !this.collapsed &&
+      !!this.telemetry &&
+      !!getSetting(SETTINGS.HIDE_TAH) &&
+      !!game.modules.get("token-action-hud-core")?.active;
+    document.body.classList.toggle("lfd-hide-tah", hide);
   }
 
   /** Alt+C: turn the panel on if it is off, otherwise collapse/expand it. */
@@ -588,7 +604,7 @@ export class FlightDeckManager {
     }
     const changed = new Set(parts ?? []);
     for (const id of PART_IDS) {
-      const key = JSON.stringify(context[id] ?? null) + context.standby + context.themeId;
+      const key = this.#partKey(context, id);
       if (this.#partKeys[id] !== key) changed.add(id);
       this.#partKeys[id] = key;
     }
@@ -604,9 +620,12 @@ export class FlightDeckManager {
   }
 
   #rememberPartKeys(context) {
-    for (const id of PART_IDS) {
-      this.#partKeys[id] = JSON.stringify(context[id] ?? null) + context.standby + context.themeId;
-    }
+    for (const id of PART_IDS) this.#partKeys[id] = this.#partKey(context, id);
+  }
+
+  /** What a part renders from: its own data, plus the shared bits (hover cards open away from the dock). */
+  #partKey(context, id) {
+    return JSON.stringify(context[id] ?? null) + context.standby + context.themeId + context.tipDirection;
   }
 
   /** The full render context, shared by every template part. */
@@ -685,6 +704,7 @@ export class FlightDeckManager {
     this.panel.damage.update(t, { reduceMotion: !!reduce });
     el.style.setProperty("--lfd-opacity", String(getSetting(SETTINGS.OPACITY)));
     el.setAttribute("aria-label", game.i18n.localize("LFD.Title"));
+    this.syncTokenActionHud();
     if (this.hud.isOpen) {
       if (this.collapsed || !t) this.hud.close();
       else {

@@ -3,6 +3,7 @@ import { STATUS } from "../constants.js";
 import { readSystems, systemTip } from "../ui/components/SystemsBay.js";
 import { BASIC_ACTIONS, textId } from "./basic.js";
 import { actionTip, basicTip, itemActions, itemState, mountedWeapons, textTip, usesOf, weaponLine, weaponTip } from "./catalog.js";
+import { keyHints } from "../ui/keyHints.js";
 
 /**
  * View models for the HUD menus. `buildMenu` returns a JSON-safe `vm` for the template (also
@@ -50,7 +51,7 @@ export function buildMenu(view, ctx) {
     notice: null,
     sections: [],
     empty: loc("LFD.Hud.Empty"),
-    footer: loc(`LFD.Hud.Footer.${view.menu === "systems" ? "systems" : "actions"}`),
+    footer: keyHints(loc(`LFD.Hud.Footer.${view.menu === "systems" ? "systems" : "actions"}`)),
   };
 
   if (view.sub?.type === "weapons") {
@@ -309,7 +310,7 @@ function weaponsView(vm, entries, view, ctx) {
   vm.back = true;
   vm.title = loc(`LFD.Basic.${mode}.Name`);
   vm.crumb = loc(`LFD.Hud.Menu.${view.menu}`);
-  vm.footer = loc("LFD.Hud.Footer.weapons");
+  vm.footer = keyHints(loc("LFD.Hud.Footer.weapons"));
   vm.readouts.push(targetReadout(ctx), defenseReadout(ctx, "evasion"));
   const mounted = mountedWeapons(ctx.actor);
   const fired = view.sub.fired ?? [];

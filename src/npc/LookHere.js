@@ -22,6 +22,7 @@ export class LookHere {
     LookHere.hide();
     if (!token || !canvas?.ready || token.scene !== canvas.scene) return;
     const container = new PIXI.Container();
+    container.name = `lfd-look-here:${token.id}`; // findable from the console
     container.eventMode = "none";
     const glow = new PIXI.Graphics();
     glow.blendMode = PIXI.BLEND_MODES.ADD;

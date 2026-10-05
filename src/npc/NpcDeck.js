@@ -6,6 +6,7 @@ import { DeckFrame } from "../ui/DeckFrame.js";
 import { HoverCards } from "../ui/HoverCards.js";
 import { LookHere } from "./LookHere.js";
 import { conditionCard } from "../core/ConditionInfo.js";
+import { keyHints } from "../ui/keyHints.js";
 import { QUICK_CONDITIONS, featureTip, isGenericArt, isNpc, isVideoArt, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -286,9 +287,12 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     const initiative = readInitiative(combat);
     if (initiative && initiative.firstDone >= 0) initiative.entries[initiative.firstDone].divider = true;
     if (initiative) await this.#stillFrames(initiative.entries);
+    // NPCs only; the initiative strip below counts every side
+    const toAct = combat ? counted.filter(r => r.canAct).length : 0;
     return {
       batch: NpcDeck.#batchView(),
       tipClass: `lfd-hud-tip lfd-themed ${this.#theme().cssClass}`,
+      footer: keyHints(game.i18n.localize("LFD.Npc.Footer")),
       collapsed: !!getSetting(SETTINGS.NPC_DECK_COLLAPSED),
       floating: this.frame.floating,
       rows,
@@ -299,7 +303,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
         round: combat?.round ?? null,
         alive: counted.filter(r => !r.destroyed).length,
         total: counted.length,
-        toAct: combat ? counted.filter(r => r.canAct).length : null,
+        toAct: toAct ? game.i18n.format(toAct === 1 ? "LFD.Npc.ToActOne" : "LFD.Npc.ToAct", { n: toAct }) : null,
       },
     };
   }
@@ -414,7 +418,8 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
         const el = event.target;
         // Initiative portrait: "look here" on the map
         if (el.matches?.(".lfd-init-portrait")) return this.#look(el);
-        // NPC row: light its token
+        // NPC row: "look here" on its token, and light it like Foundry's own hover
+        if (el.matches?.(".lfd-npc-row")) this.#look(el);
         if (el.matches?.("[data-token]")) this.#hoverToken(el.dataset.token, true, event);
       },
       true
@@ -424,6 +429,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       event => {
         const el = event.target;
         if (el.matches?.(".lfd-init-portrait")) return LookHere.hide();
+        if (el.matches?.(".lfd-npc-row")) LookHere.hide();
         if (el.matches?.("[data-token]")) this.#hoverToken(el.dataset.token, false, event);
         if (el === root) {
           this.#pointer = null;
@@ -449,14 +455,16 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     });
   }
 
-  #look(portrait) {
-    const token = canvas.tokens?.get(portrait.closest("[data-init-token]")?.dataset.initToken);
+  /** "Look here" on the token an initiative portrait or an NPC row stands for. */
+  #look(el) {
+    const id = el.matches(".lfd-init-portrait") ? el.closest("[data-init-token]")?.dataset.initToken : el.dataset.token;
+    const token = id ? canvas.tokens?.get(id) : null;
     if (token && !LookHere.isOn(token)) LookHere.show(token);
   }
 
-  /** After a redraw: keep the marker on the portrait still under the pointer, or take it down. */
+  /** After a redraw: keep the marker on the portrait or row still under the pointer, or take it down. */
   #restoreLook() {
-    const hit = this.#pointer && document.elementFromPoint(this.#pointer.x, this.#pointer.y)?.closest?.(".lfd-init-portrait");
+    const hit = this.#pointer && document.elementFromPoint(this.#pointer.x, this.#pointer.y)?.closest?.(".lfd-init-portrait, .lfd-npc-row");
     if (hit && this.element?.contains(hit)) this.#look(hit);
     else LookHere.hide();
   }

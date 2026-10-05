@@ -35,6 +35,7 @@
     <button type="button" class="lfd-check lfd-check-{{id}}" data-action="rollCheck" data-check="{{id}}"
             {{#unless ../hull.editable}}disabled{{/unless}}
             data-tooltip-html="{{localize 'LFD.Check.Tip' name=(localize (concat 'LFD.Check.' key '.Name')) formula=formula use=(localize (concat 'LFD.Check.' key '.Use'))}}"
+            data-tooltip-class="{{@root.tipClass}}" {{#if @root.tipDirection}}data-tooltip-direction="{{@root.tipDirection}}"{{/if}}
             aria-label="{{localize 'LFD.Check.Aria' name=(localize (concat 'LFD.Check.' key '.Name')) formula=formula}}">
       <span class="lfd-check-name">{{localize (concat 'LFD.Check.' key '.Short')}}</span>
       <span class="lfd-check-bonus">{{bonus}}</span>

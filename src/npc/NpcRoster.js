@@ -213,6 +213,7 @@ export function readInitiative(combat) {
       max,
       order,
       hidden: !!c.hidden,
+      tip: initTip(c.name, state, value, max),
     };
   });
   const rank = { acting: 0, ready: 1, done: 2, defeated: 3 };
@@ -230,6 +231,16 @@ export function readInitiative(combat) {
     // Big fights: smaller portraits, so the strip stays a strip
     crowded: entries.length > 12,
   };
+}
+
+/** An initiative portrait's hover card: who, where they stand this round, what the mouse does. */
+function initTip(name, state, left, max) {
+  const i18n = game.i18n;
+  const status = i18n.format(`LFD.Npc.Init.Tip.Status.${state}`, { left, max });
+  return (
+    `<div class="lfd-tip"><header><strong>${esc(name)}</strong><span>${esc(status)}</span></header>` +
+    `<footer>${esc(i18n.localize(`LFD.Npc.Init.Tip.Hints.${state}`))}</footer></div>`
+  );
 }
 
 /* -------------------------------------------- */

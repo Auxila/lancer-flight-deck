@@ -180,6 +180,17 @@ await step(p, "hide button, then the toolbar toggle brings it back", async () =>
   return { ok: hidden && back, detail: { hidden, back } };
 });
 
+await step(p, "Token Action HUD steps aside while the panel is open", async () => {
+  if (!game.modules.get("token-action-hud-core")?.active) return { detail: "Token Action HUD not active" };
+  const hiddenOpen = document.body.classList.contains("lfd-hide-tah");
+  await game.settings.set("lancer-flight-deck", "collapsed", true);
+  await new Promise(r => setTimeout(r, 500));
+  const shownCollapsed = !document.body.classList.contains("lfd-hide-tah");
+  await game.settings.set("lancer-flight-deck", "collapsed", false);
+  await new Promise(r => setTimeout(r, 900));
+  return { ok: hiddenOpen && shownCollapsed && document.body.classList.contains("lfd-hide-tah"), detail: { hiddenOpen, shownCollapsed } };
+});
+
 await step(p, "players get no NPC Deck", async () => ({
   ok: !document.getElementById("lancer-flight-deck-npc") && !game.modules.get("lancer-flight-deck").api.npcDeck(),
 }));

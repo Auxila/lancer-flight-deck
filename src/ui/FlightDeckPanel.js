@@ -162,6 +162,14 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     el.style.maxHeight = `${Math.max(160, Math.floor((limit - box.top) / scale))}px`;
     this.manager.hud.position();
+    this.updateScrollCue();
+  }
+
+  /** Mark the panel when part of it is below the fold, so the bottom edge shows a "more" cue. */
+  updateScrollCue() {
+    const el = this.element;
+    if (!el) return;
+    el.classList.toggle("has-more", el.scrollHeight - el.scrollTop - el.clientHeight > 6);
   }
 
   /* -------------------------------------------- */
@@ -172,6 +180,7 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   #attachListeners() {
     const root = this.element;
     this.#listening = true;
+    root.addEventListener("scroll", () => this.updateScrollCue(), { passive: true });
 
     // Value editors: Enter / blur commits, Escape reverts, focus selects for quick typing
     root.addEventListener("change", event => {
@@ -394,9 +403,9 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Cold boot, about 1.9 s: a power-on line, the terminal stream pouring down the panel and speeding up,
-   * a hard cut, then the finish (MAIN SYSTEM / COMBAT MODE / ENGAGED) before the overlay splits open
-   * like blast doors and the plates power on. A click skips it. Reduced motion: the finish alone, still.
+   * Cold boot, about 2.9 s: a power-on line, the terminal stream pouring down the panel and speeding up,
+   * a hard cut, then the finish (MAIN SYSTEM / COMBAT MODE / ENGAGED), which holds a beat before the overlay
+   * splits open like blast doors and the plates power on. A click skips it. Reduced motion: the finish alone, still.
    * Timed on the effects clock, so it can be slowed down for recording (api.damageClock).
    * @param {import("./boot/bootScript.js").BootData} data
    * @param {{reduce?: boolean, seed?: number}} [options]
@@ -448,7 +457,7 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     root.append(overlay);
     this._bootTimers = [];
     const at = (ms, fn) => this._bootTimers.push(clock.after(fn, ms));
-    if (reduce) return at(900, () => this.endBoot());
+    if (reduce) return at(1900, () => this.endBoot());
     const phase = cls => () => overlay.classList.add(cls);
     // The counter climbs fast and eases into 100 as the stream ends
     const pct = overlay.querySelector(".lfd-boot-pct");
@@ -461,7 +470,9 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     at(980, phase("is-cut"));
     at(1040, phase("is-finish"));
     at(1520, phase("is-engaged"));
-    at(1740, () => this.endBoot());
+    // The finish holds a beat (with a little life in it) before the doors open
+    at(1760, phase("is-holding"));
+    at(2740, () => this.endBoot());
   }
 
   /**
