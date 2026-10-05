@@ -1,3 +1,5 @@
+import { planWeapons } from "../actions/weaponRules.js";
+import { mountedWeapons } from "../actions/catalog.js";
 import { MODULE_ID, TEMPLATE_ROOT } from "../constants.js";
 import { buildMenu } from "../actions/menus.js";
 import { usedReactions } from "../actions/runner.js";
@@ -285,9 +287,17 @@ export class HudMenu {
       return this.manager.refresh();
     }
     if (entry.type === "weapons") {
-      this.view = { menu: this.view.menu, sub: { type: "weapons", mode: entry.def.id, fired: 0 } };
+      this.view = { menu: this.view.menu, sub: { type: "weapons", mode: entry.def.id, fired: [] } };
       return this.render({ force: true, animate: true });
     }
+    // No (more) Auxiliary follow-ups: the weapon action is over
+    if (entry.type === "done") {
+      this.view = { menu: this.view.menu };
+      await this.render({ force: true, animate: true });
+      return this.manager.refresh();
+    }
+    // A weapon the rules don't allow right now (Superheavy outside a Barrage, already fired...)
+    if (entry.blocked) return ui.notifications.warn(game.i18n.localize(`LFD.Hud.WeaponBlockedTip.${entry.blocked}`));
 
     this.#busy.add(entry.key);
     button.classList.add("is-busy");
@@ -298,26 +308,27 @@ export class HudMenu {
       this.#busy.delete(entry.key);
     }
     if (ok) this.#sent.set(entry.key, Date.now() + SENT_MS);
-    if (ok && entry.type === "weapon") this.#afterWeapon();
+    if (ok && entry.type === "weapon") this.#afterWeapon(entry);
     await this.render({ force: true });
     if (ok) setTimeout(() => this.#clearSent(entry.key), SENT_MS);
   }
 
   /**
-   * The slot an entry spends. A Barrage spends the full action on its first attack only;
-   * the second attack of the same Barrage is free.
+   * The slot an entry spends. A weapon action spends its slot on the first attack only: a Barrage's
+   * second attack and every Auxiliary follow-up are free.
    */
   #spendFor(entry) {
-    if (entry.type === "weapon" && entry.mode === "barrage" && (this.view?.sub?.fired ?? 0) >= 1) return null;
+    if (entry.type === "weapon" && (this.view?.sub?.fired ?? []).length) return null;
     return entry.spend ?? null;
   }
 
-  /** Skirmish and Overwatch are one attack; a Barrage is two. Then back to the menu. */
-  #afterWeapon() {
+  /** Note the attack; once the rules leave nothing more to fire, back to the menu. */
+  #afterWeapon(entry) {
     const sub = this.view?.sub;
     if (!sub) return;
-    sub.fired = (sub.fired ?? 0) + 1;
-    if (sub.mode !== "barrage" || sub.fired >= 2) this.view = { menu: this.view.menu };
+    sub.fired = [...(sub.fired ?? []), { id: entry.weapon.uuid, mount: entry.mount, size: entry.size, aux: !!entry.aux }];
+    const weapons = mountedWeapons(this.manager.actor).map(w => ({ id: w.weapon.uuid, mount: w.mountIndex, size: w.size }));
+    if (planWeapons(sub.mode, weapons, sub.fired).phase === "done") this.view = { menu: this.view.menu };
   }
 
   async #back() {

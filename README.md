@@ -166,6 +166,14 @@ Under the stat strip (EVA, E-DEF, SPD, SENS, SAVE, TECH) sit four check buttons:
 
 Clicking one rolls that check through LANCER's own check flow, exactly like the mech sheet: LANCER's accuracy and difficulty prompt opens, then the roll posts to chat. Hovering shows the formula and what the check is for. The buttons are disabled on mechs you don't own.
 
+## Weapon actions and mounts
+
+Skirmish, Barrage and Overwatch open a weapon picker that follows LANCER's mount rules:
+
+- **Superheavy** weapons only fire in a Barrage, and take the whole Barrage: elsewhere they're dimmed with the reason, and clicking one explains why.
+- After the main attack(s) the picker turns into an **Auxiliary follow-up** step listing only the weapons that may still fire: a different Auxiliary on the same mount after a Skirmish or Overwatch, and one Auxiliary on each mount that fired after a Barrage (never one that already fired). **Done** ends the action.
+- Only the first attack spends the action; a Barrage's second attack and every follow-up are free. Follow-ups deal no bonus damage, which the picker reminds you of; LANCER's attack prompt is where you leave it off.
+
 ## NPC Deck (GMs)
 
 The Flight Deck is a cockpit for one mech; a GM runs a whole enemy force. The NPC Deck is
@@ -212,6 +220,14 @@ collapses and expands it). Players never see it.
   text without using it.
 - **Rows:** click a name to select the token and look at it (Shift adds to the selection),
   double-click for the sheet; hovering a row lights its token on the map.
+
+### Several NPCs at once
+
+Select two or more NPC tokens on the map (drag a box, or shift-click tokens or initiative portraits) and a **batch bar** appears at the top of the deck:
+
+- HP and heat steps apply to every selected NPC, each one exactly as if you'd stepped its own row, so LANCER's structure and overheat prompts still come up per NPC.
+- Condition buttons show whether none, some (half-lit) or all of the selection have it. A click gives it to the ones without it; when all have it, a click removes it from all. The hover card says how many have it.
+- The × clears the selection.
 
 ### Several targets
 

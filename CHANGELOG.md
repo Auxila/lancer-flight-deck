@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0
+
+Rules: weapon mounts and running several NPCs at once.
+
+**Weapon actions**
+- The weapon picker follows LANCER's mount rules: Superheavy weapons only in a Barrage, where they take the whole action; an Auxiliary follow-up step after a Skirmish, Overwatch or Barrage, offering only the weapons the rules allow; follow-ups are free.
+
+**NPC Deck**
+- Batch bar: select two or more NPC tokens and step HP and heat, or apply and remove conditions, on all of them at once.
+
 ## 0.5.0
 
 Safe for the table: easier to hide, checked against the usual LANCER modules, tested on small screens.

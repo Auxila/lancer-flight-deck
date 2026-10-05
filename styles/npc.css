@@ -1054,3 +1054,51 @@
 #lancer-flight-deck-npc .lfd-init-unit:is(.is-done, .is-defeated) .lfd-init-glyph {
   color: #55575e;
 }
+
+/* --------------------------------------------------------------------------
+   Batch bar: two or more NPC tokens selected on the map
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck-npc .lfd-npc-batch {
+  padding: 5px 6px 6px;
+  border-bottom: 1px solid var(--lfd-line);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--lfd-accent) 10%, transparent), transparent),
+    color-mix(in srgb, var(--lfd-bg) 85%, var(--lfd-plate));
+  box-shadow: inset 2px 0 0 var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-batch-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-batch-title {
+  font: 700 9px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-batch-release {
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck-npc .lfd-npc-batch-release:hover {
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck-npc .lfd-npc-batch .lfd-npc-conds {
+  margin-top: 4px;
+}
+
+/* Some of the selection has it: half-lit */
+#lancer-flight-deck-npc .lfd-npc-conds button.is-some {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--lfd-accent) 45%, transparent) 50%, transparent 50%);
+  border-color: color-mix(in srgb, var(--lfd-accent) 60%, transparent);
+}

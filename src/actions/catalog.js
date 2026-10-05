@@ -66,12 +66,12 @@ export function pilotOf(actor) {
 /** Mounted weapons, in mount order, with their mount and mod. */
 export function mountedWeapons(actor) {
   const out = [];
-  for (const mount of actor?.system?.loadout?.weapon_mounts ?? []) {
+  (actor?.system?.loadout?.weapon_mounts ?? []).forEach((mount, mountIndex) => {
     for (const slot of mount?.slots ?? []) {
       const weapon = slot?.weapon?.value;
-      if (weapon) out.push({ weapon, mod: slot.mod?.value ?? null, mount: mount.type, bracing: !!mount.bracing });
+      if (weapon) out.push({ weapon, mod: slot.mod?.value ?? null, mount: mount.type, mountIndex, size: weapon.system?.size ?? null, bracing: !!mount.bracing });
     }
-  }
+  });
   return out;
 }
 

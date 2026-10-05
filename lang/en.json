@@ -544,8 +544,8 @@
         "protocol": "Protocol"
       },
       "WeaponNote": {
-        "skirmish": "One weapon, plus an Auxiliary on the same mount.",
-        "barrage": "Two weapons, or one Superheavy.",
+        "skirmish": "One weapon (not Superheavy), then a free Auxiliary on the same mount.",
+        "barrage": "Two weapons, or one Superheavy, then a free Auxiliary on each mount fired.",
         "overwatch": "Skirmish a hostile as it starts moving in your Threat."
       },
       "NoWeapons": "No weapons mounted.",
@@ -581,7 +581,28 @@
       },
       "UsedRound": "Already used this round. Each reaction can be taken once per round.",
       "OneTarget": "This targets one character: target just one token.",
-      "OneTargetHint": "Target exactly one token first."
+      "OneTargetHint": "Target exactly one token first.",
+      "AuxTitle": "Auxiliary follow-up",
+      "AuxNote": "Free attack with an Auxiliary weapon on a mount you fired. No bonus damage.",
+      "AuxDone": "Done",
+      "AuxDoneSub": "No follow-up attack",
+      "AuxDoneTip": "End this weapon action without an Auxiliary follow-up.",
+      "WeaponBlocked": {
+        "fired": "Fired",
+        "superheavyBarrage": "Barrage only",
+        "superheavyWhole": "Whole Barrage",
+        "notAux": "Not Auxiliary",
+        "otherMount": "Other mount",
+        "auxUsed": "Used"
+      },
+      "WeaponBlockedTip": {
+        "fired": "That weapon has already fired in this action.",
+        "superheavyBarrage": "Superheavy weapons can only be fired as part of a Barrage.",
+        "superheavyWhole": "A Superheavy weapon takes the whole Barrage: fire it as the first attack.",
+        "notAux": "Only an Auxiliary weapon can make the follow-up attack.",
+        "otherMount": "The follow-up must come from a mount that fired.",
+        "auxUsed": "That mount has already made its follow-up attack."
+      }
     },
     "Basic": {
       "skirmish": {
@@ -791,7 +812,13 @@
         }
       },
       "CondApply": "Click to apply",
-      "CondRemove": "Click to remove"
+      "CondRemove": "Click to remove",
+      "Batch": {
+        "Title": "{n} selected",
+        "Release": "Deselect all",
+        "Apply": "Click: apply to all {n} selected ({have} of {n} already have it)",
+        "Remove": "Click: remove from all {n} selected"
+      }
     }
   }
 }

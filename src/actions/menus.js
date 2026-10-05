@@ -1,3 +1,4 @@
+import { planWeapons } from "./weaponRules.js";
 import { STATUS } from "../constants.js";
 import { readSystems, systemTip } from "../ui/components/SystemsBay.js";
 import { BASIC_ACTIONS, textId } from "./basic.js";
@@ -310,26 +311,42 @@ function weaponsView(vm, entries, view, ctx) {
   vm.crumb = loc(`LFD.Hud.Menu.${view.menu}`);
   vm.footer = loc("LFD.Hud.Footer.weapons");
   vm.readouts.push(targetReadout(ctx), defenseReadout(ctx, "evasion"));
-  if (mode === "barrage") {
-    vm.readouts.push({ label: loc("LFD.Hud.Readout.Attacks"), value: `${Math.min(2, view.sub.fired ?? 0)}/2` });
-  }
-  vm.notice = loc(`LFD.Hud.WeaponNote.${mode}`);
-  const rows = mountedWeapons(ctx.actor).map(w => {
+  const mounted = mountedWeapons(ctx.actor);
+  const fired = view.sub.fired ?? [];
+  const plan = planWeapons(mode, mounted.map(w => ({ id: w.weapon.uuid, mount: w.mountIndex, size: w.size })), fired);
+  const followUp = plan.phase === "aux";
+  if (mode === "barrage") vm.readouts.push({ label: loc("LFD.Hud.Readout.Attacks"), value: `${plan.made}/${plan.needed}` });
+  if (followUp) vm.title = loc("LFD.Hud.AuxTitle");
+  vm.notice = loc(followUp ? "LFD.Hud.AuxNote" : `LFD.Hud.WeaponNote.${mode}`);
+  // Follow-ups list only what may still fire; the main attacks show everything, the barred ones dimmed
+  const shown = followUp ? mounted.filter(w => plan.options.get(w.weapon.uuid)?.allowed) : mounted;
+  const rows = shown.map(w => {
     const key = `weapon:${w.weapon.uuid}`;
+    const option = plan.options.get(w.weapon.uuid);
+    const barred = option && !option.allowed ? option.reason : null;
     // Overwatch is one reaction whichever weapon fires it, so it's recorded under the basic tile
     const reactionKey = mode === "overwatch" ? "basic:overwatch" : undefined;
-    entries.set(key, { key, type: "weapon", weapon: w.weapon, mode, spend: WEAPON_MODES[mode], reactionKey, tip: () => weaponTip(w) });
-    const state = itemState(w.weapon);
+    entries.set(key, {
+      key, type: "weapon", weapon: w.weapon, mode, mount: w.mountIndex, size: w.size, aux: followUp,
+      // The first attack spends the action; every later attack in it is free
+      spend: fired.length ? null : WEAPON_MODES[mode],
+      reactionKey, blocked: barred, tip: () => weaponTip(w),
+    });
+    const state = barred ? "used" : itemState(w.weapon);
     const uses = usesOf(w.weapon);
     return {
       key,
-      icon: w.weapon.system?.size === "Superheavy" ? "cci cci-large-beam" : (w.weapon.system?.profiles?.[0]?.type ?? "") === "Melee" ? "cci cci-melee" : "cci cci-mech-weapon",
+      icon: w.size === "Superheavy" ? "cci cci-large-beam" : (w.weapon.system?.profiles?.[0]?.type ?? "") === "Melee" ? "cci cci-melee" : "cci cci-mech-weapon",
       label: w.weapon.name,
       sub: [w.mount, weaponLine(w.weapon)].filter(Boolean).join(" · "),
       state,
-      readout: state !== "ready" ? loc(`LFD.Hud.State.${state}`) : uses ? `${uses.value}/${uses.max}` : null,
+      readout: barred ? loc(`LFD.Hud.WeaponBlocked.${barred}`) : state !== "ready" ? loc(`LFD.Hud.State.${state}`) : uses ? `${uses.value}/${uses.max}` : null,
     };
   });
+  if (followUp) {
+    entries.set("weapons:done", { key: "weapons:done", type: "done", tip: () => `<div class="lfd-tip"><p>${foundry.utils.escapeHTML(loc("LFD.Hud.AuxDoneTip"))}</p></div>` });
+    rows.push({ key: "weapons:done", icon: "fa-solid fa-check", label: loc("LFD.Hud.AuxDone"), sub: loc("LFD.Hud.AuxDoneSub"), state: "ready", readout: null });
+  }
   vm.empty = loc("LFD.Hud.NoWeapons");
   vm.sections.push(section("weapons", "rows", rows));
 }

@@ -50,6 +50,9 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       adjust: NpcDeck.#onAdjust,
       feature: { handler: NpcDeck.#onFeature, buttons: [0, 2] },
       condition: NpcDeck.#onCondition,
+      batchAdjust: NpcDeck.#onBatchAdjust,
+      batchCondition: NpcDeck.#onBatchCondition,
+      batchRelease: NpcDeck.#onBatchRelease,
       activate: NpcDeck.#onActivate,
       endTurn: NpcDeck.#onEndTurn,
       recharge: NpcDeck.#onRecharge,
@@ -284,6 +287,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     if (initiative && initiative.firstDone >= 0) initiative.entries[initiative.firstDone].divider = true;
     if (initiative) await this.#stillFrames(initiative.entries);
     return {
+      batch: NpcDeck.#batchView(),
       tipClass: `lfd-hud-tip lfd-themed ${this.#theme().cssClass}`,
       collapsed: !!getSetting(SETTINGS.NPC_DECK_COLLAPSED),
       floating: this.frame.floating,
@@ -521,15 +525,67 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static async #onAdjust(event, target) {
     const actor = NpcDeck.#tokenDoc(target)?.actor;
-    if (!actor) return;
-    const key = target.dataset.resource;
-    const delta = Number(target.dataset.delta) || 0;
+    if (actor) await NpcDeck.#adjust(actor, target.dataset.resource, Number(target.dataset.delta) || 0);
+  }
+
+  /** HP or heat by a step. LANCER's own update hook starts Structure / Overheat when warranted. */
+  static async #adjust(actor, key, delta) {
     const path = key === "heat" ? "system.heat.value" : "system.hp.value";
     const current = Number(foundry.utils.getProperty(actor, path)) || 0;
     const max = Number(foundry.utils.getProperty(actor, key === "heat" ? "system.heat.max" : "system.hp.max")) || 0;
     // HP may go below 0 (LANCER carries it into the next structure); heat can exceed the cap
     const next = key === "heat" ? Math.max(0, current + delta) : Math.min(max, current + delta);
     if (next !== current) await actor.update({ [path]: next });
+  }
+
+  /* -------------------------------------------- */
+  /*  Batch: several NPC tokens selected on the map */
+  /* -------------------------------------------- */
+
+  /** The NPC tokens selected on the map, when there are two or more. */
+  static #batchTokens() {
+    const picked = (canvas?.tokens?.controlled ?? []).filter(t => isNpc(t.actor));
+    return picked.length >= 2 ? picked : [];
+  }
+
+  static #batchView() {
+    const picked = NpcDeck.#batchTokens();
+    if (!picked.length) return null;
+    const i18n = game.i18n;
+    const n = picked.length;
+    return {
+      count: n,
+      names: picked.map(t => t.name).join(", "),
+      heat: picked.some(t => Number(t.actor.system?.heat?.max) > 0),
+      quick: QUICK_CONDITIONS.map(id => {
+        const cfg = CONFIG.statusEffects.find(s => s.id === id);
+        if (!cfg) return null;
+        const label = i18n.localize(cfg.name ?? id);
+        const have = picked.filter(t => t.actor.statuses?.has(id)).length;
+        const state = have === 0 ? "none" : have === n ? "all" : "some";
+        const hint = i18n.format(state === "all" ? "LFD.Npc.Batch.Remove" : "LFD.Npc.Batch.Apply", { n, have });
+        return { id, label, img: cfg.img, state, tip: conditionCard(id, { title: label, detail: `${have}/${n}`, hint }) };
+      }).filter(Boolean),
+    };
+  }
+
+  static async #onBatchAdjust(event, target) {
+    const key = target.dataset.resource;
+    const delta = Number(target.dataset.delta) || 0;
+    for (const t of NpcDeck.#batchTokens()) await NpcDeck.#adjust(t.actor, key, delta);
+  }
+
+  /** All of them have it: remove it from all. Otherwise: give it to the ones without it. */
+  static async #onBatchCondition(event, target) {
+    const id = target.dataset.cond;
+    const actors = NpcDeck.#batchTokens().map(t => t.actor);
+    if (!id || !actors.length) return;
+    const all = actors.every(a => a.statuses?.has(id));
+    await setStatus(all ? actors : actors.filter(a => !a.statuses?.has(id)), id, !all);
+  }
+
+  static #onBatchRelease() {
+    canvas?.tokens?.releaseAll();
   }
 
   /** Use a feature with LANCER's own flows. Right-click posts its text instead. */

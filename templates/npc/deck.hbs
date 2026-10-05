@@ -56,6 +56,35 @@
     </ol>
   </section>
   {{/if}}
+  {{#if batch}}
+  <section class="lfd-npc-batch" aria-label="{{localize 'LFD.Npc.Batch.Title' n=batch.count}}">
+    <div class="lfd-npc-batch-head">
+      <span class="lfd-npc-batch-title" data-tooltip="{{batch.names}}"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> {{localize "LFD.Npc.Batch.Title" n=batch.count}}</span>
+      <button type="button" class="lfd-npc-batch-release" data-action="batchRelease" data-tooltip="LFD.Npc.Batch.Release" aria-label="{{localize 'LFD.Npc.Batch.Release'}}"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="lfd-npc-adjust">
+      <span class="lfd-npc-adjust-label">HP</span>
+      <button type="button" data-action="batchAdjust" data-resource="hp" data-delta="-5">−5</button>
+      <button type="button" data-action="batchAdjust" data-resource="hp" data-delta="-1">−1</button>
+      <button type="button" data-action="batchAdjust" data-resource="hp" data-delta="1">+1</button>
+      <button type="button" data-action="batchAdjust" data-resource="hp" data-delta="5">+5</button>
+      {{#if batch.heat}}
+      <span class="lfd-npc-adjust-label">{{localize "LFD.Npc.Heat"}}</span>
+      <button type="button" data-action="batchAdjust" data-resource="heat" data-delta="-1">−1</button>
+      <button type="button" data-action="batchAdjust" data-resource="heat" data-delta="1">+1</button>
+      <button type="button" data-action="batchAdjust" data-resource="heat" data-delta="2">+2</button>
+      {{/if}}
+    </div>
+    <div class="lfd-npc-conds" aria-label="{{localize 'LFD.Npc.Conditions'}}" data-tooltip-class="{{tipClass}}">
+      {{#each batch.quick}}
+      <button type="button" class="{{#if (eq state 'all')}}is-on{{/if}} {{#if (eq state 'some')}}is-some{{/if}}" data-action="batchCondition" data-cond="{{id}}"
+              data-tooltip-html="{{tip}}" aria-label="{{label}}" aria-pressed="{{#if (eq state 'all')}}true{{else if (eq state 'some')}}mixed{{else}}false{{/if}}">
+        <img src="{{img}}" alt="{{label}}">
+      </button>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
   {{#if empty}}
   <p class="lfd-npc-empty">{{localize "LFD.Npc.Empty"}}</p>
   {{else}}
