@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.7
+
+- System chat cards (SYSTEMS AVAILABLE → click) leave out the flavor text: rules, actions, deployables and tags only. A system whose only rules text is its description still shows it, as the hover card does.
+
 ## 0.6.6
 
 **Protocols & reactions**

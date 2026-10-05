@@ -1224,14 +1224,3 @@
 .lfd-chat-deployable .lfd-chat-action {
   margin: 2px 0 0 5px;
 }
-
-.lfd-chat-flavor {
-  text-align: center;
-  font-size: 0.85rem;
-  font-style: italic;
-  opacity: 0.75;
-}
-
-.lfd-chat-flavor > :last-child {
-  margin-bottom: 0;
-}

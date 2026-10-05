@@ -4,8 +4,8 @@
  * LANCER's system card prints only a system's `effect` and tags, yet many systems keep their
  * rules in their actions (Neurospike's invade options, for one) or describe deployables.
  * Its sheet "send to chat" view starts collapsed and folds triggered actions away. These
- * cards print everything, always expanded, in LANCER's own chat styling (card, headers,
- * overlines, tag chips), so they sit naturally next to the system's cards.
+ * cards print every rule, always expanded, in LANCER's own chat styling (card, headers,
+ * overlines, tag chips), so they sit naturally next to the system's cards. Flavor text stays out.
  *
  * They are informational: posting a system never spends a Limited use or applies heat.
  * Using gear is what the action menus are for.
@@ -112,11 +112,10 @@ export async function systemChatCard(item) {
   const body = [`<div class="lfd-chat-meta">${meta.map(m => `<span>${esc(m)}</span>`).join("")}</div>`];
   if (state) body.push(`<div class="lfd-chat-state">${esc(loc(`LFD.Systems.State.${state}`))}</div>`);
   if (s.effect) body.push(`<div class="effect-text">${s.effect}</div>`);
+  // The description is flavor text, left out; unless a system keeps all its rules there (as the hover card does)
+  else if (!s.actions?.length && s.description && !NO_DESCRIPTION.test(s.description)) body.push(`<div class="effect-text">${s.description}</div>`);
   body.push(actionBlocks(s.actions, item.name));
   for (const lid of s.deployables ?? []) body.push(await deployableBlock(lid));
-  if (s.description && !NO_DESCRIPTION.test(s.description) && s.description !== s.effect) {
-    body.push(`<div class="lfd-chat-flavor">${s.description}</div>`);
-  }
   body.push(tagChips(tags));
 
   return `<div class="card clipped-bot lfd-chat-card" style="margin: 0px;">

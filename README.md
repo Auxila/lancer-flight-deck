@@ -140,7 +140,8 @@ to mark that slot spent, or available again; Shift+right-click REACT does the sa
 HUD listing every installed system with its state (ready, Limited uses, destroyed, cascading).
 Clicking a system posts its **full text** to chat: type, SP and uses, the effect, every action
 (activation, heat, frequency, trigger and effect, never collapsed), the deployables it creates
-with their stats and actions, its description, and its tags, in LANCER's own chat styling.
+with their stats and actions, and its tags, in LANCER's own chat styling. Flavor text is left
+out; a system whose only rules text is its description shows that instead.
 That's information only: it never spends a Limited use or applies heat (LANCER's own system
 card prints only the effect, so gear that keeps its rules in actions came out nearly empty).
 Frame traits and the core passive post their actions too.
