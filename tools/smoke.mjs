@@ -102,6 +102,91 @@ await step(p, "panel opens on the player's mech", async name => {
   return { ok: !!document.getElementById("lancer-flight-deck") && !!actor, detail: actor?.name ?? null };
 }, mechName);
 
+/* ------------------------- LANCER contract (player) ----------------------- */
+// What Flight Deck assumes about LANCER. After a LANCER or Foundry update, a FAIL here names the
+// assumption that broke, before a player meets it at the table.
+
+await step(p, "LANCER contract: the flows Flight Deck runs and hooks exist", async () => {
+  const L = game.lancer;
+  const flows = ["ActivationFlow", "BasicAttackFlow", "TechAttackFlow", "WeaponAttackFlow", "SystemFlow", "SimpleTextFlow", "SimpleHTMLFlow", "DamageRollFlow", "StructureFlow", "OverheatFlow"];
+  const missing = flows.filter(name => !L?.flows?.get?.(name));
+  const helpers = ["fromLid", "fromLidSync", "beginItemChatFlow"].filter(name => typeof L?.[name] !== "function");
+  // The basic-invade workaround slots a step in after this one, through LANCER's step registry
+  const anchor = !!L?.flows?.get?.("TechAttackFlow")?.steps?.includes?.("initTechAttackData") && L?.flowSteps instanceof Map;
+  return { ok: !missing.length && !helpers.length && anchor, detail: { missingFlows: missing, missingHelpers: helpers, techStepAnchor: anchor } };
+});
+
+await step(p, "LANCER contract: the mech's data is where the panel reads it", async () => {
+  const actor = game.modules.get("lancer-flight-deck").api.manager.actor;
+  const s = actor?.system ?? {};
+  const num = v => Number.isFinite(Number(v));
+  const checks = {
+    actionTracker: ["protocol", "move", "full", "quick", "reaction"].every(k => k in (s.action_tracker ?? {})),
+    loadout: !!s.loadout && "frame" in s.loadout && Array.isArray(s.loadout.systems) && Array.isArray(s.loadout.weapon_mounts),
+    tracks: ["hp", "heat", "structure", "stress"].every(k => num(s[k]?.value) && num(s[k]?.max)),
+    stats: ["evasion", "edef", "speed", "sensor_range", "save", "tech_attack", "hull", "agi", "sys", "eng"].every(k => num(s[k])),
+    meltdownTimer: "meltdown_timer" in s,
+    coreEnergy: "core_energy" in s,
+    pilotRef: "pilot" in s,
+  };
+  const methods = ["beginStatFlow", "beginOverchargeFlow", "beginStabilizeFlow", "beginScanFlow", "toggleStatusEffect"].filter(m => typeof actor?.[m] !== "function");
+  const frame = s.loadout?.frame?.value;
+  if (frame && typeof frame.beginCoreActiveFlow !== "function") methods.push("frame.beginCoreActiveFlow");
+  const failed = Object.keys(checks).filter(k => !checks[k]);
+  return { ok: !!actor && !failed.length && !methods.length, detail: { failed, missingMethods: methods } };
+});
+
+await step(p, "LANCER contract: every condition the tiles toggle is registered", async () => {
+  const ids = ["exposed", "shredded", "stunned", "lockon", "jammed", "impaired", "slow", "immobilized", "engaged", "prone", "hidden", "invisible", "shutdown", "dangerzone"];
+  const missing = ids.filter(id => !CONFIG.statusEffects.some(s => s.id === id));
+  return { ok: !missing.length, detail: missing.length ? { missing } : `${ids.length} statuses` };
+});
+
+await step(p, "LANCER workaround: Grapple's attack prompt carries its own title", async () => {
+  const hud = game.modules.get("lancer-flight-deck").api.manager.hud;
+  await hud.open("quick");
+  await new Promise(r => setTimeout(r, 500));
+  document.querySelector('#lancer-flight-deck-hud [data-entry="basic:grapple"]')?.click();
+  let text = "";
+  for (let i = 0; i < 40 && !/GRAPPLE/.test(text); i++) {
+    await new Promise(r => setTimeout(r, 150));
+    text = document.getElementById("hudzone")?.innerText ?? "";
+  }
+  const titled = /GRAPPLE/.test(text) && !/BASIC ATTACK/.test(text);
+  const cancel = [...document.querySelectorAll("#hudzone button, #hudzone a")].find(b => /cancel/i.test(b.innerText ?? ""));
+  cancel?.click();
+  await new Promise(r => setTimeout(r, 800));
+  hud.close();
+  return { ok: titled && !!cancel, detail: { titled, cancelled: !!cancel } };
+});
+
+await step(p, "LANCER workaround: a basic invade is marked as a tech attack (vs E-Defense)", async () => {
+  const target = canvas.tokens.placeables.find(t => t.actor?.type === "npc" && t.visible);
+  if (!target) return { detail: "no NPC token on the scene to target" };
+  const before = [...game.user.targets];
+  target.setTarget(true, { releaseOthers: true });
+  let marked = null;
+  const id = Hooks.on("lancer.postFlow.TechAttackFlow", flow => {
+    marked = { smart: !!flow.state.data?.is_smart, tech: !!flow.state.data?.acc_diff?.weapon?.tech };
+  });
+  const hud = game.modules.get("lancer-flight-deck").api.manager.hud;
+  await hud.open("invade");
+  await new Promise(r => setTimeout(r, 500));
+  document.querySelector('#lancer-flight-deck-hud [data-entry="basic:fragment"]')?.click();
+  let cancel = null;
+  for (let i = 0; i < 40 && !cancel; i++) {
+    await new Promise(r => setTimeout(r, 150));
+    cancel = [...document.querySelectorAll("#hudzone button, #hudzone a")].find(b => /cancel/i.test(b.innerText ?? ""));
+  }
+  cancel?.click();
+  for (let i = 0; i < 20 && !marked; i++) await new Promise(r => setTimeout(r, 100));
+  Hooks.off("lancer.postFlow.TechAttackFlow", id);
+  hud.close();
+  target.setTarget(false, { releaseOthers: true });
+  for (const t of before) t.setTarget(true, { releaseOthers: false });
+  return { ok: !!marked?.tech && !!marked?.smart, detail: marked ?? "the invade flow never reported back" };
+});
+
 for (const menu of ["invade", "move", "quick", "full", "reaction", "core", "systems"]) {
   await step(p, `HUD menu: ${menu}`, async m => {
     const hud = game.modules.get("lancer-flight-deck").api.manager.hud;
@@ -207,6 +292,25 @@ await step(g, "NPC Deck lists the scene's NPCs", async () => {
   const rows = deck?.querySelectorAll(".lfd-npc-row").length ?? 0;
   const npcs = canvas.scene?.tokens.filter(t => t.actor?.type === "npc").length ?? 0;
   return { ok: !!deck && (rows > 0 || npcs === 0), detail: { rows, portraits: deck?.querySelectorAll(".lfd-init-unit").length ?? 0 } };
+});
+
+await step(g, "LANCER contract: NPC Deck's combat and feature calls exist", async () => {
+  const proto = CONFIG.Combat.documentClass.prototype;
+  const missing = ["activateCombatant", "deactivateCombatant"].filter(m => typeof proto[m] !== "function");
+  const npc = canvas.scene?.tokens.find(t => t.actor?.type === "npc")?.actor;
+  if (npc) {
+    if (typeof npc.beginRechargeFlow !== "function") missing.push("npc.beginRechargeFlow");
+    const feature = npc.items.find(i => i.type === "npc_feature");
+    for (const m of ["beginWeaponAttackFlow", "beginTechAttackFlow", "beginSystemFlow"]) if (feature && typeof feature[m] !== "function") missing.push(`feature.${m}`);
+  }
+  const combatant = game.combat?.combatants.contents.find(c => c.actor?.type === "npc");
+  const activations = combatant ? ["value", "max"].every(k => k in (combatant.activations ?? {})) : null;
+  return { ok: !missing.length && activations !== false, detail: { missing, activations: activations ?? "no combat running" } };
+});
+
+await step(g, "cleanup: scanning the world for Flight Deck data works", async () => {
+  const found = game.modules.get("lancer-flight-deck").api.cleanup.scan();
+  return { ok: Array.isArray(found.tokens) && Array.isArray(found.actors), detail: { tokensWithFilters: found.tokens.length, actorsWithNotes: found.actors.length } };
 });
 
 const mechUuid = await p.evaluate(() => game.modules.get("lancer-flight-deck").api.manager.actor?.uuid);

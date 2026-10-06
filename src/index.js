@@ -14,12 +14,15 @@ import * as Odds from "./core/Odds.js";
 import { getThemes, registerTheme } from "./themes/registry.js";
 import { damageClock } from "./ui/damage/clock.js";
 import { NpcDeck } from "./npc/NpcDeck.js";
+import { registerMeltdownClock } from "./core/MeltdownClock.js";
+import { removeFlightDeckData, runCleanup, scanWorld } from "./core/Cleanup.js";
 
 Hooks.once("init", () => {
   if (game.system.id !== "lancer") return;
   FlightDeckManager.instance.init();
   registerConditionQuery();
   registerAutoDamage();
+  registerMeltdownClock();
   TokenEffects.instance.init();
   NpcDeck.init();
   const module = game.modules.get(MODULE_ID);
@@ -31,6 +34,8 @@ Hooks.once("init", () => {
     Odds,
     damageClock,
     npcDeck: () => (game.user?.isGM ? NpcDeck.instance : null), // GM only
+    // GM, before uninstalling: what Flight Deck saved in the world, and removing it
+    cleanup: { scan: scanWorld, remove: removeFlightDeckData, run: runCleanup },
   };
 });
 

@@ -27,6 +27,7 @@ export const SETTINGS = Object.freeze({
   SPEND_ACTIONS: "spendActions",
   AUTO_DAMAGE: "autoDamage",
   HIDE_TAH: "hideTokenActionHud",
+  MELTDOWN_TICK: "meltdownTick",
   NPC_DECK: "npcDeck",
   NPC_DECK_SIDE: "npcDeckSide",
   NPC_DECK_COLLAPSED: "npcDeckCollapsed",

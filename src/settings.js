@@ -1,6 +1,7 @@
 import { MODULE_ID, SCALE_MAX, SCALE_MIN, SETTINGS } from "./constants.js";
 import { TokenEffects } from "./fx/TokenEffects.js";
 import { themeChoices } from "./themes/registry.js";
+import { CleanupMenu } from "./core/Cleanup.js";
 
 /**
  * Register module settings. Everything a player tunes is client-scoped, so one
@@ -214,6 +215,25 @@ export function registerSettings(manager) {
     config: true,
     type: Boolean,
     default: true,
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.MELTDOWN_TICK, {
+    name: "LFD.Settings.MeltdownTick.Name",
+    hint: "LFD.Settings.MeltdownTick.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true,
+  });
+
+  // Before uninstalling: take out what Flight Deck saved in the world
+  game.settings.registerMenu(MODULE_ID, "cleanup", {
+    name: "LFD.Cleanup.Name",
+    label: "LFD.Cleanup.Label",
+    hint: "LFD.Cleanup.Hint",
+    icon: "fa-solid fa-broom",
+    type: CleanupMenu,
+    restricted: true,
   });
 }
 

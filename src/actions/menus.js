@@ -229,13 +229,23 @@ function moveView(vm, entries, ctx) {
   );
   const modes = [];
   if (token) {
+    // Lancer Ruler Integration picks walk / fly / crawl / ignore-terrain from the token's conditions, but
+    // only while no mode is pinned. Picking one here pins it, so Auto hands the choice back.
+    const ruler = game.modules.get("lancer-speed-provider")?.active;
+    const pinned = token._source?.movementAction ?? null;
+    if (ruler) {
+      const key = "mode:auto";
+      const label = loc("LFD.Hud.MoveAuto");
+      entries.set(key, { key, type: "moveMode", mode: null, spend: null, tip: () => textTip(label, loc("LFD.Hud.MoveMode"), `<p>${foundry.utils.escapeHTML(loc("LFD.Hud.MoveAutoText"))}</p>`, "LFD.Hud.Hint.moveMode") });
+      modes.push({ key, icon: "fa-solid fa-wand-magic-sparkles", label, state: "ready", active: pinned === null });
+    }
     for (const [id, cfg] of Object.entries(CONFIG.Token.movement?.actions ?? {})) {
       if (HIDDEN_MOVES.has(id)) continue;
       if (typeof cfg.canSelect === "function" && cfg.canSelect(token) === false) continue;
       const key = `mode:${id}`;
       const label = moveLabel(id);
       entries.set(key, { key, type: "moveMode", mode: id, spend: null, tip: () => textTip(label, loc("LFD.Hud.MoveMode"), moveText(id, cfg), "LFD.Hud.Hint.moveMode") });
-      modes.push({ key, icon: cfg.icon || "fa-solid fa-person-walking", label, state: "ready", active: token.movementAction === id });
+      modes.push({ key, icon: cfg.icon || "fa-solid fa-person-walking", label, state: "ready", active: ruler ? pinned === id : token.movementAction === id });
     }
   }
   vm.sections.push(section("moveMode", "tiles", modes));

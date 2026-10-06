@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.0
+
+**Ready for the table**
+- **GM brief** (`docs/GM-BRIEF.md`): one page for the GM: everything Flight Deck can change in a world, who writes it and which setting controls it, what it never does, how to remove it, and what it's been checked alongside.
+- **Remove Flight Deck data** (Configure Settings, GM only): finds Flight Deck's Token Magic filters on every scene and its notes on actors, lists them, and removes them on confirmation, then turns off *Condition effects on token art* so the filters don't come back. Game state stays. Also `api.cleanup.run()` for macros.
+- **Meltdown countdowns tick at turn end:** in combat, a reactor meltdown countdown goes down by one at the end of that mech's or NPC's turn, when LANCER runs its own end-of-turn automation. The active GM's client does it, so it's counted once. At T-0 a chat card tells the table, and the owner's panel flashes REACTOR CRITICAL with the klaxon. World setting, on by default; the tile's right-click still ticks by hand.
+- **Lancer Ruler Integration:** the MOVE menu gains **Auto**, which unpins the movement mode so Ruler Integration chooses it again (walk, fly, crawl while Prone, ignore-terrain). Picking a mode used to pin it silently.
+
+**Checked alongside the rest of the stack:** Lancer Weapon FX (the same animation macro for HUD and sheet attacks, from its own log), Enhanced Lancer Status Effects, Lancer Alternative Sheets, Bar Brawl, Token Variant Art. Notes in the README's Compatibility section.
+
+**LANCER contract checks** in `npm run smoke`: every LANCER flow and helper Flight Deck calls, the step the basic-invade workaround hooks onto, the mech's data paths, the condition ids the tiles toggle, the NPC Deck's combat and feature calls; and live, Grapple's attack prompt carries its own title and a basic invade reaches LANCER as a tech attack (both cancelled). After a LANCER or Foundry update, a failure names the assumption that broke.
+
 ## 0.6.9
 
 **Performance** (from a profiling pass: idle cost, redraw timings, a leak check)

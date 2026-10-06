@@ -105,6 +105,10 @@
       "AutoDamage": {
         "Name": "Roll damage after a hit",
         "Hint": "When an attack you make hits or crits at least one target, LANCER's damage roll opens by itself, as if you'd pressed ROLL DAMAGE on the attack card. Works for attacks from anywhere: the HUD, the sheet, macros. The button stays on the card for re-rolls."
+      },
+      "MeltdownTick": {
+        "Name": "Meltdown countdowns tick at turn end",
+        "Hint": "In combat, a reactor meltdown countdown (started from the Meltdown tile or Self-Destruct) goes down by one at the end of that mech's or NPC's turn, when LANCER runs its own end-of-turn automation, and a chat card announces T-0. The active GM's client does it. Turn off to tick countdowns by hand."
       }
     },
     "Keybinding": {
@@ -349,7 +353,8 @@
     },
     "Banner": {
       "CoreOnline": "Core online",
-      "SignalLost": "Signal lost"
+      "SignalLost": "Signal lost",
+      "ReactorCritical": "Reactor critical"
     },
     "Error": {
       "NotOwner": "Flight Deck: you don't own this mech.",
@@ -381,7 +386,7 @@
       "HintToggle": "Click: toggle on {target}",
       "HintCounter": "{condition} on {target}: click +1 · right-click −1 · Shift+click clears",
       "HintHidden": "{target}: click toggles Hidden · right-click toggles Invisible",
-      "HintMeltdown": "{target}: click starts or clears a meltdown countdown · right-click ticks it down",
+      "HintMeltdown": "{target}: click starts or clears a meltdown countdown · right-click ticks it down by hand",
       "Failed": "Flight Deck: could not apply to {name} ({reason}).",
       "NotAllowed": "the GM has turned off Lock On for tokens you do not own",
       "NoGM": "no GM is connected to apply it",
@@ -395,9 +400,11 @@
     },
     "Meltdown": {
       "Title": "Reactor meltdown",
-      "Body": "Start a countdown on the selected mech. The panel shows it as T-n; right-click the tile to tick it down at the end of each turn.",
+      "Body": "Start a countdown on the selected mech. The panel shows it as T-n. In combat it ticks down at the end of each of the mech's turns (world setting); right-click the tile to tick it by hand.",
       "Turns": "Turns until meltdown",
-      "Start": "Start countdown"
+      "Start": "Start countdown",
+      "CardTitle": "Reactor meltdown",
+      "CardText": "{name}'s meltdown countdown has run out: the reactor goes critical and the mech is destroyed in a reactor explosion that also hits everything nearby."
     },
     "Check": {
       "SentToPlayer": "Flight Deck: the {kind} check prompt went to {players}, who owns {name}.",
@@ -630,7 +637,9 @@
       },
       "Deploy": "Deploy {name}",
       "Recall": "Recall {name}",
-      "Redeploy": "Redeploy {name}"
+      "Redeploy": "Redeploy {name}",
+      "MoveAuto": "Auto",
+      "MoveAutoText": "Lancer Ruler Integration chooses: walking, flying, crawling while Prone, or ignoring terrain, from your conditions and gear. Picking a mode here pins it until you choose Auto again."
     },
     "Basic": {
       "skirmish": {
@@ -873,6 +882,21 @@
         "redeploy": "{mech} redeploys {name}."
       },
       "CardTitle": "{source}: deploy {name}"
+    },
+    "Cleanup": {
+      "Name": "Remove Flight Deck data",
+      "Label": "Remove data",
+      "Hint": "Before uninstalling: removes what Flight Deck saved in this world (its Token Magic filters on token art and its notes on actors), on every scene. Conditions, HP, heat and other game state stay. Also turns off \"Condition effects on token art\".",
+      "Title": "Remove Flight Deck data",
+      "Intro": "Flight Deck saved this in the world:",
+      "Filters": "Token Magic filters ({n}) on these tokens:",
+      "Actors": "Notes on these actors (reactions used this round):",
+      "Keeps": "Conditions, HP, heat, the action tracker and other game state stay as they are. \"Condition effects on token art\" will be turned off, so the filters don't come back.",
+      "Confirm": "Remove",
+      "Cancel": "Cancel",
+      "Done": "Flight Deck data removed: {filters} token filters, notes on {actors} actors.",
+      "Nothing": "Flight Deck: nothing to remove; this world holds no Flight Deck data.",
+      "GmOnly": "Flight Deck: only a GM can remove Flight Deck data."
     }
   }
 }

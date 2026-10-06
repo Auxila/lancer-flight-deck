@@ -196,6 +196,7 @@ export class TelemetryAdapter {
     if (gained(STATUS.EXPOSED)) events.add("exposed");
     if (gained(STATUS.STUNNED) || gained(STATUS.SHREDDED)) events.add("warning");
     if (!prev.meltdown.active && next.meltdown.active) events.add("meltdown");
+    if (prev.meltdown.timer > 0 && next.meltdown.timer === 0) events.add("meltdownZero");
     if (gained(STATUS.SHUT_DOWN)) events.add("shutdown");
     if (prev.flags[STATUS.SHUT_DOWN] && !next.flags[STATUS.SHUT_DOWN]) events.add("bootUp");
     if (prev.core.ready && !next.core.ready) events.add("coreSpent");

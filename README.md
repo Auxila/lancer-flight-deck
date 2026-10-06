@@ -27,6 +27,8 @@ The panel is opt-in for each player: the first time a player logs in with a mech
 
 ## Before your first session
 
+For the GM deciding whether to allow it, **[docs/GM-BRIEF.md](docs/GM-BRIEF.md)** is one page: everything Flight Deck can change in a world, what it never does, and how to remove it.
+
 Ten minutes in a copy of your world (or a test world) shows everything a cautious GM wants to see:
 
 1. Enable **Flight Deck** in **Game Settings → Manage Modules**. Nothing appears for players yet: the panel is off until each player turns it on.
@@ -36,7 +38,7 @@ Ten minutes in a copy of your world (or a test world) shows everything a cautiou
 5. Click the eye-slash button in the panel header to hide it, then bring it back with the gauge button in **Token Controls**. Every player can do this mid-session.
 6. Open the mech sheet: it's untouched. Flight Deck reads the actor and runs LANCER's flows; it doesn't replace anything.
 
-**Removing it cleanly.** Apart from ordinary game changes you make through it (HP, heat, conditions, the action tracker), Flight Deck saves only two things: Token Magic filters on tokens (ids starting `lfd-`) and a small flag recording which reactions were used this round. Turn off the world setting **Condition effects on token art** first to remove the filters, then untick Flight Deck in **Manage Modules**.
+**Removing it cleanly.** Apart from ordinary game changes you make through it (HP, heat, conditions, the action tracker), Flight Deck saves only two things: Token Magic filters on tokens (ids starting `lfd-`) and a small flag recording which reactions were used this round. **Configure Settings → Flight Deck → Remove Flight Deck data** (GM) shows what it found on every scene and removes both, then turns off **Condition effects on token art** so the filters don't come back. Then untick Flight Deck in **Manage Modules**. Macros can call `game.modules.get("lancer-flight-deck").api.cleanup.run()`.
 
 ## What it shows
 
@@ -73,7 +75,7 @@ Synthesized sound follows the same timeline: data chatter, a thunk on the cut, a
 | Stress lost | Stress track flashes, the panel browns out; with cracks, steam blows out of them | 2.5 s of Geiger clicks; a soft hiss if the glass is cracked |
 | Structure lost | The glass fractures (see Battle damage), the panel kicks | Low impact thud and a crackle of breaking glass |
 | Lock On, Exposed, Stunned, Shredded | Tiles light and flash | Two-tone caution chime |
-| Reactor meltdown (`meltdown_timer` or the Reactor Meltdown status) | Tile shows `T-n` | One klaxon cycle |
+| Reactor meltdown (`meltdown_timer` or the Reactor Meltdown status) | Tile shows `T-n`. In combat the countdown ticks down at the end of the mech's turn; at T-0 the panel flashes REACTOR CRITICAL and a chat card tells the table | One klaxon cycle, again at T-0 |
 | Jammed | Static and scanlines over the comms strip | — |
 | Shut Down / Boot Up | Instruments drop to emergency power / the cold boot | Data chatter, then the ENGAGED chime |
 | Core Power spent | CORE ONLINE banner | Rising sweep |
@@ -130,7 +132,7 @@ to mark that slot spent, or available again; Shift+right-click REACT does the sa
 | Light | Menu |
 |---|---|
 | INVADE | Fragment Signal and every invade option from your systems, frame and talents, with Tech Attack, Sensors and your current target. The button itself is a live terminal: hex rain, a scan line and a short glitch every few seconds. It goes quiet when no quick action is left. |
-| MOVE | Movement modes your token can use (walk, climb, jump, teleport…), set on the token so the ruler measures them, plus Boost, Disengage and a movement reset |
+| MOVE | Movement modes your token can use (walk, climb, jump, teleport…), set on the token so the ruler measures them, plus Boost, Disengage and a movement reset. With Lancer Ruler Integration, **Auto** hands the mode back to it (it picks walk, fly, crawl or ignore-terrain from your conditions); picking a mode pins it |
 | QUICK | Skirmish, Boost, Grapple, Ram, Hide, Search, Prepare, Eject, Shut Down, Self-Destruct; quick tech (Bolster, Lock On, Scan, Invade); then every quick and quick-tech action from your gear |
 | FULL | Barrage, Improvised Attack, Stabilize, Disengage, Boot Up, Mount, Jockey, Full Tech; then every full and full-tech action from your gear |
 | REACT | Protocols and reactions. On top, every protocol your frame, systems and talents give you, marked PROTOCOL READY or USED. Below, Brace and Overwatch, then every reaction your frame, systems, weapons, talents and core bonuses give you. The light's lamp is your reaction; its PROTO line lights while the protocol is still available this turn. |
@@ -314,7 +316,7 @@ When the recipient isn't the mech on the panel, small rings mark the tiles it al
 | Lock On | Toggle on your target(s) | — | — |
 | Burn, Overshield | +1 | −1 | Clear |
 | Hidden | Toggle Hidden | Toggle Invisible | — |
-| Meltdown | Start a countdown (asks for turns) or clear it | Tick down one turn | — |
+| Meltdown | Start a countdown (asks for turns) or clear it | Tick down one turn by hand | — |
 
 **Players and enemies.** Players can only select tokens they own, so they can only condition their own mech. The single exception is **Lock On**. A player's Lock On on an enemy is applied by the active GM through v13's built-in user queries (no socketlib), and the GM side refuses any other request for an unowned token. The world setting **Players can Lock On tokens they do not own** turns the exception off.
 
@@ -351,7 +353,7 @@ Every condition has its own look on the token itself. Three techniques, each mat
 - **Panel header:** the speaker button mutes audio, the eye-slash button hides the panel completely, and the chevrons collapse it to a slim tab that still shows heat and structure.
 - **Token Controls:** the **Flight Deck** toggle (gauge icon) turns the panel on and off for every player. It's the one-click way back after hiding it.
 - Client settings, which are per player: show panel, dock side, theme, panel size, opacity, reduce motion, cold boot, audio, volume, and Danger Zone afterglow.
-- World settings: offer the panel to each player once when they first log in with a mech (opt-in; nobody is forced), whether players can Lock On tokens they don't own, and when HUD menus spend actions.
+- World settings: offer the panel to each player once when they first log in with a mech (opt-in; nobody is forced), whether players can Lock On tokens they don't own, when HUD menus spend actions, and whether meltdown countdowns tick at turn end (the active GM's client ticks them, when LANCER runs its own end-of-turn automation). **Remove Flight Deck data** (GM) is here too.
 
 The panel follows the last mech token you control. If you aren't controlling one, it falls back to your assigned character (or your pilot's active mech).
 
@@ -362,7 +364,13 @@ Checked against the modules LANCER tables commonly run, by testing and by readin
 - **LANCER Alternative Structure:** while it's active, the structure and stress odds use its tables and carry an **ALT TABLE** tag. Under those tables no single roll destroys the mech; a failed HULL or ENGINEERING check decides, shown as `+x% more if the check fails`. Losing the last point still ends the mech.
 - **Lancer QoL:** its wreck automation deletes a destroyed NPC's token and combatant, so that NPC leaves the NPC Deck and the initiative strip. Wrecking also clears Token Magic filters, Flight Deck's included. QoL keeps its own Danger Zone visuals; the world setting **Jammed effect** picks Flight Deck's or QoL's Jammed.
 - **Token Action HUD:** works alongside. Actions run from Token Action HUD don't spend slots on LANCER's action tracker (neither does the sheet); actions run from Flight Deck's HUD menus do, as the world setting says. Its bar sits behind a left-docked panel, so while the panel is open on your mech the bar is hidden; collapse or hide the panel and it's back. **Hide Token Action HUD while open** in Configure Settings turns that off (then drag the bar somewhere clear).
-- **LANCER Weapon FX:** animations play for attacks made from Flight Deck.
+- **LANCER Weapon FX:** it reacts to LANCER's flows by name, and every HUD action runs those flows, so it finds the same animation for a HUD attack as for a sheet attack (checked from its own log).
+- **Lancer Ruler Integration:** it picks the movement mode from a token's conditions while no mode is pinned. Choosing a mode in the MOVE menu pins one (as Foundry's own token HUD does); **Auto** there hands it back.
+- **Enhanced Lancer Status Effects:** it improves the Token HUD's status palette and changes no status ids, so condition tiles and token effects are unaffected.
+- **Lancer Alternative Sheets:** every "open sheet" goes through Foundry's normal sheet call, so the sheet you configured opens.
+- **Bar Brawl, Token Variant Art:** no overlap; Flight Deck reads token data, not how bars or art are drawn.
+
+The full list of what Flight Deck can change in a world is in **[docs/GM-BRIEF.md](docs/GM-BRIEF.md)**.
 - **Lancer Speed Provider:** its extra movement modes appear in the MOVE menu.
 - **LANCER Alternative Sheets, Enhanced LANCER Status Effects, Ilysen's NPC rebake:** no conflicts found.
 - **Token Magic FX:** optional.

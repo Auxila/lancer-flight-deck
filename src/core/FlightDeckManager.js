@@ -724,7 +724,8 @@ export class FlightDeckManager {
     const audio = this.theme.audio;
     const panel = this.panel;
 
-    if (has("meltdown")) this.synth.play("klaxon", { freqs: audio.klaxon });
+    if (has("meltdown") || has("meltdownZero")) this.synth.play("klaxon", { freqs: audio.klaxon });
+    if (has("meltdownZero")) panel?.flashBanner(game.i18n.localize("LFD.Banner.ReactorCritical"), "lost", 2600);
     else if (has("lockOn") || has("exposed") || has("warning")) this.synth.play("chime", { freqs: audio.chime });
 
     if (has("dangerEnter")) {
