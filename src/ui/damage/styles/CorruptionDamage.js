@@ -35,14 +35,15 @@ const BIG_EYE = `<svg viewBox="0 0 200 120" aria-hidden="true" focusable="false"
  *   further off; styles/themes/horus.css). Repairs defragment the blocks away.
  * - Stress: the machine wakes. As stress runs low something on the other side of the readout notices
  *   you, and every eye follows the pointer (src/ui/HorusEyes.js):
- *   - first, static over the readout, a few watchers opening in the margins, a rare glitch slip, the
- *     odd pixel running, and a phrase surfacing in the noise now and then;
- *   - then more watchers, a roll bar, the plates slipping more often, pixels melting down the
+ *   - first, static over the readout, a few watchers opening in the margins, a plate slipping out of
+ *     register now and then, the
+ *     odd pixel running, and a phrase surfacing in the noise;
+ *   - then more watchers, a roll bar, the slips a little more often, pixels melting down the
  *     readout, the great eye stirring in the static, and the cockpit's own labels hijacked ("link
  *     nominal" becomes "it hears you"; styles/themes/horus.css);
- *   - at the last point, eyes everywhere and staring (they stop blinking, and stop looking away), a great
- *     eye opening in the static to watch the pointer, heavy melt, the section titles rewriting
- *     themselves, and now and then the whole readout inverting.
+ *   - at the last point, eyes everywhere and staring (they stop blinking, and stop looking away), heavy
+ *     melt, the section titles rewriting themselves, and once in a while a great eye opening in the
+ *     static to watch the pointer.
  *   Each hit jams the feed: the plates stutter down a line at a time, every eye snaps wide and turns to
  *   look, a phrase flashes, the pixels run, and hex garbage scrolls up the edge.
  */

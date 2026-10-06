@@ -1254,8 +1254,8 @@
   100% { transform: scaleY(1); }
 }
 
-/* The great eye: it stirs in the static at the second level, and at the last point it opens, watches
-   the pointer, blinks, and closes again */
+/* The great eye: it stirs in the static at the second level, and at the last point, once in a while, it
+   opens for a few seconds, watches the pointer, blinks, and closes again */
 #lancer-flight-deck .lfd-dmg-corruption .lfd-cor-bigeye {
   inset: auto;
   left: 50%;
@@ -1283,7 +1283,7 @@
 }
 
 #lancer-flight-deck.lfd-stress-3 .lfd-cor-bigeye svg {
-  animation: lfd-cor-wake 15s ease-in-out infinite;
+  animation: lfd-cor-wake 45s ease-in-out -30s infinite;
 }
 
 #lancer-flight-deck .lfd-cor-lid {
@@ -1320,13 +1320,13 @@
 }
 
 @keyframes lfd-cor-wake {
-  0%, 22% { transform: scaleY(0.02); }
-  30% { transform: scaleY(1); }
-  64% { transform: scaleY(1); }
-  65.5% { transform: scaleY(0.05); }
-  67% { transform: scaleY(1); }
-  82% { transform: scaleY(1); }
-  90%, 100% { transform: scaleY(0.02); }
+  0%, 86% { transform: scaleY(0.02); }
+  89% { transform: scaleY(1); }
+  94% { transform: scaleY(1); }
+  94.5% { transform: scaleY(0.05); }
+  95% { transform: scaleY(1); }
+  97% { transform: scaleY(1); }
+  99.5%, 100% { transform: scaleY(0.02); }
 }
 
 /* The melt: pixels running down from the readout, from the second level */
@@ -1421,14 +1421,6 @@
   38%, 100% { opacity: 0; }
 }
 
-@keyframes lfd-cor-invert {
-  0%, 95.9% { filter: none; }
-  96% { filter: invert(1) hue-rotate(180deg); }
-  96.7% { filter: none; }
-  97.3% { filter: invert(1) hue-rotate(180deg) contrast(1.2); }
-  97.9%, 100% { filter: none; }
-}
-
 /* The cockpit's own labels hijacked for a moment: never the numbers, only the words around them */
 #lancer-flight-deck.lfd-theme-horus:is(.lfd-stress-2, .lfd-stress-3) :is(.lfd-datalink-status, .lfd-frame-name, .lfd-horus-handle span),
 #lancer-flight-deck.lfd-theme-horus.lfd-stress-3 .lfd-section-title > span:first-child {
@@ -1493,8 +1485,8 @@
   91%, 100% { opacity: 0; }
 }
 
-/* The plates slip in glitch bursts, each on its own beat, more often as stress runs low; at the last
-   point the whole readout also inverts for a moment, every plate at once, now and then */
+/* Now and then a plate slips out of register for a moment, each on its own beat, a little more often
+   as stress runs low */
 #lancer-flight-deck.lfd-theme-horus [data-application-part="header"] { --slip: 0; }
 #lancer-flight-deck.lfd-theme-horus [data-application-part="hull"] { --slip: 2.3; }
 #lancer-flight-deck.lfd-theme-horus [data-application-part="heat"] { --slip: 4.1; }
@@ -1503,27 +1495,24 @@
 #lancer-flight-deck.lfd-theme-horus [data-application-part="actions"] { --slip: 3.3; }
 
 #lancer-flight-deck.lfd-theme-horus.lfd-stressed:not(.lfd-booting, .lfd-boot-reveal, .lfd-reduce-motion, .is-tear, .is-jam) .lfd-plate {
-  animation: lfd-horus-slip 11s steps(1) infinite;
-  animation-delay: calc(var(--slip, 0) * -1.7s);
+  animation: lfd-cor-slip 17s steps(1) infinite;
+  animation-delay: calc(var(--slip, 0) * -2.9s);
 }
 
 #lancer-flight-deck.lfd-theme-horus.lfd-stress-2:not(.lfd-booting, .lfd-boot-reveal, .lfd-reduce-motion, .is-tear, .is-jam) .lfd-plate {
-  animation-duration: 6.2s;
-  animation-delay: calc(var(--slip, 0) * -1s);
+  animation-duration: 12s;
+  animation-delay: calc(var(--slip, 0) * -2s);
 }
 
 #lancer-flight-deck.lfd-theme-horus.lfd-stress-3:not(.lfd-booting, .lfd-boot-reveal, .lfd-reduce-motion, .is-tear, .is-jam) .lfd-plate {
-  animation: lfd-horus-slip 3.4s steps(1) infinite, lfd-cor-invert 9.5s steps(1) infinite;
-  animation-delay: calc(var(--slip, 0) * -1s), 0s;
+  animation-duration: 8s;
+  animation-delay: calc(var(--slip, 0) * -1.4s);
 }
 
-@keyframes lfd-horus-slip {
-  0%, 90% { transform: none; box-shadow: none; }
-  91% { transform: translateX(var(--tx, 4px)); box-shadow: -4px 0 0 rgb(0 162 86 / 0.75), 3px 0 0 rgb(232 228 214 / 0.35); }
-  92.2% { transform: translateX(calc(var(--tx, 4px) * -0.5)) skewX(-3deg); box-shadow: 3px 0 0 rgb(232 228 214 / 0.5); }
-  93.5% { transform: none; box-shadow: none; }
-  96% { transform: translateX(calc(var(--tx, 4px) * 0.3)); }
-  96.8%, 100% { transform: none; }
+@keyframes lfd-cor-slip {
+  0%, 97% { transform: none; box-shadow: none; }
+  97.4% { transform: translateX(calc(var(--tx, 4px) * 0.3)); box-shadow: -2px 0 0 rgb(0 162 86 / 0.6); }
+  98.2%, 100% { transform: none; box-shadow: none; }
 }
 
 /* A stress hit: hex garbage scrolls up the edge... */
@@ -1552,12 +1541,10 @@
 
 @keyframes lfd-horus-jam {
   0%, 100% { transform: none; }
-  12% { transform: translateY(3px); }
-  26% { transform: translateY(1px); }
-  40% { transform: translateY(5px); }
-  56% { transform: translateY(2px); }
-  72% { transform: translateY(4px); }
-  86% { transform: translateY(1px); }
+  15% { transform: translateY(1px); }
+  35% { transform: translateY(2px); }
+  55% { transform: translateY(1px); }
+  75% { transform: none; }
 }
 
 /* ...and every open eye blinks */
