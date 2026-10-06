@@ -1,0 +1,63 @@
+{{!-- SSC reactor: a calibrated scale with a hand riding over the heat, the Danger Zone engraved over its
+      stretch of the track; the Overcharge ladder is a row of set jewels, the next one lit. --}}
+<section class="lfd-heat lfd-plate lfd-body {{#if heat.inDanger}}is-danger{{/if}} {{#if heat.over}}is-over{{/if}}" aria-label="{{localize 'LFD.Heat.Title'}}">
+  {{#unless standby}}
+  <div class="lfd-section-title">
+    <span>{{localize "LFD.Heat.Title"}}</span>
+    <div class="lfd-editor {{#if heat.inDanger}}is-danger{{/if}} {{#if heat.over}}is-over{{/if}}" role="group" aria-label="{{localize 'LFD.Heat.Gauge'}}">
+      <button type="button" class="lfd-step" data-action="adjust" data-resource="heat" data-delta="-5" {{#unless heat.editable}}disabled{{/unless}} aria-label="{{localize 'LFD.Edit.Minus' n=5}}">−5</button>
+      <button type="button" class="lfd-step" data-action="adjust" data-resource="heat" data-delta="-1" {{#unless heat.editable}}disabled{{/unless}} aria-label="{{localize 'LFD.Edit.Minus' n=1}}">−1</button>
+      <span class="lfd-editor-value">
+        <input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" data-resource="heat"
+               value="{{heat.value}}" {{#unless heat.editable}}disabled{{/unless}}
+               aria-label="{{localize 'LFD.Heat.Gauge'}}" data-tooltip="LFD.Edit.Hint">
+        {{#if heat.hasCap}}<small>/{{heat.max}}</small>{{/if}}
+      </span>
+      <button type="button" class="lfd-step" data-action="adjust" data-resource="heat" data-delta="1" {{#unless heat.editable}}disabled{{/unless}} aria-label="{{localize 'LFD.Edit.Plus' n=1}}">+1</button>
+      <button type="button" class="lfd-step" data-action="adjust" data-resource="heat" data-delta="5" {{#unless heat.editable}}disabled{{/unless}} aria-label="{{localize 'LFD.Edit.Plus' n=5}}">+5</button>
+    </div>
+  </div>
+
+  {{#if heat.hasCap}}
+  <div class="lfd-heat-gauge lfd-ssc-calibre" role="meter" aria-valuemin="0" aria-valuemax="{{heat.max}}" aria-valuenow="{{heat.value}}"
+       aria-label="{{localize 'LFD.Heat.Gauge'}}" style="--at:{{heat.fillPct}}%">
+    <i class="lfd-ssc-hand" aria-hidden="true"></i>
+    {{#if heat.segmented}}
+    <div class="lfd-heat-segments" style="--lfd-seg-count:{{heat.max}}">
+      {{#each heat.segments}}
+      <span class="lfd-seg {{#if filled}}is-filled{{/if}} {{#if danger}}is-dz{{/if}} {{#if boundary}}is-boundary{{/if}}">{{#if boundary}}<b>{{n}}</b>{{else if @last}}<b>{{n}}</b>{{/if}}</span>
+      {{/each}}
+    </div>
+    {{else}}
+    <div class="lfd-heat-continuous">
+      <div class="lfd-heat-fill" style="width:{{heat.fillPct}}%"></div>
+      <div class="lfd-dz-line" style="left:{{heat.dangerPct}}%"></div>
+    </div>
+    {{/if}}
+    <div class="lfd-dz-label">
+      <span class="{{#if heat.inDanger}}lfd-k-caution{{/if}}">{{#if heat.inDanger}}{{localize "LFD.Heat.InDanger"}}{{else}}{{localize "LFD.Heat.DangerAt" at=heat.dangerAt}}{{/if}}</span>
+      {{#if heat.over}}<span class="lfd-k-warning">{{localize "LFD.Heat.OverCap"}}</span>{{/if}}
+    </div>
+  </div>
+  {{else}}
+  <div class="lfd-muted">{{localize "LFD.Heat.NoCap"}}</div>
+  {{/if}}
+
+  <div class="lfd-oc lfd-risk-{{heat.oc.risk}} lfd-ssc-setting">
+    <div class="lfd-oc-head">
+      <span class="lfd-oc-label">{{localize "LFD.Heat.NextOvercharge"}}</span>
+      <span class="lfd-oc-cost">{{heat.oc.cost}}</span>
+    </div>
+    <ol class="lfd-oc-ladder" aria-label="{{localize 'LFD.Heat.Ladder'}}">
+      {{#each heat.oc.rungs}}
+      <li class="{{#if current}}is-current{{/if}} {{#if spent}}is-spent{{/if}}"><i class="lfd-ssc-jewel" aria-hidden="true"></i><span>{{label}}</span></li>
+      {{/each}}
+    </ol>
+    {{#if heat.oc.pOverCap}}
+    <div class="lfd-oc-odds">
+      {{localize "LFD.Heat.OcRange" range=heat.oc.range}} · <b>{{localize "LFD.Heat.OcOverCap" pct=heat.oc.pOverCap}}</b>
+    </div>
+    {{/if}}
+  </div>
+  {{/unless}}
+</section>

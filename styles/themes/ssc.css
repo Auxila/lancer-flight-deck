@@ -1,86 +1,276 @@
 /* ==========================================================================
-   SSC: Smith-Shimano Corpro. Bespoke luxury: graphite, gold leaf, hairline precision.
+   SSC: Smith-Shimano Corpro. Bespoke luxury from the Constellar ateliers.
    Canon colours (lancer-data manufacturers.json): #b57e07 light, #d1920a dark.
-   Foundation: palette and first ornaments; more to come.
+
+   An atelier chronometer, not a terminal:
+   - serif small caps (Sitka on Windows, Didot/Baskerville on macOS) over light watch numerals
+   - black lacquer engraved with guilloché, framed in a double gold hairline
+   - the header is a maker's label: the SSC seal (it blooms when you reach for it), the house and a
+     commission number, the mech's name in its owner's own case
+   - HP is a wingspan, spreading from the body to both tips (the frames are moths and butterflies)
+   - heat is a calibrated scale with a hand; the Overcharge ladder a row of set jewels
+   - integrity reads on two sub-dials, each box an applied index
+   The UI gold is champagne, paler than caution amber, and mostly hairline and type: amber stays the
+   colour of a lit caution. Layout lives in templates/panel/ssc/; semantic colours never change.
    ========================================================================== */
+
+/* Sitka's figures are old-style only: digits come from a lining serif, letters stay Sitka */
+@font-face {
+  font-family: "LFD SSC Figures";
+  src: local("Cambria"), local("Times New Roman"), local("TimesNewRomanPSMT");
+  font-weight: 400;
+  unicode-range: U+0030-0039;
+}
+
+@font-face {
+  font-family: "LFD SSC Figures";
+  src: local("Cambria Bold"), local("Cambria-Bold"), local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT");
+  font-weight: 600 900;
+  unicode-range: U+0030-0039;
+}
 
 #lancer-flight-deck.lfd-theme-ssc,
 .lfd-themed.lfd-theme-ssc {
-  --lfd-bg: #0e0d0b;
-  --lfd-plate: #16140f;
-  --lfd-plate-2: #201d16;
-  --lfd-line: #3d3626;
+  --lfd-bg: #0c0b09;
+  --lfd-plate: #13110d;
+  --lfd-plate-2: #1c1914;
+  --lfd-line: #3a3224;
   --lfd-ink: #f3ecdc;
-  --lfd-ink-dim: #a39a84;
-  --lfd-accent: #d1920a;
+  --lfd-ink-dim: #a89e88;
+  --lfd-accent: #ddb862;
   --lfd-accent-deep: #b57e07;
-  --lfd-accent-ink: #140e02;
-  --lfd-well: #090806;
-  --lfd-well-2: #0c0b08;
-  --lfd-edge: #2a251a;
-  --lfd-off: #262117;
-  --lfd-unlit: #615b4d;
-  --lfd-chamfer: 6px;
+  --lfd-accent-ink: #1a1204;
+  --lfd-well: #080706;
+  --lfd-well-2: #0b0a08;
+  --lfd-edge: #2a241a;
+  --lfd-off: #241f16;
+  --lfd-unlit: #615a4b;
+  --lfd-font-display: "LFD SSC Figures", "Sitka Heading", "Sitka Text", "Didot", "Bodoni 72", "Baskerville", "Cambria", "Amiri", Georgia, serif;
+  --lfd-font-data: "Segoe UI", "Avenir Next", "Helvetica Neue", "Signika", sans-serif;
+  --lfd-font-body: var(--lfd-font-data);
+
+  /* SSC's own: gold leaf in three tones, and the hairline every frame is drawn with */
+  --ssc-gold-hi: #f4dc9c;
+  --ssc-gold: #d9b45c;
+  --ssc-gold-lo: #8f6a1e;
+  --ssc-hair: rgb(217 180 92 / 0.3);
+  --ssc-numerals: 300 1em/1 "Segoe UI Light", "Segoe UI", "Avenir Next", "Helvetica Neue", sans-serif;
 }
 
-/* Header: a gold hairline above, and one below that fades out at the ends */
+/* --------------------------------------------------------------------------
+   Lacquer and gold
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-plate {
+  clip-path: none;
+  border-radius: 2px;
+  background:
+    radial-gradient(120% 90% at 50% -25%, rgb(240 210 150 / 0.065), transparent 62%),
+    repeating-radial-gradient(circle at 50% 170%, rgb(230 200 140 / 0.028) 0 1px, transparent 1px 4px),
+    var(--lfd-plate);
+  /* The double frame: the border, a breath of lacquer, then a gold hairline */
+  box-shadow:
+    inset 0 0 0 2px var(--lfd-plate),
+    inset 0 0 0 3px var(--ssc-hair);
+}
+
+/* Section titles: gold small caps after a hairline and a pearl */
+#lancer-flight-deck.lfd-theme-ssc .lfd-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+  color: var(--ssc-gold);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-section-title > span:first-child {
+  position: relative;
+  padding-left: 15px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-section-title > span:first-child::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  translate: 0 -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--ssc-gold-hi) 0 1.2px, transparent 1.6px 2.3px, var(--ssc-gold) 2.6px 3.4px, transparent 3.8px);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-readout,
+#lancer-flight-deck.lfd-theme-ssc .lfd-stat dd,
+#lancer-flight-deck.lfd-theme-ssc .lfd-editor-value input {
+  font: var(--ssc-numerals);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   The maker's label (header)
+   -------------------------------------------------------------------------- */
+
 #lancer-flight-deck.lfd-theme-ssc .lfd-header {
-  padding-bottom: 9px;
-  border-top: 1px solid var(--lfd-accent);
+  padding: 8px 9px 11px;
 }
 
+/* A gold rule under the label, fading at both ends, with a pearl at its centre */
 #lancer-flight-deck.lfd-theme-ssc .lfd-header::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 2px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--lfd-accent) 18% 82%, transparent);
-}
-
-/* Badge: gold leaf outline rather than a block */
-#lancer-flight-deck.lfd-theme-ssc .lfd-badge,
-.lfd-theme-chip.lfd-theme-ssc {
-  color: var(--lfd-accent);
-  background: color-mix(in srgb, var(--lfd-accent) 10%, var(--lfd-well));
-  box-shadow: inset 0 0 0 1px var(--lfd-accent);
-  letter-spacing: 0.2em;
-}
-
-/* Hairline corner marks, top left and bottom right */
-#lancer-flight-deck.lfd-theme-ssc .lfd-plate.lfd-body::before {
-  content: "";
-  position: absolute;
-  inset: 3px;
-  background:
-    linear-gradient(var(--lfd-accent) 0 0) left top / 10px 1px no-repeat,
-    linear-gradient(var(--lfd-accent) 0 0) left top / 1px 10px no-repeat,
-    linear-gradient(var(--lfd-accent) 0 0) right bottom / 10px 1px no-repeat,
-    linear-gradient(var(--lfd-accent) 0 0) right bottom / 1px 10px no-repeat;
-  opacity: 0.7;
+  left: 10%;
+  right: 10%;
+  bottom: 3px;
+  height: 5px;
   pointer-events: none;
-}
-
-/* Section titles: wider tracking, no stencil */
-#lancer-flight-deck.lfd-theme-ssc .lfd-section-title > span:first-child {
-  letter-spacing: 0.22em;
-}
-
-/* Plate texture: a soft sheen, nothing industrial */
-#lancer-flight-deck.lfd-theme-ssc .lfd-plate {
   background:
-    linear-gradient(115deg, rgb(255 225 160 / 0.045), transparent 38%),
-    var(--lfd-plate);
+    radial-gradient(circle, var(--ssc-gold-hi) 0 1.4px, transparent 2px) center / 5px 5px no-repeat,
+    linear-gradient(90deg, transparent, var(--ssc-gold) 30% 70%, transparent) center / 100% 1px no-repeat;
 }
 
-#lancer-flight-deck.lfd-theme-ssc .lfd-btn {
-  background: linear-gradient(180deg, var(--lfd-plate-2), var(--lfd-plate));
-  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--lfd-accent) 45%, transparent);
+#lancer-flight-deck.lfd-theme-ssc .lfd-header-main {
+  gap: 10px;
 }
 
+/* The seal: the SSC flower in gold leaf, set in a double ring. It blooms as you reach for it. */
+#lancer-flight-deck.lfd-theme-ssc .lfd-badge.lfd-ssc-seal {
+  width: 40px;
+  min-width: 0;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, #201b12, #0a0907 70%);
+  box-shadow:
+    inset 0 0 0 1px var(--ssc-gold),
+    inset 0 0 0 3px #0a0907,
+    inset 0 0 0 3.6px var(--ssc-hair),
+    0 2px 5px rgb(0 0 0 / 0.55);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-badge.lfd-ssc-seal::after {
+  display: none;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-seal svg {
+  width: 30px;
+  height: 30px;
+  overflow: visible;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.7));
+  transition: rotate 640ms cubic-bezier(0.22, 1, 0.36, 1), scale 640ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-badge.lfd-ssc-seal:is(:hover, :focus-visible, [aria-expanded="true"]) svg {
+  rotate: 30deg;
+  scale: 1.08;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-badge.lfd-ssc-seal:focus-visible {
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+#lancer-flight-deck.lfd-theme-ssc :is(.lfd-ssc-seal, .lfd-ssc-tab-seal) .lfd-petal-l { fill: var(--ssc-gold-hi); }
+#lancer-flight-deck.lfd-theme-ssc :is(.lfd-ssc-seal, .lfd-ssc-tab-seal) .lfd-petal-r { fill: #b98b2c; }
+#lancer-flight-deck.lfd-theme-ssc :is(.lfd-ssc-seal, .lfd-ssc-tab-seal) .lfd-petal-core {
+  fill: #0a0907;
+  stroke: var(--ssc-gold);
+  stroke-width: 0.8;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-house {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-bottom: 1px;
+  white-space: nowrap;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-house b {
+  font: 600 8px/1 var(--lfd-font-data);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ssc-gold);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-house span {
+  font: italic 400 10.5px/1 var(--lfd-font-display);
+  letter-spacing: 0.06em;
+  color: var(--lfd-ink-dim);
+}
+
+/* The name as its owner wrote it, set in the serif */
+#lancer-flight-deck.lfd-theme-ssc .lfd-mech-name {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.03em;
+  text-transform: none;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-frame-name {
+  font: italic 400 11.5px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+#lancer-flight-deck.lfd-theme-ssc.is-standby .lfd-frame-name {
+  font: 400 11px/1.3 var(--lfd-font-data);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-icon-btn {
+  border-color: var(--ssc-hair);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-icon-btn:hover {
+  border-color: var(--ssc-gold);
+  color: var(--ssc-gold-hi);
+  background: rgb(217 180 92 / 0.08);
+}
+
+/* Comms: no box, just hairlines above and below, and a small green stone while the link holds */
+#lancer-flight-deck.lfd-theme-ssc .lfd-datalink {
+  gap: 7px;
+  margin-top: 8px;
+  padding: 3px 4px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--ssc-hair);
+  border-bottom: 1px solid var(--ssc-hair);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-gem {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 34%, #e9fff1 0 0.8px, var(--lfd-ok) 1.6px, #1f6b3e);
+  box-shadow: 0 0 0 1px var(--ssc-gold-lo), 0 0 5px color-mix(in srgb, var(--lfd-ok) 60%, transparent);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-datalink.is-jammed .lfd-ssc-gem {
+  background: radial-gradient(circle at 38% 34%, #fff6e0 0 0.8px, var(--lfd-caution) 1.6px, #7a4d08);
+  animation: lfd-blink 0.7s steps(2, jump-none) infinite;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-activation {
+  border-radius: 1px;
+}
+
+/* Collapsed: a slim lacquer card with the seal on top */
 #lancer-flight-deck.lfd-theme-ssc.is-collapsed .lfd-header {
-  border-top: none;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 
 #lancer-flight-deck.lfd-theme-ssc.is-collapsed .lfd-header::after {
@@ -88,10 +278,827 @@
 }
 
 #lancer-flight-deck.lfd-theme-ssc.is-collapsed .lfd-tab {
-  border-left: 2px solid var(--lfd-accent);
+  width: 36px;
+  padding: 5px 0 10px;
+  border-color: var(--lfd-line);
+  border-radius: 2px;
+  background:
+    radial-gradient(120% 60% at 50% 0, rgb(240 210 150 / 0.07), transparent 70%),
+    var(--lfd-plate);
+  box-shadow: inset 0 0 0 2px var(--lfd-plate), inset 0 0 0 3px var(--ssc-hair);
 }
 
-#lancer-flight-deck.lfd-theme-ssc.lfd-dock-right.is-collapsed .lfd-tab {
-  border-left: 1px solid var(--lfd-line);
-  border-right: 2px solid var(--lfd-accent);
+#lancer-flight-deck.lfd-theme-ssc .lfd-tab-badge.lfd-ssc-tab-seal {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, #201b12, #0a0907 70%);
+  box-shadow: inset 0 0 0 1px var(--ssc-gold);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-tab-seal svg {
+  width: 21px;
+  height: 21px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-tab-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+  color: var(--ssc-gold);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-tab-mini {
+  font-size: 10.5px;
+}
+
+/* --------------------------------------------------------------------------
+   Hull: the wingspan
+   -------------------------------------------------------------------------- */
+
+/* Tapered to a point at both tips */
+#lancer-flight-deck.lfd-theme-ssc .lfd-hp-bar.lfd-ssc-wings {
+  height: 13px;
+  margin: 2px 0 0;
+  background: color-mix(in srgb, var(--ssc-gold) 7%, var(--lfd-well));
+  border: none;
+  clip-path: polygon(0 50%, 11px 0, calc(100% - 11px) 0, 100% 50%, calc(100% - 11px) 100%, 11px 100%);
+}
+
+/* HP spreads from the body outward, and folds back in as it falls */
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-wings :is(.lfd-hp-fill, .lfd-os-fill) {
+  left: 50%;
+  right: auto;
+  translate: -50% 0;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-wings .lfd-hp-fill {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.35), transparent 45%, rgb(0 0 0 / 0.18)),
+    linear-gradient(90deg, #a77d2c, #e8cd8c 22%, #fbf3dc 50%, #e8cd8c 78%, #a77d2c);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-wings .lfd-hp-fill.is-low {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.3), transparent 45%, rgb(0 0 0 / 0.2)),
+    linear-gradient(90deg, color-mix(in srgb, var(--lfd-warning) 70%, #000), var(--lfd-warning) 35% 65%, color-mix(in srgb, var(--lfd-warning) 70%, #000));
+}
+
+/* The body between the wings, and faint veins across them */
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-body {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 1px), rgb(12 11 9 / 0.85) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+    repeating-linear-gradient(-58deg, transparent 0 15px, rgb(12 11 9 / 0.2) 15px 16px) left / 50% 100% no-repeat,
+    repeating-linear-gradient(58deg, transparent 0 15px, rgb(12 11 9 / 0.2) 15px 16px) right / 50% 100% no-repeat;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-tag {
+  background: none;
+  border-color: var(--ssc-hair);
+  border-radius: 2px;
+  font-size: 11px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-tag b {
+  margin-right: 5px;
+  font-family: var(--lfd-font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+}
+
+/* Armor as set stones */
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-stones {
+  display: inline-block;
+  width: calc(var(--n) * 8px);
+  height: 8px;
+  margin-right: calc(min(var(--n), 1) * 4px);
+  vertical-align: -1px;
+  background: radial-gradient(circle, var(--ssc-gold-hi) 0 1.4px, var(--ssc-gold) 1.8px 2.4px, var(--ssc-gold-lo) 2.7px 3.1px, transparent 3.4px) 0 50% / 8px 8px repeat-x;
+}
+
+/* Stats: no boxes, a hairline between each, light numerals like a dial's */
+#lancer-flight-deck.lfd-theme-ssc .lfd-stats {
+  gap: 0;
+  margin-top: 6px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-stat {
+  padding: 1px 0 3px;
+  background: none;
+  border-top: none;
+  border-left: 1px solid var(--ssc-hair);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-stat:first-child {
+  border-left: none;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-stat dt {
+  font: 600 11px/1.1 var(--lfd-font-display);
+  letter-spacing: 0.1em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-stat dd {
+  font-size: 19px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-checks {
+  gap: 4px;
+  margin-top: 6px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-check {
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--chk) 45%, transparent);
+  border-radius: 2px;
+  font: 600 12px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.1em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-check-bonus {
+  font: var(--ssc-numerals);
+  font-size: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Value editors
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-step {
+  background: none;
+  border-color: var(--ssc-hair);
+  border-radius: 2px;
+  font-family: var(--lfd-font-data);
+  font-weight: 400;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-step:hover:not(:disabled) {
+  border-color: var(--ssc-gold);
+  background: rgb(217 180 92 / 0.1);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-editor-value input {
+  font-size: 20px;
+  border-radius: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Reactor: a calibrated scale with a hand, and the jewels
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre {
+  position: relative;
+  margin: 12px 0 2px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre .lfd-heat-segments {
+  height: 8px;
+  gap: 2px;
+  padding: 0;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre .lfd-seg {
+  border: none;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--lfd-ink-dim) 13%, var(--lfd-well));
+  transform: none;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre .lfd-seg.is-dz {
+  background: color-mix(in srgb, var(--lfd-heat-danger) 16%, var(--lfd-well));
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre .lfd-seg.is-filled {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lfd-heat-safe) 65%, #fff), var(--lfd-heat-safe) 60%);
+  box-shadow: none;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre .lfd-seg.is-filled.is-dz {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lfd-heat-danger) 70%, #fff), var(--lfd-heat-danger) 60%);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--lfd-heat-danger) 55%, transparent);
+}
+
+/* The Danger Zone, engraved over its stretch of the scale */
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre .lfd-seg.is-dz::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: 0;
+  top: -5px;
+  height: 1px;
+  background: color-mix(in srgb, var(--lfd-heat-danger) 75%, transparent);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre .lfd-seg.is-boundary::after {
+  left: 0;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre .lfd-seg.is-boundary::before {
+  left: -2px;
+  top: -5px;
+  bottom: -3px;
+  width: 1px;
+}
+
+/* Numerals at the Danger Zone and the cap, where the hand would stand at that heat */
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre .lfd-seg > b {
+  position: absolute;
+  right: 0;
+  top: 11px;
+  translate: 50% 0;
+  font: var(--ssc-numerals);
+  font-size: 10px;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre .lfd-seg:last-child > b {
+  translate: 0 0;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre .lfd-seg.is-dz > b {
+  color: color-mix(in srgb, var(--lfd-heat-danger) 70%, var(--lfd-ink-dim));
+}
+
+/* The hand: a slender pointer over the track at the current heat */
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-hand {
+  position: absolute;
+  left: var(--at, 0%);
+  top: -10px;
+  z-index: 1;
+  width: 11px;
+  height: 21px;
+  translate: -50% 0;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--ssc-gold-hi), var(--ssc-gold-hi)) center 7px / 1.5px 14px no-repeat,
+    conic-gradient(from 150deg at 50% 100%, var(--ssc-gold-hi) 0 60deg, transparent 0) center 0 / 11px 8px no-repeat;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.8));
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-heat.is-danger .lfd-ssc-hand {
+  background:
+    linear-gradient(var(--lfd-heat-danger), var(--lfd-heat-danger)) center 7px / 1.5px 14px no-repeat,
+    conic-gradient(from 150deg at 50% 100%, var(--lfd-heat-danger) 0 60deg, transparent 0) center 0 / 11px 8px no-repeat;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-calibre .lfd-heat-continuous {
+  height: 8px;
+  border: none;
+  border-radius: 1px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-dz-label {
+  margin-top: 12px;
+  font: italic 400 11.5px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+/* The jewels: one setting per rung on a fine chain; the next lit, the spent ones clouded */
+#lancer-flight-deck.lfd-theme-ssc .lfd-oc.lfd-ssc-setting {
+  margin-top: 3px;
+  padding: 5px 2px 0;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--ssc-hair);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-oc-label {
+  font: 600 12px/1.1 var(--lfd-font-display);
+  letter-spacing: 0.12em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-setting .lfd-oc-cost {
+  padding: 0;
+  background: none;
+  color: var(--ssc-gold-hi);
+  font: italic 600 19px/1 var(--lfd-font-display);
+  letter-spacing: 0.02em;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-setting .lfd-oc-ladder {
+  position: relative;
+  gap: 0;
+  margin-top: 5px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-setting .lfd-oc-ladder::before {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 7px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--ssc-gold-lo), var(--ssc-gold) 50%, var(--ssc-gold-lo));
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-setting .lfd-oc-ladder li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  font: 400 11px/1 var(--lfd-font-data);
+  text-decoration: none;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-jewel {
+  position: relative;
+  z-index: 1;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #15120d 0 4.2px, var(--ssc-gold-lo) 4.6px 5.4px, var(--ssc-gold) 5.8px 6.6px, #0a0907 7px);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-setting li.is-spent {
+  opacity: 0.55;
+  text-decoration: none;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-setting li.is-spent .lfd-ssc-jewel {
+  background: radial-gradient(circle, #3b3326 0 4.2px, var(--ssc-gold-lo) 4.6px 5.4px, #6d5524 5.8px 6.6px, #0a0907 7px);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-setting li.is-current {
+  font-weight: 700;
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-setting li.is-current .lfd-ssc-jewel {
+  background:
+    radial-gradient(circle at 38% 32%, #fff 0 0.9px, transparent 1.6px),
+    radial-gradient(circle, var(--ssc-gold-hi) 0 2px, var(--ssc-gold) 3.2px, #a77d2c 4.6px, var(--ssc-gold-hi) 5px 5.8px, var(--ssc-gold) 6.2px 6.8px, #0a0907 7.1px);
+  box-shadow: 0 0 9px rgb(244 220 156 / 0.55);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-setting .lfd-oc-odds {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+/* --------------------------------------------------------------------------
+   Integrity: two sub-dials
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 0 2px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-registers .lfd-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-registers .lfd-track + .lfd-track {
+  margin-top: 0;
+}
+
+/* A sunburst dial in a gold bezel, with a minute track */
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-dial {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin-top: 3px;
+  border-radius: 50%;
+  background:
+    repeating-conic-gradient(from 0deg, rgb(240 210 150 / 0.06) 0 1.2deg, transparent 1.2deg 6deg),
+    radial-gradient(circle at 50% 38%, #1d1912, #0b0a07 72%);
+  box-shadow:
+    0 0 0 1px var(--ssc-gold-lo),
+    0 0 0 3px var(--lfd-plate),
+    0 0 0 4px var(--ssc-hair),
+    inset 0 2px 7px rgb(0 0 0 / 0.75);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-dial::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from -0.4deg, rgb(217 180 92 / 0.55) 0 0.8deg, transparent 0.8deg 6deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 26px, #000 26.5px);
+  mask: radial-gradient(circle, transparent 0 26px, #000 26.5px);
+  pointer-events: none;
+}
+
+/* Each box an applied index around the dial: gold while it holds, hollow red once lost */
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-dial .lfd-pips {
+  position: absolute;
+  inset: 0;
+  display: block;
+  flex: none;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-dial .lfd-pip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 10px;
+  margin: -5px 0 0 -2px;
+  clip-path: none;
+  border-radius: 1px;
+  transform: rotate(calc(var(--i) * 360deg / var(--n))) translateY(-19px);
+  background: linear-gradient(90deg, var(--ssc-gold-hi), var(--ssc-gold) 50%, var(--ssc-gold-lo));
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.7);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-dial .lfd-pip.is-lost {
+  background: color-mix(in srgb, var(--lfd-warning) 22%, transparent);
+  box-shadow: inset 0 0 0 1px var(--lfd-warning), 0 0 5px color-mix(in srgb, var(--lfd-warning) 45%, transparent);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-dial .lfd-readout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-dial .lfd-readout small {
+  font: inherit;
+  font-size: 11px;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-registers .lfd-track-label {
+  width: auto;
+  margin-top: 2px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+  color: var(--ssc-gold);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-registers .lfd-odds {
+  width: 100%;
+  margin-top: 1px;
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-registers .lfd-odds-bar {
+  height: 3px;
+  border-radius: 2px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-registers .lfd-odds-head {
+  flex-wrap: wrap;
+  gap: 0 6px;
+  margin: 4px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-ssc-registers .lfd-odds-final {
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-odds-alt {
+  border-radius: 1px;
+  font-family: var(--lfd-font-data);
+  font-size: 7.5px;
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Annunciator and actions (base layout, atelier finish)
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-apply-seg {
+  background: none;
+  border-color: var(--ssc-hair);
+  border-radius: 1px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-tile,
+#lancer-flight-deck.lfd-theme-ssc button.lfd-tile {
+  border-radius: 1px;
+  font-family: var(--lfd-font-data);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+/* Action lamps: cabochons in gold bezels */
+#lancer-flight-deck.lfd-theme-ssc .lfd-light {
+  border-color: var(--lfd-edge);
+  border-radius: 1px;
+  background: linear-gradient(180deg, #14120d, var(--lfd-well-2));
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-light-lamp {
+  width: 10px;
+  height: 10px;
+  box-shadow: 0 0 0 1.5px var(--ssc-gold-lo), 0 0 0 2.5px #050403, inset 0 0 2px #000;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-light.is-on .lfd-light-lamp {
+  background: radial-gradient(circle at 38% 32%, #f2fff6 0 1px, var(--lfd-ok) 2.4px, #1d6a3c);
+  box-shadow: 0 0 0 1.5px var(--ssc-gold), 0 0 0 2.5px #050403, 0 0 8px color-mix(in srgb, var(--lfd-ok) 65%, transparent);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-light-core.is-on .lfd-light-lamp {
+  background: radial-gradient(circle at 38% 32%, #fff 0 1px, var(--ssc-gold-hi) 2.4px, #a77d2c);
+  box-shadow: 0 0 0 1.5px var(--ssc-gold), 0 0 0 2.5px #050403, 0 0 9px rgb(244 220 156 / 0.7);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-light-label {
+  font-family: var(--lfd-font-data);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-light-detail {
+  font: var(--ssc-numerals);
+  font-size: 10.5px;
+}
+
+/* Push-buttons are engraved plaques with the same double frame */
+#lancer-flight-deck.lfd-theme-ssc .lfd-btn {
+  border-color: var(--lfd-line);
+  border-bottom: 1px solid var(--lfd-line);
+  border-radius: 1px;
+  background: linear-gradient(180deg, #1d1a14, #12100c);
+  box-shadow: inset 0 0 0 2px #15130e, inset 0 0 0 3px rgb(217 180 92 / 0.18);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-btn span {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-btn small {
+  font: italic 400 11px/1.2 var(--lfd-font-display);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-btn:hover:not(:disabled) {
+  border-color: var(--ssc-gold);
+  background: linear-gradient(180deg, #2a2418, #17140f);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-btn-core:not(:disabled) {
+  border-bottom-color: var(--ssc-gold);
+  box-shadow: inset 0 0 0 2px #15130e, inset 0 0 0 3px rgb(217 180 92 / 0.32), inset 0 -3px 0 rgb(217 180 92 / 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   Cold boot: guilloché turning behind FULL SYNC
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot {
+  background:
+    radial-gradient(130% 75% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.6)),
+    #070605;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-stream {
+  font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Consolas, "Liberation Mono", monospace;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-finish {
+  overflow: hidden;
+}
+
+/* Two fine rosettes turning against each other: the moiré is the guilloché */
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-finish::before,
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-finish::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 560px;
+  height: 560px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, rgb(217 180 92 / 0.2) 0 0.45deg, transparent 0.45deg 3deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 18%, #000 30% 42%, transparent 64%);
+  mask: radial-gradient(circle, transparent 0 18%, #000 30% 42%, transparent 64%);
+  opacity: 0;
+  transition: opacity 320ms ease;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-finish::after {
+  translate: -46% -50%;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot.is-finish .lfd-boot-finish::before {
+  opacity: 1;
+  animation: lfd-ssc-turn 22s linear infinite;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot.is-finish .lfd-boot-finish::after {
+  opacity: 0.8;
+  animation: lfd-ssc-turn 28s linear infinite reverse;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot.is-still .lfd-boot-finish::before,
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot.is-still .lfd-boot-finish::after {
+  animation: none;
+}
+
+@keyframes lfd-ssc-turn {
+  to { rotate: 1turn; }
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-frame {
+  background: radial-gradient(closest-side, rgb(7 6 5 / 0.9), rgb(7 6 5 / 0.65) 70%, transparent);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-corner {
+  border-width: 1px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-caption {
+  font: italic 400 14px/1.1 var(--lfd-font-display);
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--ssc-gold);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-title {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--ssc-gold-hi);
+  text-shadow: 0 0 16px rgb(217 180 92 / 0.45);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-bar i {
+  height: 2px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-badge,
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-stamp {
+  border-radius: 1px;
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-boot-meta {
+  font-family: var(--lfd-font-data);
+}
+
+/* --------------------------------------------------------------------------
+   HUD menus: lacquer glass in a double frame, octagonal gem-cut glyphs
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck-hud.lfd-hud.lfd-theme-ssc {
+  --hud-hex: polygon(29% 0, 71% 0, 100% 29%, 100% 71%, 71% 100%, 29% 100%, 0 71%, 0 29%);
+  border-radius: 2px;
+}
+
+#lancer-flight-deck-hud.lfd-hud.lfd-theme-ssc::before {
+  inset: 3px;
+  background: none;
+  border: 1px solid var(--ssc-hair);
+  border-radius: 1px;
+}
+
+#lancer-flight-deck-hud.lfd-theme-ssc .lfd-hud-frame::before {
+  background: repeating-radial-gradient(circle at 50% -40%, rgb(230 200 140 / 0.025) 0 1px, transparent 1px 4px);
+}
+
+#lancer-flight-deck-hud.lfd-theme-ssc .lfd-hud-tiles .lfd-hud-glyph {
+  width: 27px;
+  height: 27px;
+}
+
+#lancer-flight-deck-hud.lfd-theme-ssc .lfd-hud-rows .lfd-hud-glyph {
+  width: 21px;
+  height: 21px;
+}
+
+#lancer-flight-deck-hud.lfd-theme-ssc .lfd-hud-tiles .lfd-hud-item {
+  border-radius: 1px;
+}
+
+#lancer-flight-deck-hud.lfd-theme-ssc .lfd-hud-tiles .lfd-hud-label {
+  font-family: var(--lfd-font-data);
+  font-size: 7.6px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+#lancer-flight-deck-hud.lfd-theme-ssc .lfd-hud-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+}
+
+/* --------------------------------------------------------------------------
+   Hover cards and the theme picker
+   -------------------------------------------------------------------------- */
+
+#tooltip.lfd-hud-tip.lfd-theme-ssc {
+  border-left-width: 1px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 2px var(--lfd-bg), inset 0 0 0 3px rgb(217 180 92 / 0.18), 0 8px 24px rgb(0 0 0 / 0.5);
+}
+
+#tooltip.lfd-hud-tip.lfd-theme-ssc .lfd-tip {
+  font-family: var(--lfd-font-data);
+}
+
+#tooltip.lfd-hud-tip.lfd-theme-ssc .lfd-tip header strong {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+}
+
+#lancer-flight-deck-themes.lfd-theme-menu.lfd-theme-ssc {
+  border-top-width: 1px;
+  border-radius: 2px;
+}
+
+.lfd-theme-chip.lfd-theme-ssc {
+  color: var(--ssc-gold-hi);
+  background: radial-gradient(circle at 50% 30%, #2a2418, #0c0b09);
+  box-shadow: inset 0 0 0 1px var(--ssc-gold), inset 0 0 0 3px #0c0b09, inset 0 0 0 3.6px var(--ssc-hair);
+  letter-spacing: 0.22em;
+}
+
+/* --------------------------------------------------------------------------
+   NPC Deck: the same finish, gem-cut portraits
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck-npc.lfd-theme-ssc .lfd-npc-frame {
+  border-top-width: 1px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 2px var(--lfd-plate), inset 0 0 0 3px var(--ssc-hair);
+}
+
+#lancer-flight-deck-npc.lfd-theme-ssc .lfd-npc-badge {
+  clip-path: polygon(29% 0, 71% 0, 100% 29%, 100% 71%, 71% 100%, 29% 100%, 0 71%, 0 29%);
+}
+
+#lancer-flight-deck-npc.lfd-theme-ssc :is(.lfd-init-portrait, .lfd-init-portrait img, .lfd-init-glyph) {
+  clip-path: polygon(29% 0, 71% 0, 100% 29%, 100% 71%, 71% 100%, 29% 100%, 0 71%, 0 29%);
+}
+
+#lancer-flight-deck-npc.lfd-theme-ssc .lfd-npc-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: none;
+  font-variant-caps: all-small-caps;
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ssc.lfd-reduce-motion .lfd-ssc-seal svg {
+  transition: none;
+}
+
+#lancer-flight-deck.lfd-theme-ssc.lfd-reduce-motion .lfd-datalink.is-jammed .lfd-ssc-gem {
+  animation: none;
 }

@@ -61,4 +61,14 @@ export class BaseTheme {
   static registry(_t) {
     return null;
   }
+
+  /**
+   * A stable 32-bit hash of the mech (FNV-1a over its uuid), for cosmetic serials.
+   * @param {object} t  Telemetry snapshot
+   */
+  static hash(t) {
+    let h = 0x811c9dc5;
+    for (const ch of String(t?.uuid ?? t?.name ?? "")) h = Math.imul(h ^ ch.charCodeAt(0), 0x01000193) >>> 0;
+    return h;
+  }
 }

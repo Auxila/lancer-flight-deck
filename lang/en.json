@@ -11,7 +11,8 @@
       "HA": "HA: Harrison Armory",
       "Tagline": {
         "GMS": "Union standard issue: red on gunmetal",
-        "IPSN": "A ship's bridge: riveted plate, signal flags, a telegraph"
+        "IPSN": "A ship's bridge: riveted plate, signal flags, a telegraph",
+        "SSC": "An atelier chronometer: lacquer, gold leaf, sub-dials"
       }
     },
     "Settings": {
@@ -913,6 +914,15 @@
       "AutoDetail": "{frame}: {badge}",
       "AutoNone": "No mech linked: {badge}",
       "Footer": "Hover: preview · Click: choose · Esc: close"
+    },
+    "SSC": {
+      "House": "Smith-Shimano",
+      "Commission": "Nº {id}",
+      "Boot": {
+        "Caption": "You only need one",
+        "Title": "Full sync",
+        "Stamp": "Bespoke"
+      }
     },
     "IPSN": {
       "Hull": "Hull {id}",

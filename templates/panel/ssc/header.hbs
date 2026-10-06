@@ -1,0 +1,86 @@
+{{!-- SSC: the maker's label. The SSC seal opens the theme picker; over the mech's name, the house and its
+      commission number (cosmetic, stable per mech); under it, the frame. Names keep the owner's own case. --}}
+<header class="lfd-header lfd-plate lfd-ssc-label">
+  <button type="button" class="lfd-tab" data-action="toggleCollapse" data-tooltip="LFD.Header.Expand" aria-label="{{localize 'LFD.Header.Expand'}}">
+    <span class="lfd-tab-badge lfd-ssc-tab-seal" aria-hidden="true">
+      <svg viewBox="-16 -16 32 32" focusable="false">
+        <g transform="rotate(0)"><path class="lfd-petal-l" d="M0 -2.6C-2.6 -4.6 -5.5 -8.6 -4.7 -14.2L0 -11.3Z"/><path class="lfd-petal-r" d="M0 -2.6C2.6 -4.6 5.5 -8.6 4.7 -14.2L0 -11.3Z"/></g>
+        <g transform="rotate(60)"><path class="lfd-petal-l" d="M0 -2.6C-2.6 -4.6 -5.5 -8.6 -4.7 -14.2L0 -11.3Z"/><path class="lfd-petal-r" d="M0 -2.6C2.6 -4.6 5.5 -8.6 4.7 -14.2L0 -11.3Z"/></g>
+        <g transform="rotate(120)"><path class="lfd-petal-l" d="M0 -2.6C-2.6 -4.6 -5.5 -8.6 -4.7 -14.2L0 -11.3Z"/><path class="lfd-petal-r" d="M0 -2.6C2.6 -4.6 5.5 -8.6 4.7 -14.2L0 -11.3Z"/></g>
+        <g transform="rotate(180)"><path class="lfd-petal-l" d="M0 -2.6C-2.6 -4.6 -5.5 -8.6 -4.7 -14.2L0 -11.3Z"/><path class="lfd-petal-r" d="M0 -2.6C2.6 -4.6 5.5 -8.6 4.7 -14.2L0 -11.3Z"/></g>
+        <g transform="rotate(240)"><path class="lfd-petal-l" d="M0 -2.6C-2.6 -4.6 -5.5 -8.6 -4.7 -14.2L0 -11.3Z"/><path class="lfd-petal-r" d="M0 -2.6C2.6 -4.6 5.5 -8.6 4.7 -14.2L0 -11.3Z"/></g>
+        <g transform="rotate(300)"><path class="lfd-petal-l" d="M0 -2.6C-2.6 -4.6 -5.5 -8.6 -4.7 -14.2L0 -11.3Z"/><path class="lfd-petal-r" d="M0 -2.6C2.6 -4.6 5.5 -8.6 4.7 -14.2L0 -11.3Z"/></g>
+        <circle class="lfd-petal-core" r="1.7"/>
+      </svg>
+    </span>
+    <span class="lfd-tab-title">{{localize "LFD.Title"}}</span>
+    {{#unless standby}}
+    <span class="lfd-tab-mini {{#if header.mini.danger}}is-danger{{/if}}" aria-hidden="true">
+      <i class="mdi mdi-fire"></i>{{header.mini.heat}}
+    </span>
+    <span class="lfd-tab-mini" aria-hidden="true"><i class="mdi mdi-hexagon-multiple"></i>{{header.mini.structure}}</span>
+    {{#if header.alertWarning}}<span class="lfd-tab-alert lfd-k-warning" style="animation-delay:{{header.warningDelay}}ms" aria-hidden="true">▲</span>
+    {{else if header.alertCaution}}<span class="lfd-tab-alert lfd-k-caution" style="animation-delay:{{header.cautionDelay}}ms" aria-hidden="true">◆</span>{{/if}}
+    {{/unless}}
+  </button>
+
+  <div class="lfd-header-main">
+    <span class="lfd-drag-grip" data-tooltip="LFD.Move.Hint" aria-hidden="true"><i class="fa-solid fa-grip-vertical"></i></span>
+    <button type="button" class="lfd-badge lfd-ssc-seal" data-action="themeMenu" data-tooltip="{{themeTip}}" aria-label="{{themeTip}}"
+            aria-haspopup="menu" aria-expanded="false">
+      <svg viewBox="-16 -16 32 32" aria-hidden="true" focusable="false">
+        <g class="lfd-ssc-seal-bloom">
+          <g transform="rotate(0)"><path class="lfd-petal-l" d="M0 -2.6C-2.6 -4.6 -5.5 -8.6 -4.7 -14.2L0 -11.3Z"/><path class="lfd-petal-r" d="M0 -2.6C2.6 -4.6 5.5 -8.6 4.7 -14.2L0 -11.3Z"/></g>
+          <g transform="rotate(60)"><path class="lfd-petal-l" d="M0 -2.6C-2.6 -4.6 -5.5 -8.6 -4.7 -14.2L0 -11.3Z"/><path class="lfd-petal-r" d="M0 -2.6C2.6 -4.6 5.5 -8.6 4.7 -14.2L0 -11.3Z"/></g>
+          <g transform="rotate(120)"><path class="lfd-petal-l" d="M0 -2.6C-2.6 -4.6 -5.5 -8.6 -4.7 -14.2L0 -11.3Z"/><path class="lfd-petal-r" d="M0 -2.6C2.6 -4.6 5.5 -8.6 4.7 -14.2L0 -11.3Z"/></g>
+          <g transform="rotate(180)"><path class="lfd-petal-l" d="M0 -2.6C-2.6 -4.6 -5.5 -8.6 -4.7 -14.2L0 -11.3Z"/><path class="lfd-petal-r" d="M0 -2.6C2.6 -4.6 5.5 -8.6 4.7 -14.2L0 -11.3Z"/></g>
+          <g transform="rotate(240)"><path class="lfd-petal-l" d="M0 -2.6C-2.6 -4.6 -5.5 -8.6 -4.7 -14.2L0 -11.3Z"/><path class="lfd-petal-r" d="M0 -2.6C2.6 -4.6 5.5 -8.6 4.7 -14.2L0 -11.3Z"/></g>
+          <g transform="rotate(300)"><path class="lfd-petal-l" d="M0 -2.6C-2.6 -4.6 -5.5 -8.6 -4.7 -14.2L0 -11.3Z"/><path class="lfd-petal-r" d="M0 -2.6C2.6 -4.6 5.5 -8.6 4.7 -14.2L0 -11.3Z"/></g>
+          <circle class="lfd-petal-core" r="1.7"/>
+        </g>
+      </svg>
+    </button>
+    <div class="lfd-ident">
+      {{#if standby}}
+      <div class="lfd-ssc-house"><b>{{localize "LFD.SSC.House"}}</b></div>
+      <div class="lfd-mech-name">{{localize "LFD.Header.Standby"}}</div>
+      <div class="lfd-frame-name">{{localize "LFD.Header.StandbyHint"}}</div>
+      {{else}}
+      <div class="lfd-ssc-house">
+        <b>{{localize "LFD.SSC.House"}}</b>{{#if header.registry}}<span>{{localize "LFD.SSC.Commission" id=header.registry}}</span>{{/if}}
+      </div>
+      <button type="button" class="lfd-mech-name" data-action="openSheet" data-tooltip="LFD.Header.OpenSheet">{{header.mechName}}</button>
+      <div class="lfd-frame-name">{{header.frameName}}</div>
+      {{/if}}
+    </div>
+    <div class="lfd-header-controls">
+      {{#if header.floating}}
+      <button type="button" class="lfd-icon-btn" data-action="dock" data-tooltip="LFD.Move.Dock" aria-label="{{localize 'LFD.Move.Dock'}}">
+        <i class="fa-solid fa-thumbtack"></i>
+      </button>
+      {{/if}}
+      <button type="button" class="lfd-icon-btn" data-action="toggleMute"
+              data-tooltip="{{#if header.muted}}LFD.Header.Unmute{{else}}LFD.Header.Mute{{/if}}"
+              aria-label="{{#if header.muted}}{{localize 'LFD.Header.Unmute'}}{{else}}{{localize 'LFD.Header.Mute'}}{{/if}}"
+              aria-pressed="{{#if header.muted}}true{{else}}false{{/if}}">
+        <i class="fa-solid {{#if header.muted}}fa-volume-xmark{{else}}fa-volume-low{{/if}}"></i>
+      </button>
+      <button type="button" class="lfd-icon-btn" data-action="hidePanel" data-tooltip="LFD.Header.Hide" aria-label="{{localize 'LFD.Header.Hide'}}">
+        <i class="fa-solid fa-eye-slash"></i>
+      </button>
+      <button type="button" class="lfd-icon-btn" data-action="toggleCollapse" data-tooltip="LFD.Header.Collapse" aria-label="{{localize 'LFD.Header.Collapse'}}">
+        <i class="fa-solid fa-angles-left lfd-collapse-icon"></i>
+      </button>
+    </div>
+  </div>
+
+  {{#unless standby}}
+  <div class="lfd-datalink {{#if header.jammed}}is-jammed{{/if}}">
+    <span class="lfd-ssc-gem" aria-hidden="true"></span>
+    <span class="lfd-datalink-label">{{localize "LFD.Header.Pilot"}}</span>
+    <span class="lfd-datalink-callsign">{{header.callsign}}</span>
+    {{#if header.activation}}<span class="lfd-activation">{{localize "LFD.Header.Activation"}}</span>{{/if}}
+    <span class="lfd-datalink-status">{{#if header.jammed}}{{localize "LFD.Header.LinkJammed"}}{{else}}{{localize "LFD.Header.LinkOk"}}{{/if}}</span>
+  </div>
+  {{/unless}}
+</header>

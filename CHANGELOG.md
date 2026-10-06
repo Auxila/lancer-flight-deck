@@ -14,10 +14,18 @@
 - HUD menus (round glyphs, radiused glass), hover cards, the NPC Deck (porthole portraits) and the collapsed tab (the rose on top) follow. Cold boot: a sonar sweep behind *Your friend in an unfriendly sea*, BATTLE STATIONS, ALL HANDS.
 - Warning, caution and Heat colours are the same as GMS's, and every number, control and alert is where it always is.
 
+**SSC: an atelier chronometer**
+- Its own header, hull, reactor and integrity, and an atelier finish on everything else: black lacquer engraved with guilloché in a double gold hairline frame, serif small caps (Sitka on Windows, Didot or Baskerville on macOS) over light watch numerals, cabochon lamps, engraved plaques for buttons.
+- **Maker's label:** the SSC seal opens the picker and blooms as you reach for it; over the name, Smith-Shimano and a commission number (Nº 4277; cosmetic, the same for a mech every session); the name in its owner's own case, the frame in italics.
+- **Hull:** HP is a wingspan, spreading from the body out to both tips and folding back in as it falls; armor as set stones; the stats in light numerals between hairlines.
+- **Reactor:** a calibrated scale with a hand at the current heat, the Danger Zone engraved over its stretch with numerals at the threshold and the cap. The Overcharge ladder is a row of jewels on a fine chain: the next cost lit, spent ones clouded.
+- **Integrity:** two sunburst sub-dials, structure and stress. Each box is an applied index, gold while it holds and hollow red once lost; the count in the centre, the odds below.
+- HUD glyphs and NPC Deck portraits are gem-cut octagons; hover cards and the picker follow. The UI gold is a pale champagne, kept to hairlines and type, so amber still means a lit caution. Cold boot: two guilloché rosettes turning against each other behind *You only need one*, FULL SYNC, BESPOKE.
+
 **Under the hood**
 - Theme colours are tokens all the way down (wells, edges, unlit lamps), so every surface follows the maker.
 - Themes can bring their own templates per part, finish-card text and a header serial; `tests/themes.test.js` checks the maker mapping, the override, and that a theme's templates keep every hook of the parts they replace. `npm run smoke` gains a picker step.
-- SSC, HORUS and HA have first-pass palettes in the repo, unregistered until they're finished.
+- HORUS and HA have first-pass palettes in the repo, unregistered until they're finished.
 
 ## 0.7.0
 

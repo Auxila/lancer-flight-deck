@@ -360,8 +360,10 @@ including LCP manufacturers, use GMS.
 | **GMS** | Union standard issue: red on gunmetal, chamfered plates, hazard striping. The baseline layout. |
 | **IPS-N** | A ship's bridge. A nameboard with the Northstar rose (it turns when you reach for it), a hull number and the frame as a vessel class; riveted plating with rounded hatch corners and signal flags on the sections. HP is hull plating marked at every hit point. The Danger Zone threshold is a load line with its Plimsoll mark, the Overcharge ladder an engine order telegraph pointing at the next cost, and integrity a damage control board: structure as watertight compartments that flood, stress as valve wheels that blow. Cold boot: a sonar sweep, then BATTLE STATIONS. |
 
+| **SSC** | An atelier chronometer. Black lacquer engraved with guilloché, gold hairlines and serif small caps; a maker's label with the SSC seal (it blooms when you reach for it), the house and a commission number, the mech's name as its owner wrote it. HP is a wingspan, spreading from the body to both tips; heat a calibrated scale with a hand; the Overcharge ladder a row of set jewels, the next one lit; integrity two watch sub-dials whose indices go hollow red as boxes are lost. Cold boot: guilloché turning behind *You only need one*, FULL SYNC, BESPOKE. |
+
 Every theme shows the same numbers, odds, controls and warnings in the same places; warning, caution and
-Heat colours never change between themes. SSC, HORUS and HA are next.
+Heat colours never change between themes. HORUS and HA are next.
 
 ## Controls and settings
 
@@ -414,7 +416,7 @@ src/
     Odds.js                    exact check/overcharge maths (pure, Node-testable)
   themes/
     BaseTheme.js, registry.js   the theme contract; maker -> theme, the player's override
-    GMSTheme.js, IPSNTheme.js   one per manufacturer
+    GMSTheme.js, IPSNTheme.js, SSCTheme.js   one per manufacturer
   actions/
     basic.js                   LANCER's basic actions: menu, icon, slot, how each runs
     catalog.js                 every action from equipped gear, weapons, hover cards
@@ -438,6 +440,7 @@ src/
     components/*.js            view models per section
 templates/panel/*.hbs          one Handlebars part per section
 templates/panel/ipsn/*.hbs     IPS-N's own header, hull, heat and integrity layouts
+templates/panel/ssc/*.hbs      SSC's own header, hull, heat and integrity layouts
 templates/panel/theme-menu.hbs the theme picker
 templates/hud/menu.hbs         every HUD menu
 styles/flight-deck-base.css    layout, instruments, effects
@@ -447,6 +450,7 @@ styles/npc.css                 the NPC Deck
 templates/npc/deck.hbs         the NPC Deck
 styles/themes/gms.css          GMS palette and ornaments
 styles/themes/ipsn.css         IPS-N: palette, type, hardware, its layouts
+styles/themes/ssc.css          SSC: the same
 ```
 
 Each section is an ApplicationV2 part, and only the parts whose data changed re-render.
@@ -456,7 +460,7 @@ Each section is an ApplicationV2 part, and only the parts whose data changed re-
 1. Subclass `BaseTheme` with `id`, `label`, `tagline` (the picker's one-liner), `badge`, `manufacturers` (frame manufacturer codes, for example `["HA"]`), `audio` and `bootLines()`. Optionally `boot` (i18n keys for the boot's finish card) and `registry(t)` (a cosmetic serial for the header, stable per mech).
 2. Add `styles/themes/<id>.css` that sets the `--lfd-*` variables on `#lancer-flight-deck.lfd-theme-<id>, .lfd-themed.lfd-theme-<id>`, then list it in `module.json` (Foundry reads that list when the server starts).
 3. Register it in `themes/registry.js`, or from another module with `api.registerTheme(MyTheme)`. Its `bootLines()` lead the cold boot's terminal stream, and `audio.boot` tunes the ENGAGED chime.
-4. Optionally bring your own layout per part with `static templates = { heat: "..." }` (IPS-N replaces four). A theme's template must keep every action, field, data hook and class of the base part; `tests/themes.test.js` checks.
+4. Optionally bring your own layout per part with `static templates = { heat: "..." }` (IPS-N and SSC replace four each). A theme's template must keep every action, field, data hook and class of the base part; `tests/themes.test.js` checks.
 
 Frames whose manufacturer has no theme use GMS.
 

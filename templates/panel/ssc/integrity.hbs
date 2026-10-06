@@ -1,0 +1,38 @@
+{{!-- SSC integrity: two sub-dials, like a chronograph's registers. Each box is an applied index around the
+      dial (gold while it holds, red once lost); the count sits in the centre, the next check's odds below. --}}
+<section class="lfd-integrity lfd-plate lfd-body lfd-ssc-registers" aria-label="{{localize 'LFD.Integrity.Title'}}">
+  {{#unless standby}}
+  <div class="lfd-section-title">
+    <span>{{localize "LFD.Integrity.Title"}}</span>
+    {{#if integrity.altRules}}<span class="lfd-odds-alt" data-tooltip="LFD.Integrity.AltRulesTip">{{localize "LFD.Integrity.AltRules"}}</span>{{/if}}
+  </div>
+  <div class="lfd-ssc-board">
+    {{#each integrity.tracks}}
+    <div class="lfd-track lfd-state-{{state}}" data-track="{{kind}}">
+      <div class="lfd-ssc-dial">
+        <span class="lfd-pips" role="img" aria-label="{{localize label}} {{value}}/{{max}}" style="--n:{{max}}">
+          {{#each pips}}<span class="lfd-pip {{#if intact}}is-intact{{else}}is-lost{{/if}}" style="--i:{{@index}}"></span>{{/each}}
+        </span>
+        <span class="lfd-readout">{{value}}<small>/{{max}}</small></span>
+      </div>
+      <span class="lfd-track-label">{{localize label}}</span>
+      {{#if segments}}
+      <div class="lfd-odds" data-tooltip-html="{{tooltip}}" data-tooltip-class="{{@root.tipClass}}" {{#if @root.tipDirection}}data-tooltip-direction="{{@root.tipDirection}}"{{/if}}>
+        <div class="lfd-odds-bar">
+          {{#each segments}}<span class="lfd-band lfd-band-{{kind}} {{#if check}}is-check{{/if}}" style="flex-basis:{{width}}%"></span>{{/each}}
+        </div>
+        <div class="lfd-odds-head">
+          <span>{{localize "LFD.Integrity.NextCheck" dice=dice}}</span>
+          <span class="lfd-odds-loss {{#if lossOnCheck}}is-check{{/if}}">{{loss}}</span>
+        </div>
+      </div>
+      {{else if headline}}
+      <div class="lfd-odds lfd-odds-final" {{#if tooltip}}data-tooltip-html="{{tooltip}}" data-tooltip-class="{{@root.tipClass}}" {{#if @root.tipDirection}}data-tooltip-direction="{{@root.tipDirection}}"{{/if}}{{/if}}>
+        <span class="lfd-k-warning">{{headline}}</span>
+      </div>
+      {{/if}}
+    </div>
+    {{/each}}
+  </div>
+  {{/unless}}
+</section>

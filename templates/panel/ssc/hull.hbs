@@ -1,0 +1,49 @@
+{{!-- SSC hull: HP as a wingspan, spreading from the body to both tips and folding in as it falls;
+      armor as set stones. --}}
+<section class="lfd-hull lfd-plate lfd-body" aria-label="{{localize 'LFD.Hull.Title'}}">
+  {{#unless standby}}
+  <div class="lfd-section-title">
+    <span>{{localize "LFD.Hull.Title"}}</span>
+    <div class="lfd-editor {{#if hull.hp.low}}is-low{{/if}} {{#if hull.hp.negative}}is-negative{{/if}}" role="group" aria-label="{{localize 'LFD.Hull.HP'}}">
+      <button type="button" class="lfd-step" data-action="adjust" data-resource="hp" data-delta="-5" {{#unless hull.editable}}disabled{{/unless}} aria-label="{{localize 'LFD.Edit.Minus' n=5}}">−5</button>
+      <button type="button" class="lfd-step" data-action="adjust" data-resource="hp" data-delta="-1" {{#unless hull.editable}}disabled{{/unless}} aria-label="{{localize 'LFD.Edit.Minus' n=1}}">−1</button>
+      <span class="lfd-editor-value">
+        <input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" data-resource="hp"
+               value="{{hull.hp.value}}" {{#unless hull.editable}}disabled{{/unless}}
+               aria-label="{{localize 'LFD.Hull.HP'}}" data-tooltip="LFD.Edit.Hint">
+        <small>/{{hull.hp.max}}</small>
+      </span>
+      <button type="button" class="lfd-step" data-action="adjust" data-resource="hp" data-delta="1" {{#unless hull.editable}}disabled{{/unless}} aria-label="{{localize 'LFD.Edit.Plus' n=1}}">+1</button>
+      <button type="button" class="lfd-step" data-action="adjust" data-resource="hp" data-delta="5" {{#unless hull.editable}}disabled{{/unless}} aria-label="{{localize 'LFD.Edit.Plus' n=5}}">+5</button>
+    </div>
+  </div>
+  <div class="lfd-hp-bar lfd-ssc-wings" role="meter" aria-valuemin="0" aria-valuemax="{{hull.hp.max}}" aria-valuenow="{{hull.hp.value}}"
+       aria-label="{{localize 'LFD.Hull.HP'}}" style="--lfd-hp-max:{{hull.hp.max}}">
+    <div class="lfd-hp-fill {{#if hull.hp.low}}is-low{{/if}}" style="width:{{hull.hp.pct}}%"></div>
+    {{#if hull.overshield}}<div class="lfd-os-fill" style="width:{{hull.osPct}}%"></div>{{/if}}
+    <i class="lfd-ssc-body" aria-hidden="true"></i>
+  </div>
+  <div class="lfd-hull-tags">
+    <span class="lfd-tag lfd-ssc-armor"><b>{{localize "LFD.Hull.Armor"}}</b><i class="lfd-ssc-stones" style="--n:{{hull.armor}}" aria-hidden="true"></i>{{hull.armor}}</span>
+    {{#if hull.overshield}}<span class="lfd-tag lfd-k-advisory"><b>{{localize "LFD.Hull.Overshield"}}</b> {{hull.overshield}}</span>{{/if}}
+    {{#if hull.burn}}<span class="lfd-tag lfd-k-caution"><b>{{localize "LFD.Hull.Burn"}}</b> {{hull.burn}}</span>{{/if}}
+  </div>
+  <dl class="lfd-stats">
+    {{#each hull.stats}}
+    <div class="lfd-stat"><dt>{{localize key}}</dt><dd>{{value}}</dd></div>
+    {{/each}}
+  </dl>
+  <div class="lfd-checks" role="group" aria-label="{{localize 'LFD.Check.Group'}}">
+    {{#each hull.checks}}
+    <button type="button" class="lfd-check lfd-check-{{id}}" data-action="rollCheck" data-check="{{id}}"
+            {{#unless ../hull.editable}}disabled{{/unless}}
+            data-tooltip-html="{{localize 'LFD.Check.Tip' name=(localize (concat 'LFD.Check.' key '.Name')) formula=formula use=(localize (concat 'LFD.Check.' key '.Use'))}}"
+            data-tooltip-class="{{@root.tipClass}}" {{#if @root.tipDirection}}data-tooltip-direction="{{@root.tipDirection}}"{{/if}}
+            aria-label="{{localize 'LFD.Check.Aria' name=(localize (concat 'LFD.Check.' key '.Name')) formula=formula}}">
+      <span class="lfd-check-name">{{localize (concat 'LFD.Check.' key '.Short')}}</span>
+      <span class="lfd-check-bonus">{{bonus}}</span>
+    </button>
+    {{/each}}
+  </div>
+  {{/unless}}
+</section>

@@ -49,7 +49,8 @@
     "styles/damage.css",
     "styles/npc.css",
     "styles/themes/gms.css",
-    "styles/themes/ipsn.css"
+    "styles/themes/ipsn.css",
+    "styles/themes/ssc.css"
   ],
   "languages": [
     {

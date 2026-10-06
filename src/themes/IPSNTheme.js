@@ -46,8 +46,7 @@ export class IPSNTheme extends BaseTheme {
 
   /** A hull number in the Trunk Security style (9A-38), hashed from the actor so it never changes. */
   static registry(t) {
-    let h = 0x811c9dc5;
-    for (const ch of String(t?.uuid ?? t?.name ?? "")) h = Math.imul(h ^ ch.charCodeAt(0), 0x01000193) >>> 0;
+    const h = this.hash(t);
     const letter = HULL_LETTERS[(h >>> 4) % HULL_LETTERS.length];
     return `${1 + (h % 9)}${letter}-${String((h >>> 9) % 100).padStart(2, "0")}`;
   }
