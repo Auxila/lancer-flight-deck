@@ -5,19 +5,25 @@ const REACH_X = 4.5;
 const REACH_Y = 2.6;
 /** Pointer distance (screen px) at which an eye looks fully aside; nearer, it turns proportionally less. */
 const FULL_AT = 160;
+/**
+ * Every eye on a HORUS cockpit: the structure eyes, the watchers that open in the static as stress runs
+ * low, and the great eye at the last point (src/ui/damage/styles/CorruptionDamage.js).
+ */
+const EYES = ".lfd-horus-structure .lfd-pip.is-intact, .lfd-cor-watcher, .lfd-cor-bigeye";
 
 /**
- * HORUS's structure eyes follow the pointer. A passive pointermove listener records where the pointer
- * is; one animation frame per move turns each open eye's iris toward it (CSS variables --lx/--ly on the
- * eye, eased by a short transition). While it follows, the root carries `lfd-horus-tracking`, which
- * stops the idle glance animation; a few still seconds later the class drops and the eyes look about on
- * their own again. Closed eyes (lost structure) don't move. Reduced motion: no following.
+ * HORUS's eyes follow the pointer. A passive pointermove listener records where the pointer is; one
+ * animation frame per move turns each eye's iris toward it (CSS variables --lx/--ly on the eye, eased by
+ * a short transition; each kind of eye scales them to its own size). The eyes are found afresh each
+ * frame, so watchers that open later join in. While they follow, the root carries `lfd-horus-tracking`,
+ * which stops the structure eyes' idle glance; a few still seconds later they look about on their own
+ * again. At the last stress point they don't: they keep staring where the pointer last was. Closed eyes
+ * (lost structure) don't move. Reduced motion: no following (checked each frame, since the setting can
+ * change without a render).
  */
 export class HorusEyes {
   /** @type {HTMLElement|null} */
   #root = null;
-  /** @type {HTMLElement[]} */
-  #eyes = [];
   #listening = false;
   #frame = 0;
   #idle = 0;
@@ -32,13 +38,13 @@ export class HorusEyes {
 
   #onLeave = () => this.#rest();
 
-  /** After every render: pick up the eyes that are open now (the parts are fresh elements). */
+  /** After every render, while HORUS is on screen. */
   mount(root) {
     if (this.#root && this.#root !== root) this.unmount();
-    const reduce = root.classList.contains("lfd-reduce-motion");
-    this.#eyes = reduce ? [] : [...root.querySelectorAll(".lfd-horus-structure .lfd-pip.is-intact")];
-    if (!this.#eyes.length) return this.unmount();
     this.#root = root;
+    if (root.classList.contains("lfd-reduce-motion")) this.#rest({ force: true });
+    // Eyes that open while the others are watching (a render, a new watcher) turn to look at once
+    if (root.classList.contains("lfd-horus-tracking") && !this.#frame) this.#frame = requestAnimationFrame(() => this.#aim());
     if (this.#listening) return;
     document.addEventListener("pointermove", this.#onMove, { passive: true });
     document.documentElement.addEventListener("pointerleave", this.#onLeave);
@@ -53,18 +59,20 @@ export class HorusEyes {
     }
     cancelAnimationFrame(this.#frame);
     this.#frame = 0;
-    this.#rest();
+    this.#rest({ force: true });
     this.#root = null;
-    this.#eyes = [];
   }
 
   #aim() {
     this.#frame = 0;
-    if (!this.#root?.isConnected) return this.unmount();
+    const root = this.#root;
+    if (!root?.isConnected) return this.unmount();
+    // Reduced motion can switch on without a render: the eyes stay front until it's off again
+    if (root.classList.contains("lfd-reduce-motion")) return this.#rest({ force: true });
     let looking = false;
-    for (const eye of this.#eyes) {
+    for (const eye of root.querySelectorAll(EYES)) {
       const r = eye.getBoundingClientRect();
-      if (!r.width) continue; // collapsed or scrolled away
+      if (!r.width) continue; // collapsed, scrolled away, or not open yet
       const dx = this.#x - (r.left + r.width / 2);
       const dy = this.#y - (r.top + r.height / 2);
       const d = Math.hypot(dx, dy) || 1;
@@ -74,17 +82,20 @@ export class HorusEyes {
       looking = true;
     }
     if (!looking) return;
-    this.#root.classList.add("lfd-horus-tracking");
+    root.classList.add("lfd-horus-tracking");
     clearTimeout(this.#idle);
     this.#idle = setTimeout(() => this.#rest(), IDLE_MS);
   }
 
-  /** Eyes front, and back to glancing about. */
-  #rest() {
+  /** Eyes front, and back to glancing about; at the last stress point they keep staring instead. */
+  #rest({ force = false } = {}) {
     clearTimeout(this.#idle);
     this.#idle = 0;
-    this.#root?.classList.remove("lfd-horus-tracking");
-    for (const eye of this.#eyes) {
+    const root = this.#root;
+    if (!root) return;
+    if (!force && root.classList.contains("lfd-stress-3")) return;
+    root.classList.remove("lfd-horus-tracking");
+    for (const eye of root.querySelectorAll(EYES)) {
       eye.style.removeProperty("--lx");
       eye.style.removeProperty("--ly");
     }
