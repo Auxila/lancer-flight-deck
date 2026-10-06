@@ -1102,3 +1102,413 @@
 #lancer-flight-deck.lfd-theme-ssc.lfd-reduce-motion .lfd-datalink.is-jammed .lfd-ssc-gem {
   animation: none;
 }
+
+/* ==========================================================================
+   Battle damage: kintsugi and moths (src/ui/damage/styles/KintsugiDamage.js)
+   ========================================================================== */
+
+#lancer-flight-deck .lfd-dmg-kintsugi .lfd-kin-svg {
+  inset: 0 auto auto 0;
+  z-index: 2;
+  overflow: visible;
+}
+
+#lancer-flight-deck .lfd-dmg-kintsugi .lfd-kin-fx > div {
+  position: absolute;
+  inset: auto;
+  width: 0;
+  height: 0;
+}
+
+#lancer-flight-deck .lfd-dmg-kintsugi .lfd-kin-fx { z-index: 5; }
+#lancer-flight-deck .lfd-dmg-kintsugi .lfd-kin-moths { z-index: 4; }
+#lancer-flight-deck .lfd-dmg-kintsugi .lfd-kin-flare { z-index: 3; inset: auto; }
+
+/* The seams: gold set into the break, soft-glowing, chips filled solid */
+#lancer-flight-deck .lfd-seam :is(.lfd-seam-crack, .lfd-seam-glow, .lfd-seam-gold, .lfd-seam-glint) {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#lancer-flight-deck .lfd-seam-crack {
+  stroke: rgb(255 252 240 / 0.95);
+  stroke-width: calc(var(--w, 1) * 0.7px);
+  opacity: 0;
+}
+
+#lancer-flight-deck .lfd-seam-glow {
+  stroke: rgb(244 205 110 / 0.18);
+  stroke-width: calc(var(--w, 1) * 4.2px);
+}
+
+#lancer-flight-deck .lfd-seam-gold {
+  stroke: #e7c46c;
+  stroke-width: calc(var(--w, 1) * 1.35px);
+  filter: drop-shadow(0 0 1px rgb(255 226 150 / 0.55));
+}
+
+#lancer-flight-deck .lfd-seam-chip {
+  fill: #e1bb60;
+  stroke: #f7e4a8;
+  stroke-width: 0.4;
+  filter: drop-shadow(0 0 1.5px rgb(255 220 140 / 0.5));
+}
+
+/* Now and then a glint runs the length of the gold */
+#lancer-flight-deck .lfd-seam-glint {
+  stroke: #fffaf0;
+  stroke-width: calc(var(--w, 1) * 1.7px);
+  stroke-dasharray: 0.045 1.2;
+  stroke-dashoffset: 0.05;
+  mix-blend-mode: screen;
+  animation: lfd-kin-glint 9s ease-in-out infinite;
+  animation-delay: var(--g, 0s);
+}
+
+@keyframes lfd-kin-glint {
+  0% { stroke-dashoffset: 0.05; opacity: 0; }
+  2% { opacity: 1; }
+  24% { opacity: 1; }
+  27%, 100% { stroke-dashoffset: -1.05; opacity: 0; }
+}
+
+/* Forming: the white hairline races in, the gold flows after it, molten, and sets */
+#lancer-flight-deck .lfd-seam.is-forming .lfd-seam-glint {
+  opacity: 0;
+  animation: none;
+}
+
+#lancer-flight-deck .lfd-seam.is-forming .lfd-seam-crack {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation:
+    lfd-crack-draw var(--dur) cubic-bezier(0.1, 0.7, 0.3, 1) calc(var(--t0, 0ms) + var(--delay)) forwards,
+    lfd-kin-hairline 2200ms ease-out calc(var(--t0, 0ms) + var(--delay)) both;
+}
+
+#lancer-flight-deck .lfd-seam.is-forming :is(.lfd-seam-gold, .lfd-seam-glow) {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation:
+    lfd-crack-draw var(--dur) cubic-bezier(0.35, 0.1, 0.4, 1) calc(var(--t0, 0ms) + var(--delay)) forwards,
+    lfd-kin-molten 1800ms ease-out calc(var(--t0, 0ms) + var(--delay)) both;
+}
+
+#lancer-flight-deck .lfd-seam.is-forming .lfd-seam-glow {
+  animation:
+    lfd-crack-draw var(--dur) cubic-bezier(0.35, 0.1, 0.4, 1) calc(var(--t0, 0ms) + var(--delay)) forwards,
+    lfd-kin-molten-glow 1800ms ease-out calc(var(--t0, 0ms) + var(--delay)) both;
+}
+
+#lancer-flight-deck .lfd-seam.is-forming .lfd-seam-chip {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lfd-kin-chip 700ms cubic-bezier(0.2, 1.4, 0.4, 1) calc(var(--t0, 0ms) + var(--delay)) both;
+}
+
+@keyframes lfd-kin-hairline {
+  0% { opacity: 1; }
+  45% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+@keyframes lfd-kin-molten {
+  0% { stroke: #fff6d8; filter: drop-shadow(0 0 3px rgb(255 214 120 / 0.95)); }
+  100% { stroke: #e7c46c; filter: drop-shadow(0 0 1px rgb(255 226 150 / 0.55)); }
+}
+
+@keyframes lfd-kin-molten-glow {
+  0% { stroke: rgb(255 214 120 / 0.55); }
+  100% { stroke: rgb(244 205 110 / 0.18); }
+}
+
+@keyframes lfd-kin-chip {
+  0% { opacity: 0; transform: scale(0.2); fill: #fff6d8; }
+  100% { opacity: 1; transform: scale(1); fill: #e1bb60; }
+}
+
+/* Repaired: one last bright polish, then the gold fades into the lacquer */
+#lancer-flight-deck .lfd-seam.is-mending {
+  animation: lfd-kin-polish 1300ms ease-in forwards;
+}
+
+@keyframes lfd-kin-polish {
+  0% { opacity: 1; filter: none; }
+  25% { opacity: 1; filter: brightness(1.8) drop-shadow(0 0 3px rgb(255 230 160 / 0.9)); }
+  100% { opacity: 0; filter: none; }
+}
+
+/* The hit: a crystalline glint, a ripple through the lacquer, gold leaf drifting down */
+#lancer-flight-deck .lfd-kin-glint::before,
+#lancer-flight-deck .lfd-kin-glint::after {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: -0.6px;
+  width: 28px;
+  height: 1.2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, transparent, #fffaf0 40% 60%, transparent);
+  box-shadow: 0 0 4px rgb(255 230 160 / 0.9);
+  mix-blend-mode: screen;
+  animation: lfd-kin-star 620ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+#lancer-flight-deck .lfd-kin-glint::after {
+  --turn: 90deg;
+}
+
+@keyframes lfd-kin-star {
+  0% { opacity: 0; transform: rotate(var(--turn, 0deg)) scale(0.1); }
+  20% { opacity: 1; transform: rotate(calc(var(--turn, 0deg) + 20deg)) scale(1.2); }
+  100% { opacity: 0; transform: rotate(calc(var(--turn, 0deg) + 45deg)) scale(0.4); }
+}
+
+#lancer-flight-deck .lfd-kin-ripple::before {
+  content: "";
+  position: absolute;
+  left: -30px;
+  top: -30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 1px solid rgb(240 210 140 / 0.7);
+  animation: lfd-impact-ring 700ms cubic-bezier(0.1, 0.6, 0.3, 1) forwards;
+}
+
+#lancer-flight-deck .lfd-kin-leaf {
+  animation: lfd-kin-drift var(--dur) cubic-bezier(0.35, 0, 0.65, 1) var(--d) both;
+}
+
+#lancer-flight-deck .lfd-kin-leaf i {
+  position: absolute;
+  left: calc(var(--s) / -2);
+  top: calc(var(--s) / -2);
+  width: var(--s);
+  height: calc(var(--s) * 0.8);
+  background: linear-gradient(135deg, #fbefc4, #e1bb60 45%, #9c7424);
+  clip-path: polygon(0 12%, 80% 0, 100% 70%, 30% 100%);
+  animation: lfd-kin-flutter var(--dur) linear var(--d) both;
+}
+
+@keyframes lfd-kin-drift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(calc(var(--dx) * 0.4 + var(--sx)), calc(var(--dy) * 0.22)); }
+  50% { transform: translate(calc(var(--dx) * 0.6 - var(--sx)), calc(var(--dy) * 0.5)); }
+  75% { transform: translate(calc(var(--dx) * 0.8 + var(--sx)), calc(var(--dy) * 0.76)); }
+  100% { transform: translate(var(--dx), var(--dy)); }
+}
+
+@keyframes lfd-kin-flutter {
+  0% { opacity: 0; transform: rotate(0) rotateY(0); }
+  8% { opacity: 1; }
+  80% { opacity: 0.9; }
+  100% { opacity: 0; transform: rotate(var(--rot)) rotateY(540deg); }
+}
+
+/* Stress: moths drawn to the reactor, each on its own looping orbit */
+#lancer-flight-deck .lfd-kin-moth {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 17px;
+  height: 13px;
+  offset-anchor: center;
+  offset-rotate: auto 90deg;
+  animation: lfd-kin-fly var(--dur) linear var(--d) infinite;
+  filter: drop-shadow(0 0 2px rgb(255 220 140 / 0.5));
+  opacity: 0.92;
+}
+
+@keyframes lfd-kin-fly {
+  from { offset-distance: 0%; }
+  to { offset-distance: 100%; }
+}
+
+#lancer-flight-deck .lfd-kin-moth i {
+  position: absolute;
+  inset: 0;
+}
+
+/* The body with its antennae, and the two wings beating: a broad forewing, a rounded hindwing, an eyespot */
+#lancer-flight-deck .lfd-kin-moth i::after {
+  content: "";
+  position: absolute;
+  left: 7.6px;
+  top: 2.5px;
+  z-index: 1;
+  width: 1.8px;
+  height: 9px;
+  border-radius: 1px;
+  background: linear-gradient(#5c4416, #8a6a28);
+}
+
+#lancer-flight-deck .lfd-kin-moth i::before {
+  content: "";
+  position: absolute;
+  left: 5.5px;
+  top: 0;
+  width: 6px;
+  height: 3px;
+  border: 0.6px solid #8a6a28;
+  border-bottom: none;
+  border-radius: 50% 50% 0 0;
+}
+
+#lancer-flight-deck .lfd-kin-moth b {
+  position: absolute;
+  top: 1px;
+  width: 8.5px;
+  height: 12px;
+  background:
+    radial-gradient(circle at 46% 42%, rgb(110 80 24 / 0.9) 0 0.9px, rgb(255 246 214 / 0.9) 1.2px 1.7px, transparent 2px),
+    linear-gradient(170deg, rgb(252 236 186 / 0.97), rgb(214 172 82 / 0.85) 55%, rgb(150 110 40 / 0.6));
+  animation: lfd-kin-flap var(--flap, 120ms) ease-in-out infinite alternate;
+}
+
+#lancer-flight-deck .lfd-kin-moth b:first-child {
+  left: 0;
+  clip-path: polygon(100% 18%, 30% 0, 0 12%, 6% 46%, 34% 58%, 14% 78%, 36% 100%, 100% 80%);
+  transform-origin: 100% 50%;
+}
+
+#lancer-flight-deck .lfd-kin-moth b:last-child {
+  right: 0;
+  background-position: 54% 42%, 0 0;
+  clip-path: polygon(0 18%, 70% 0, 100% 12%, 94% 46%, 66% 58%, 86% 78%, 64% 100%, 0 80%);
+  transform-origin: 0 50%;
+}
+
+@keyframes lfd-kin-flap {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0.22); }
+}
+
+/* Startled by a hit: they beat their wings faster for a moment */
+#lancer-flight-deck .lfd-kin-moths.is-startled b {
+  animation-duration: 55ms;
+}
+
+/* A stress hit flares the reactor and lifts gold dust off it */
+#lancer-flight-deck .lfd-dmg-kintsugi .lfd-kin-flare {
+  background: radial-gradient(ellipse at 50% 60%, rgb(255 240 200 / 0.55), rgb(240 200 110 / 0.22) 45%, transparent 75%);
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+#lancer-flight-deck .lfd-kin-flare.is-flaring {
+  animation: lfd-kin-flare 1100ms ease-out forwards;
+}
+
+@keyframes lfd-kin-flare {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+#lancer-flight-deck .lfd-kin-dust::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--s) / -2);
+  top: calc(var(--s) / -2);
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: #fff3cc;
+  box-shadow: 0 0 4px rgb(255 214 120 / 0.9);
+  opacity: 0;
+  animation: lfd-kin-dust 1300ms ease-out var(--d) forwards;
+}
+
+@keyframes lfd-kin-dust {
+  0% { opacity: 0; translate: 0 0; }
+  15% { opacity: 1; }
+  100% { opacity: 0; translate: var(--dx) var(--dy); }
+}
+
+/* Tarnish: the gold leaf dulls as stress mounts (the gold in the seams stays bright) */
+#lancer-flight-deck.lfd-theme-ssc.lfd-stress-1,
+.lfd-themed.lfd-theme-ssc.lfd-stress-1 {
+  --ssc-gold: #ccab62;
+  --ssc-gold-hi: #e8d4a2;
+  --ssc-hair: rgb(205 175 112 / 0.27);
+  --lfd-accent: #d2b169;
+}
+
+#lancer-flight-deck.lfd-theme-ssc.lfd-stress-2 {
+  --ssc-gold: #ae9768;
+  --ssc-gold-hi: #d0c29f;
+  --ssc-gold-lo: #6f5a34;
+  --ssc-hair: rgb(170 150 114 / 0.23);
+  --lfd-accent: #bea67a;
+}
+
+#lancer-flight-deck.lfd-theme-ssc.lfd-stress-3 {
+  --ssc-gold: #858077;
+  --ssc-gold-hi: #aaa597;
+  --ssc-gold-lo: #4a463f;
+  --ssc-hair: rgb(130 124 112 / 0.2);
+  --lfd-accent: #9c968a;
+}
+
+/* A structure hit: the movement skips a beat (stress hits tick smaller) */
+#lancer-flight-deck.lfd-theme-ssc.is-shaken {
+  animation: lfd-ssc-skip 520ms steps(1);
+}
+
+#lancer-flight-deck.lfd-theme-ssc.is-tick {
+  animation: lfd-ssc-tick 480ms steps(1);
+}
+
+@keyframes lfd-ssc-skip {
+  0%, 100% { transform: none; }
+  10% { transform: translate(-2px, 0) rotate(-0.35deg); }
+  22% { transform: translate(1.5px, 0) rotate(0.25deg); }
+  38% { transform: translate(-1px, 0) rotate(-0.15deg); }
+  56% { transform: translate(0.5px, 0); }
+  74% { transform: none; }
+}
+
+@keyframes lfd-ssc-tick {
+  0%, 100% { transform: none; }
+  12% { transform: translateX(-1px); }
+  30% { transform: translateX(1px); }
+  48% { transform: translateX(-0.5px); }
+}
+
+/* Collapsed: a gold seam on the strip, and a dulling gold light at its foot */
+#lancer-flight-deck.lfd-dmg-kintsugi.is-collapsed:is(.lfd-cracked, .lfd-stressed) .lfd-tab {
+  position: relative;
+}
+
+#lancer-flight-deck.lfd-dmg-kintsugi.is-collapsed.lfd-cracked .lfd-tab::after {
+  content: "";
+  position: absolute;
+  top: 40px;
+  right: 0;
+  width: 34px;
+  height: 60px;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 60'%3E%3Cpath d='M34 10 Q27 14 24 20 T15 31 Q11 37 6 41' fill='none' stroke='%23e7c46c' stroke-width='1.2' stroke-linecap='round'/%3E%3Cpath d='M24 20 Q22 26 25 31' fill='none' stroke='%23e7c46c' stroke-width='.8' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat;
+  filter: drop-shadow(0 0 1px rgb(255 226 150 / 0.6));
+}
+
+#lancer-flight-deck.lfd-dmg-kintsugi.is-collapsed.lfd-stressed .lfd-tab::before {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  border-radius: 50%;
+  background: var(--ssc-gold);
+  box-shadow: 0 0 5px var(--ssc-gold);
+  animation: lfd-led 2.8s ease-in-out infinite;
+}
+
+/* Reduced motion: no moths, no glints; the gold and the tarnish stand */
+#lancer-flight-deck.lfd-reduce-motion :is(.lfd-kin-moths, .lfd-seam-glint) {
+  display: none !important;
+}

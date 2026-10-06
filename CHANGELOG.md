@@ -40,8 +40,17 @@
 
 All four of the Big Four now have their own cockpit; LCP manufacturers keep GMS.
 
+**Battle damage, by maker**
+- Each cockpit now takes structure and stress damage its own way; GMS keeps its cracked glass and steam.
+- **IPS-N, hull breach and battle lanterns:** a shell punches through the plating (petals torn outward and white-hot, rivets popping out, sea spray), the panel rolls like a struck ship, and damage control bolts a hazard-taped patch over it a second later, welding each bolt; the patch stays, dripping. Stress brings a red rotating beacon and red emergency light; each hit is a pressure wave through the bulkheads.
+- **SSC, kintsugi and moths:** a white hairline races in and molten gold flows in behind it and sets, gold leaf drifting down as the movement skips a beat; the gold seams stay, a glint running along them. Stress draws gold-dust moths to the reactor (one, two, four) and tarnishes the gold leaf toward pewter; each hit flares the reactor.
+- **HORUS, corruption and interference:** a datamosh tear, a FAULT stamp, and a bad sector printed against the edge with its error code and pixel-sort smears; the print slips further out of register with every point lost. Stress brings static, a roll bar and, at the last point, the sigil's eye in the noise; each hit jams the feed and every eye blinks.
+- **HA, spalled concrete and heat soak:** a heavy thud, a chunk out of the slab with the rebar showing, stepped cracks, dust and debris. Stress soaks the slabs with heat from the edges in, violet to orange, with rising haze and burning insignia; each hit vents plasma from the bottom corners.
+- Repairs undo each in kind (welded smooth, polished away, defragmented, poured full of resin). Switching theme while damaged redraws the same damage in the new style without replaying it; reduced motion shows it all, still. Steam's hiss only plays where there's glass.
+
 **Under the hood**
 - Theme colours are tokens all the way down (wells, edges, unlit lamps), so every surface follows the maker.
+- Battle damage is split into the DamageLayer (when: it diffs the mech's tracks, so reloads and switches draw quietly) and a damage style per maker (what: `BaseTheme.damage`, `src/ui/damage/styles/`), with the new geometry seeded per mech like the glass (`geometry.js`, `tests/damage.test.js`). The smoke run counts damage marks whatever the style.
 - Themes can bring their own templates per part, finish-card text, a header serial and live behaviour (`mount`/`unmount`, started after each render while the theme is on screen: HORUS's eyes, `src/ui/HorusEyes.js`); `tests/themes.test.js` checks the maker mapping, the override, and that a theme's templates keep every hook of the parts they replace. `npm run smoke` gains a picker step.
 
 ## 0.7.0

@@ -1246,3 +1246,394 @@
   clip-path: none;
   border-radius: 50%;
 }
+
+/* ==========================================================================
+   Battle damage: hull breaches and battle lanterns (src/ui/damage/styles/HullDamage.js)
+   ========================================================================== */
+
+#lancer-flight-deck .lfd-dmg-hull .lfd-hull-svg {
+  inset: 0 auto auto 0;
+  z-index: 3;
+  overflow: visible;
+}
+
+#lancer-flight-deck .lfd-dmg-hull :is(.lfd-hull-fx, .lfd-hull-drips) > div {
+  position: absolute;
+  inset: auto;
+  width: 0;
+  height: 0;
+}
+
+#lancer-flight-deck .lfd-dmg-hull .lfd-hull-fx { z-index: 5; }
+#lancer-flight-deck .lfd-dmg-hull .lfd-hull-drips { z-index: 2; }
+
+/* The breach: scorch, the hole, petals of plating torn outward, popped rivet holes */
+#lancer-flight-deck .lfd-breach-hole {
+  fill: #020406;
+  stroke: rgb(255 150 80 / 0.25);
+  stroke-width: 0.6;
+}
+
+#lancer-flight-deck .lfd-breach-petals polygon {
+  fill: #4f6882;
+  stroke: #b3c8db;
+  stroke-width: 0.55;
+  stroke-linejoin: round;
+}
+
+#lancer-flight-deck .lfd-breach-rivets circle {
+  fill: #04070a;
+  stroke: #7f98b0;
+  stroke-width: 0.5;
+}
+
+/* The damage control patch: plate, hazard tape, a weld bead round it, four bolts */
+#lancer-flight-deck .lfd-patch-in {
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.65));
+}
+
+#lancer-flight-deck .lfd-patch-plate {
+  stroke: #1f2e3c;
+  stroke-width: 0.6;
+}
+
+#lancer-flight-deck .lfd-patch-tape {
+  opacity: 0.92;
+}
+
+#lancer-flight-deck .lfd-patch-weld {
+  fill: none;
+  stroke: #c8d6e3;
+  stroke-width: 0.7;
+  stroke-dasharray: 1.1 0.9;
+  opacity: 0.55;
+}
+
+#lancer-flight-deck .lfd-patch-bolt {
+  fill: #bccddd;
+  stroke: #2a3a4a;
+  stroke-width: 0.4;
+}
+
+/* Forming: the burst, the petals white-hot and cooling, then the patch slammed on and welded */
+#lancer-flight-deck .lfd-breach.is-forming :is(.lfd-breach-hole, .lfd-breach-petals) {
+  transform-origin: var(--ox) var(--oy);
+  animation: lfd-hull-burst 240ms cubic-bezier(0.2, 1.5, 0.4, 1) var(--t0, 0ms) both;
+}
+
+#lancer-flight-deck .lfd-breach.is-forming .lfd-breach-petals polygon {
+  animation: lfd-hull-hot 1500ms ease-out var(--t0, 0ms) both;
+}
+
+#lancer-flight-deck .lfd-breach.is-forming .lfd-breach-scorch {
+  animation: lfd-fade-in 420ms ease-out var(--t0, 0ms) both;
+}
+
+#lancer-flight-deck .lfd-breach.is-forming .lfd-patch-in {
+  animation: lfd-hull-patch 280ms cubic-bezier(0.2, 1.5, 0.45, 1) calc(var(--t0, 0ms) + 1080ms) both;
+}
+
+#lancer-flight-deck .lfd-breach.is-forming .lfd-patch-bolt {
+  animation: lfd-hull-weld 360ms ease-out calc(var(--t0, 0ms) + 1260ms) both;
+}
+
+#lancer-flight-deck .lfd-breach.is-forming .lfd-patch-bolt:nth-of-type(2) { animation-delay: calc(var(--t0, 0ms) + 1370ms); }
+#lancer-flight-deck .lfd-breach.is-forming .lfd-patch-bolt:nth-of-type(3) { animation-delay: calc(var(--t0, 0ms) + 1480ms); }
+#lancer-flight-deck .lfd-breach.is-forming .lfd-patch-bolt:nth-of-type(4) { animation-delay: calc(var(--t0, 0ms) + 1590ms); }
+
+#lancer-flight-deck .lfd-breach.is-forming .lfd-patch-weld {
+  animation: lfd-hull-bead 900ms ease-out calc(var(--t0, 0ms) + 1300ms) both;
+}
+
+/* Repaired: the patch is welded smooth (a bright bead runs round it), then the breach fades */
+#lancer-flight-deck .lfd-breach.is-mending {
+  animation: lfd-hull-mend 1200ms ease-in forwards;
+}
+
+#lancer-flight-deck .lfd-breach.is-mending .lfd-patch-weld {
+  stroke: #eaf6ff;
+  opacity: 1;
+  filter: drop-shadow(0 0 2px #9fd8ff);
+}
+
+@keyframes lfd-hull-burst {
+  0% { transform: scale(0.2); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes lfd-hull-hot {
+  0% { fill: #ffe2b0; stroke: #fff4dc; }
+  25% { fill: #e08a4a; stroke: #ffd29a; }
+  100% { fill: #4f6882; stroke: #b3c8db; }
+}
+
+@keyframes lfd-hull-patch {
+  0% { opacity: 0; transform: scale(1.5) rotate(-6deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes lfd-hull-weld {
+  0% { fill: #ffffff; filter: drop-shadow(0 0 3px #bfe8ff) drop-shadow(0 0 1px #fff); }
+  100% { fill: #bccddd; filter: none; }
+}
+
+@keyframes lfd-hull-bead {
+  0% { stroke: #ffffff; opacity: 1; }
+  100% { stroke: #c8d6e3; opacity: 0.55; }
+}
+
+@keyframes lfd-hull-mend {
+  0%, 50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Water seeping out from under the patch: a damp streak, and a drop every few seconds */
+#lancer-flight-deck .lfd-dmg-hull .lfd-hull-drips > .lfd-hull-drip {
+  width: 2px;
+  margin-left: -1px;
+}
+
+#lancer-flight-deck .lfd-hull-drip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 1px;
+  background: linear-gradient(180deg, rgb(170 205 235 / 0.22), rgb(170 205 235 / 0.08) 70%, transparent);
+}
+
+#lancer-flight-deck .lfd-hull-drip i {
+  position: absolute;
+  left: -0.5px;
+  top: 0;
+  width: 3px;
+  height: 4px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: radial-gradient(circle at 40% 35%, #f2fbff, rgb(150 200 235 / 0.8) 70%);
+  opacity: 0;
+  animation: lfd-hull-drop 4.6s cubic-bezier(0.5, 0, 0.9, 0.5) infinite;
+  animation-delay: calc(var(--i, 0) * -1.6s);
+}
+
+@keyframes lfd-hull-drop {
+  0%, 52% { top: 0; opacity: 0; transform: scale(0.4); }
+  62% { top: 0; opacity: 0.9; transform: scale(1); }
+  96% { top: 100%; opacity: 0.85; transform: scale(0.9, 1.3); }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* The hit: a flash, sparks, rivets thrown out of the seam, a burst of sea spray */
+#lancer-flight-deck .lfd-hull-flash::before {
+  content: "";
+  position: absolute;
+  left: -55px;
+  top: -55px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 255 255 / 0.95) 0 7%, rgb(190 225 255 / 0.6) 20%, rgb(28 154 232 / 0.25) 42%, transparent 70%);
+  mix-blend-mode: screen;
+  animation: lfd-impact-flash 520ms cubic-bezier(0.2, 0.6, 0.35, 1) forwards;
+}
+
+#lancer-flight-deck .lfd-hull-spark::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -0.5px;
+  width: 10px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #fff, #ffc46b 45%, transparent);
+  transform-origin: 0 50%;
+  transform: rotate(var(--rot));
+  opacity: 0;
+  animation: lfd-spark 300ms ease-out var(--d) forwards;
+}
+
+#lancer-flight-deck .lfd-hull-rivet {
+  animation: lfd-shard-x var(--dur) linear var(--d) both;
+}
+
+#lancer-flight-deck .lfd-hull-rivet i {
+  position: absolute;
+  left: -2px;
+  top: -2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e3edf6, #6f8ba6 60%, #263749);
+  animation: lfd-hull-pop var(--dur) cubic-bezier(0.3, 0, 0.8, 0.6) var(--d) both;
+}
+
+@keyframes lfd-hull-pop {
+  0% { opacity: 0; transform: translateY(0) rotate(0); }
+  6% { opacity: 1; }
+  28% { transform: translateY(var(--up)) rotate(calc(var(--rot) * 0.3)); }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(var(--dy)) rotate(var(--rot)); }
+}
+
+#lancer-flight-deck .lfd-hull-spray::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--s) / -2);
+  top: calc(var(--s) / -2);
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: rgb(215 238 255 / 0.85);
+  box-shadow: 0 0 3px rgb(160 210 255 / 0.6);
+  opacity: 0;
+  animation: lfd-hull-spray 620ms cubic-bezier(0.15, 0.7, 0.4, 1) var(--d) forwards;
+}
+
+@keyframes lfd-hull-spray {
+  0% { opacity: 0; translate: 0 0; }
+  12% { opacity: 1; }
+  100% { opacity: 0; translate: var(--dx) var(--dy); }
+}
+
+/* Stress: battle lanterns. Red emergency light closing in from the edges... */
+#lancer-flight-deck .lfd-dmg-hull .lfd-hull-lantern {
+  z-index: 1;
+  background: radial-gradient(ellipse 90% 70% at 50% 50%, transparent 48%, rgb(255 48 40 / 0.55) 100%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+#lancer-flight-deck.lfd-stress-1 .lfd-hull-lantern { opacity: 0.32; }
+#lancer-flight-deck.lfd-stress-2 .lfd-hull-lantern { opacity: 0.55; }
+#lancer-flight-deck.lfd-stress-3 .lfd-hull-lantern { opacity: 0.8; animation: lfd-hull-lantern 1.6s ease-in-out infinite; }
+
+@keyframes lfd-hull-lantern {
+  50% { opacity: 0.5; }
+}
+
+/* ...and the rotating beacon: a double beam turning above the bridge, faster with each level */
+#lancer-flight-deck .lfd-dmg-hull .lfd-hull-beacon {
+  inset: auto;
+  left: 50%;
+  top: -26px;
+  z-index: 1;
+  display: none;
+  width: 240px;
+  height: 1900px;
+  margin: -950px 0 0 -120px;
+  background: linear-gradient(90deg, transparent, rgb(255 70 55 / 0.55) 48% 52%, transparent);
+  clip-path: polygon(0 0, 100% 0, 50% 50%, 100% 100%, 0 100%, 50% 50%);
+  -webkit-mask: linear-gradient(transparent, #000 12% 88%, transparent);
+  mask: linear-gradient(transparent, #000 12% 88%, transparent);
+  mix-blend-mode: screen;
+  will-change: transform;
+  animation: lfd-hull-beacon 3.2s linear infinite;
+}
+
+#lancer-flight-deck.lfd-stressed .lfd-hull-beacon { display: block; opacity: 0.2; }
+#lancer-flight-deck.lfd-stress-2 .lfd-hull-beacon { opacity: 0.28; animation-duration: 2.1s; }
+#lancer-flight-deck.lfd-stress-3 .lfd-hull-beacon { opacity: 0.4; animation-duration: 1.25s; }
+
+@keyframes lfd-hull-beacon {
+  to { transform: rotate(1turn); }
+}
+
+/* A stress hit: a pressure wave rolls down through the bulkheads... */
+#lancer-flight-deck .lfd-dmg-hull .lfd-hull-surge {
+  z-index: 4;
+  background: linear-gradient(180deg, transparent, rgb(190 225 255 / 0.2) 40%, rgb(255 255 255 / 0.32) 50%, rgb(190 225 255 / 0.2) 60%, transparent) 0 -20% / 100% 90px no-repeat;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+#lancer-flight-deck .lfd-dmg-hull.is-surge .lfd-hull-surge {
+  animation: lfd-hull-surge 760ms cubic-bezier(0.3, 0.1, 0.4, 1) forwards;
+}
+
+@keyframes lfd-hull-surge {
+  0% { opacity: 1; background-position: 0 -20%; }
+  85% { opacity: 1; }
+  100% { opacity: 0; background-position: 0 120%; }
+}
+
+/* ...paint flakes shaken loose... */
+#lancer-flight-deck .lfd-hull-flake {
+  animation: lfd-shard-x var(--dur) linear var(--d) both;
+}
+
+#lancer-flight-deck .lfd-hull-flake i {
+  position: absolute;
+  left: -1.5px;
+  top: -1px;
+  width: 3px;
+  height: 2px;
+  background: linear-gradient(135deg, #8ea8c1, #2f4256);
+  animation: lfd-shard-y var(--dur) cubic-bezier(0.45, 0, 0.9, 0.6) var(--d) both;
+}
+
+/* ...and the panel flexes like a bulkhead under pressure */
+#lancer-flight-deck.lfd-theme-ipsn.is-groan {
+  transform-origin: 50% 0;
+  animation: lfd-ipsn-groan 720ms ease-in-out;
+}
+
+@keyframes lfd-ipsn-groan {
+  0%, 100% { transform: none; }
+  22% { transform: scaleY(0.992) skewX(-0.25deg); }
+  48% { transform: scaleY(1.004) skewX(0.2deg); }
+  72% { transform: scaleY(0.998); }
+}
+
+/* A structure hit rolls the panel like a ship taking a shell */
+#lancer-flight-deck.lfd-theme-ipsn.is-shaken {
+  transform-origin: 50% 0;
+  animation: lfd-ipsn-roll 0.95s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@keyframes lfd-ipsn-roll {
+  0%, 100% { transform: none; }
+  10% { transform: translateX(-3px) rotate(1.1deg); }
+  34% { transform: translateX(2px) rotate(-0.7deg); }
+  58% { transform: translateX(-1px) rotate(0.35deg); }
+  80% { transform: rotate(-0.12deg); }
+}
+
+/* Collapsed: a hazard patch on the strip, and a red beacon at its foot */
+#lancer-flight-deck.lfd-dmg-hull.is-collapsed:is(.lfd-cracked, .lfd-stressed) .lfd-tab {
+  position: relative;
+}
+
+#lancer-flight-deck.lfd-dmg-hull.is-collapsed.lfd-cracked .lfd-tab::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: 46px;
+  width: 11px;
+  height: 7px;
+  rotate: -12deg;
+  border-radius: 1px;
+  background: repeating-linear-gradient(45deg, #e2b52a 0 2px, #14181d 2px 4px);
+  box-shadow: 0 0 0 1px #33475a, 0 1px 2px rgb(0 0 0 / 0.6);
+}
+
+#lancer-flight-deck.lfd-dmg-hull.is-collapsed.lfd-stressed .lfd-tab::before {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: #ff3b30;
+  box-shadow: 0 0 6px #ff3b30;
+  animation: lfd-led 1.6s ease-in-out infinite;
+}
+
+/* Reduced motion: the damage stands, nothing turns or drips */
+#lancer-flight-deck.lfd-reduce-motion .lfd-hull-beacon,
+#lancer-flight-deck.lfd-reduce-motion .lfd-hull-drip i {
+  display: none !important;
+}

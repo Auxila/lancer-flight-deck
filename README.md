@@ -94,7 +94,10 @@ Audio is built for tables that talk over Discord:
 
 ## Battle damage
 
-The panel wears the mech's damage, and it stays there until it's repaired.
+The panel wears the mech's damage, and it stays there until it's repaired. Each manufacturer's cockpit
+breaks its own way; GMS's (and any frame without a theme of its own) is cracked glass and steam.
+
+### GMS: cracked glass
 
 - **Structure: the glass fractures.** Each structure point lost strikes a new impact on the
   panel's bezel: a hot flash and shockwave ring, sparks, a split-second RGB tear across the
@@ -112,12 +115,27 @@ The panel wears the mech's damage, and it stays there until it's repaired.
 - **Readability.** Impacts sit on the bezel and cracks stop short of the panel's far side.
   Crack lines are blended so they can only brighten what's under them, never darken it, and
   steam is translucent; every readout stays legible.
-- **Every mech cracks its own way.** The fractures are generated from the mech's id and the
+
+### The other makers
+
+| | Structure lost | Stress lost |
+|---|---|---|
+| **IPS-N** | **Hull breach.** The shell punches a jagged hole, plating petals torn outward and white-hot, scorching round it; rivets pop out of the seam and spin away, sea spray bursts in, and the panel rolls like a ship taking a hit. A second later damage control slams a hazard-taped patch over it and welds its four bolts down one by one. The patch stays, popped rivet holes beside it, water dripping out from under it. Repairs weld it smooth and it fades. | **Battle lanterns.** A red rotating beacon sweeps the bridge, faster with each level, and red emergency light closes in from the edges. Each hit sends a pressure wave rolling down through the bulkheads: the panel flexes and paint flakes fall. |
+| **SSC** | **Kintsugi.** A crystalline glint and a ripple through the lacquer, a white hairline racing inward, then molten gold flowing in behind it and setting, filling the chips along the way, while gold leaf drifts down and the movement skips a beat. The gold seams stay, a glint running along them now and then. Repairs polish them away. | **Moths to the flame.** Gold-dust moths circle the reactor, one, then two, then four, and the gold leaf of the whole cockpit tarnishes toward pewter. Each hit flares the reactor, lifts gold dust off it and startles the moths. |
+| **HORUS** | **Corruption.** The plates tear sideways in a datamosh, the eyes blink, and a FAULT stamp flashes; a bad sector prints in against the edge (noise, its error code running up it, pixel-sort smears dragging inward, dead pixels round it) and flickers now and then. The print slips further out of register with every point lost. Repairs defragment it away. | **Interference.** Static over the readout, thicker with each level, a roll bar from the second, and at the last point the sigil's eye surfacing in the noise. Each hit jams the feed: the plates stutter down a line at a time, the eyes blink, hex garbage scrolls up the edge. |
+| **HA** | **Spalled concrete.** A heavy thud (the panel drops and settles; it doesn't shake), a chunk bitten out of the slab with the rebar showing, blocky cracks running from it in hard steps, dust billowing and chunks falling. Repairs pour it full of violet resin. | **Heat soak.** The slabs glow from the edges in, violet going orange, deeper with each level; heat haze rises from the second; at the last point the insignia burn. Each hit vents plasma jets from the bottom corners. |
+
+In every style, damage sits on the panel's edges and keeps clear of its middle, where the big readouts
+are, and every number stays legible.
+
+### All of them
+
+- **Every mech breaks its own way.** The damage is generated from the mech's id and the
   structure point lost, so the same mech always shows the same damage, across reloads,
   without anything being saved.
-- Only real changes animate: opening the panel, reloading or switching mechs draws the
-  damage as it stands. Collapsed, the tab shows a small crack and a stress LED. Reduced
-  motion shows all the damage without animating any of it.
+- Only real changes animate: opening the panel, reloading, switching mechs or switching theme
+  draws the damage as it stands. Collapsed, the tab shows a small mark of each and a stress
+  light. Reduced motion shows all the damage without animating any of it.
 - To inspect it frame by frame:
   `game.modules.get("lancer-flight-deck").api.damageClock.setScale(0.1)` slows the damage
   timers and steam to a tenth. Slow the CSS to match with DevTools > Animations.
@@ -435,9 +453,11 @@ src/
     HoverCards.js              full-text hover cards on Foundry's tooltip (HUD, NPC Deck)
     DeckFrame.js               docked / floating placement, drag to move, grip to resize
     damage/
-      fracture.js              seeded fracture geometry, damage levels (pure, Node-testable)
-      DamageLayer.js           cracks, impacts, stress lights, brownouts, mending
-      SteamField.js            canvas steam venting through the cracks
+      DamageLayer.js           when: diffs the mech's tracks, picks the theme's damage style
+      fracture.js              glass fracture geometry, damage levels (pure, Node-testable)
+      geometry.js              breaches, seams, corruption, spalls (pure, Node-testable)
+      styles/*.js              what: Glass (GMS), Hull (IPS-N), Kintsugi (SSC), Corruption (HORUS), Concrete (HA)
+      SteamField.js            canvas steam venting through the glass's cracks
       clock.js                 the effects' clock (slow motion for inspection)
     components/*.js            view models per section
 templates/panel/*.hbs          one Handlebars part per section

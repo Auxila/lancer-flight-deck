@@ -1,7 +1,8 @@
 /* ==========================================================================
-   Battle damage: cracked glass for lost structure, drained colour and warning
-   lights for lost stress, steam through the cracks when both run low.
-   Drawn by src/ui/damage/DamageLayer.js.
+   Battle damage: the layer, and GMS's cracked glass (drained colour and warning
+   lights for lost stress, steam through the cracks when both run low).
+   Drawn by src/ui/damage/DamageLayer.js and styles/GlassDamage.js. The other makers'
+   damage lives with their themes (styles/themes/*.css, "Battle damage").
    ========================================================================== */
 
 .lfd-themed {
@@ -25,7 +26,8 @@
   display: none;
 }
 
-#lancer-flight-deck .lfd-damage > * {
+#lancer-flight-deck .lfd-damage > *,
+#lancer-flight-deck .lfd-dmg-host > * {
   position: absolute;
   inset: 0;
 }
@@ -290,13 +292,13 @@
    Stress: drained colour, warning lights, brownouts
    -------------------------------------------------------------------------- */
 
-#lancer-flight-deck.lfd-stress-1 { --lfd-sat: 0.84; }
-#lancer-flight-deck.lfd-stress-2 { --lfd-sat: 0.68; }
-#lancer-flight-deck.lfd-stress-3 { --lfd-sat: 0.52; }
+#lancer-flight-deck.lfd-dmg-glass.lfd-stress-1 { --lfd-sat: 0.84; }
+#lancer-flight-deck.lfd-dmg-glass.lfd-stress-2 { --lfd-sat: 0.68; }
+#lancer-flight-deck.lfd-dmg-glass.lfd-stress-3 { --lfd-sat: 0.52; }
 
 /* Shut Down and Destroyed have their own filters on the body plates; those win */
-#lancer-flight-deck.lfd-stressed:not(.is-shutdown, .is-destroyed) .lfd-plate,
-#lancer-flight-deck.lfd-stressed:is(.is-shutdown, .is-destroyed) .lfd-plate:not(.lfd-body) {
+#lancer-flight-deck.lfd-dmg-glass.lfd-stressed:not(.is-shutdown, .is-destroyed) .lfd-plate,
+#lancer-flight-deck.lfd-dmg-glass.lfd-stressed:is(.is-shutdown, .is-destroyed) .lfd-plate:not(.lfd-body) {
   /* No transition: the brownout masks the change, and the impact tear must snap off */
   filter: saturate(var(--lfd-sat, 1));
 }
@@ -307,7 +309,7 @@
 }
 
 /* Emergency lighting: a faint amber wash creeping in from the bezel */
-#lancer-flight-deck .lfd-damage::before {
+#lancer-flight-deck .lfd-damage[data-style="glass"]::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -320,9 +322,9 @@
   transition: opacity 1s ease;
 }
 
-#lancer-flight-deck.lfd-stress-1 .lfd-damage::before { animation: lfd-emergency 5.5s ease-in-out infinite; --peak: 0.35; }
-#lancer-flight-deck.lfd-stress-2 .lfd-damage::before { animation: lfd-emergency 4s ease-in-out infinite; --peak: 0.6; }
-#lancer-flight-deck.lfd-stress-3 .lfd-damage::before {
+#lancer-flight-deck.lfd-stress-1 .lfd-damage[data-style="glass"]::before { animation: lfd-emergency 5.5s ease-in-out infinite; --peak: 0.35; }
+#lancer-flight-deck.lfd-stress-2 .lfd-damage[data-style="glass"]::before { animation: lfd-emergency 4s ease-in-out infinite; --peak: 0.6; }
+#lancer-flight-deck.lfd-stress-3 .lfd-damage[data-style="glass"]::before {
   animation: lfd-emergency 2.4s ease-in-out infinite;
   --peak: 0.85;
   --lfd-steam-warn: var(--lfd-warning);
@@ -428,7 +430,7 @@
   animation: none !important;
 }
 
-#lancer-flight-deck.lfd-reduce-motion.lfd-stressed .lfd-damage::before {
+#lancer-flight-deck.lfd-reduce-motion.lfd-stressed .lfd-damage[data-style="glass"]::before {
   opacity: 0.4;
 }
 
@@ -444,7 +446,7 @@
   position: relative;
 }
 
-#lancer-flight-deck.is-collapsed.lfd-cracked .lfd-tab::after {
+#lancer-flight-deck.lfd-dmg-glass.is-collapsed.lfd-cracked .lfd-tab::after {
   content: "";
   position: absolute;
   top: 22px;
@@ -458,7 +460,7 @@
 }
 
 /* A stress LED at the foot of the tab */
-#lancer-flight-deck.is-collapsed.lfd-stressed .lfd-tab::before {
+#lancer-flight-deck.lfd-dmg-glass.is-collapsed.lfd-stressed .lfd-tab::before {
   content: "";
   position: absolute;
   bottom: 3px;
@@ -472,7 +474,7 @@
   animation: lfd-led 2.8s ease-in-out infinite;
 }
 
-#lancer-flight-deck.is-collapsed.lfd-stress-3 .lfd-tab::before {
+#lancer-flight-deck.lfd-dmg-glass.is-collapsed.lfd-stress-3 .lfd-tab::before {
   background: var(--lfd-warning);
   box-shadow: 0 0 6px var(--lfd-warning);
   animation-duration: 1.2s;

@@ -32,6 +32,12 @@ export class BaseTheme {
     stamp: "LFD.Boot.Stamp",
   };
 
+  /**
+   * How the cockpit takes battle damage (src/ui/damage/styles): "glass" (GMS: cracked screen and steam),
+   * "hull", "kintsugi", "corruption" or "concrete".
+   */
+  static damage = "glass";
+
   /** Synth parameters this theme's cues use. Frequencies in Hz. */
   static audio = {
     chime: [800, 600],

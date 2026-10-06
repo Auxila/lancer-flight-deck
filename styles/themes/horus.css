@@ -954,3 +954,381 @@
 #lancer-flight-deck.lfd-theme-horus.lfd-reduce-motion .lfd-mech-name[data-text]::after {
   animation: none;
 }
+
+/* ==========================================================================
+   Battle damage: corruption and interference (src/ui/damage/styles/CorruptionDamage.js)
+   ========================================================================== */
+
+#lancer-flight-deck .lfd-dmg-corruption .lfd-cor-blocks { z-index: 3; }
+#lancer-flight-deck .lfd-dmg-corruption .lfd-cor-fx { z-index: 5; }
+
+#lancer-flight-deck .lfd-dmg-corruption :is(.lfd-cor-blocks, .lfd-cor-fx) > * {
+  position: absolute;
+}
+
+#lancer-flight-deck .lfd-dmg-corruption .lfd-cor-fx > div {
+  inset: auto;
+  width: 0;
+  height: 0;
+}
+
+/* A corrupted block: noise against the edge, an error code, pixel-sort smears dragging inward */
+#lancer-flight-deck .lfd-corrupt {
+  overflow: visible;
+  animation: lfd-cor-flicker 7s steps(1) infinite;
+  animation-delay: calc(var(--i, 0) * -2.3s);
+}
+
+#lancer-flight-deck .lfd-corrupt-noise {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgb(0 0 0 / 0.55) 0 1px, transparent 1px 3px),
+    repeating-conic-gradient(rgb(232 228 214 / 0.55) 0 25%, transparent 0 50%) 0 0 / 2px 2px,
+    repeating-conic-gradient(rgb(0 162 86 / 0.55) 0 25%, transparent 0 50%) 1px 0 / 5px 3px,
+    rgb(0 0 0 / 0.55);
+  box-shadow: inset 0 0 0 1px rgb(232 228 214 / 0.25), 2px 1px 0 rgb(0 162 86 / 0.35);
+  animation: lfd-cor-noise 0.42s steps(3) infinite;
+}
+
+#lancer-flight-deck .lfd-corrupt-code {
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  padding: 0 2px;
+  font: 700 7px/1.25 var(--lfd-font-data);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: #000;
+  background: var(--lfd-ink);
+}
+
+/* On the side edges the code runs up the strip */
+#lancer-flight-deck .lfd-corrupt:is([data-side="left"], [data-side="right"]) .lfd-corrupt-code {
+  left: 50%;
+  top: 2px;
+  translate: -50% 0;
+  padding: 2px 0;
+  writing-mode: vertical-rl;
+  font-size: 6px;
+  line-height: 1;
+}
+
+#lancer-flight-deck .lfd-corrupt-smear {
+  position: absolute;
+  top: var(--at);
+  height: var(--thick);
+  width: var(--len);
+}
+
+#lancer-flight-deck .lfd-corrupt[data-side="right"] .lfd-corrupt-smear {
+  right: 100%;
+  background: linear-gradient(270deg, rgb(232 228 214 / 0.6), rgb(0 162 86 / 0.25) 60%, transparent);
+}
+
+#lancer-flight-deck .lfd-corrupt[data-side="left"] .lfd-corrupt-smear {
+  left: 100%;
+  background: linear-gradient(90deg, rgb(232 228 214 / 0.6), rgb(0 162 86 / 0.25) 60%, transparent);
+}
+
+#lancer-flight-deck .lfd-corrupt:is([data-side="top"], [data-side="bottom"]) .lfd-corrupt-smear {
+  top: auto;
+  left: var(--at);
+  width: var(--thick);
+  height: var(--len);
+}
+
+#lancer-flight-deck .lfd-corrupt[data-side="top"] .lfd-corrupt-smear {
+  top: 100%;
+  background: linear-gradient(180deg, rgb(232 228 214 / 0.6), rgb(0 162 86 / 0.25) 60%, transparent);
+}
+
+#lancer-flight-deck .lfd-corrupt[data-side="bottom"] .lfd-corrupt-smear {
+  bottom: 100%;
+  background: linear-gradient(0deg, rgb(232 228 214 / 0.6), rgb(0 162 86 / 0.25) 60%, transparent);
+}
+
+#lancer-flight-deck .lfd-corrupt-dead {
+  width: 2px;
+  height: 2px;
+  background: var(--lfd-ink);
+  box-shadow: 0 0 2px rgb(232 228 214 / 0.6);
+  opacity: 0.7;
+}
+
+#lancer-flight-deck .lfd-corrupt-dead:nth-of-type(3n) {
+  background: var(--horus-green);
+}
+
+@keyframes lfd-cor-noise {
+  0% { background-position: 0 0, 0 0, 1px 0, 0 0; }
+  33% { background-position: 0 1px, 1px 0, 3px 1px, 0 0; }
+  66% { background-position: 0 2px, 0 1px, 0 2px, 0 0; }
+}
+
+@keyframes lfd-cor-flicker {
+  0%, 91% { opacity: 1; transform: none; }
+  92% { opacity: 0.35; transform: translateX(3px); }
+  93.5% { opacity: 1; transform: translateX(-2px); }
+  95%, 100% { opacity: 1; transform: none; }
+}
+
+/* Forming: the block prints in line by line; repaired, it defragments away */
+#lancer-flight-deck .lfd-corrupt.is-forming {
+  animation: lfd-cor-print 340ms steps(6) var(--t0, 0ms) both;
+}
+
+#lancer-flight-deck .lfd-corrupt.is-forming .lfd-corrupt-code {
+  animation: lfd-cor-code 900ms steps(1) var(--t0, 0ms) both;
+}
+
+#lancer-flight-deck :is(.lfd-corrupt, .lfd-corrupt-dead).is-mending {
+  transform-origin: 50% 50%;
+  animation: lfd-cor-defrag 900ms steps(5) forwards;
+}
+
+@keyframes lfd-cor-print {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(-100vh -100vw); }
+}
+
+@keyframes lfd-cor-code {
+  0%, 20%, 40% { background: var(--horus-green); }
+  10%, 30%, 50%, 100% { background: var(--lfd-ink); }
+}
+
+@keyframes lfd-cor-defrag {
+  0% { opacity: 1; transform: scaleY(1); }
+  60% { opacity: 1; transform: scaleY(0.2); }
+  100% { opacity: 0; transform: scaleY(0); }
+}
+
+/* The hit: the stamp, and a spray of bits dragged inward */
+#lancer-flight-deck .lfd-dmg-corruption .lfd-cor-fx > .lfd-cor-fault {
+  width: auto;
+  height: auto;
+  translate: -50% -50%;
+  padding: 1px 6px;
+  font: 700 10px/1.3 var(--lfd-font-data);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  color: #000;
+  background: var(--lfd-ink);
+  box-shadow: 3px 2px 0 rgb(0 162 86 / 0.7);
+  animation: lfd-cor-fault 900ms steps(1) forwards;
+}
+
+@keyframes lfd-cor-fault {
+  0% { opacity: 1; transform: translateX(-4px); }
+  10% { opacity: 1; transform: translateX(3px); background: var(--horus-green); }
+  20% { opacity: 1; transform: none; background: var(--lfd-ink); }
+  70% { opacity: 1; clip-path: inset(0); }
+  76% { opacity: 1; clip-path: inset(0 0 50% 0); transform: translateX(5px); }
+  82%, 100% { opacity: 0; }
+}
+
+#lancer-flight-deck .lfd-cor-bit::before {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--lfd-ink);
+  opacity: 0;
+  animation: lfd-cor-bit 600ms steps(6) var(--d) forwards;
+}
+
+@keyframes lfd-cor-bit {
+  0% { opacity: 1; translate: 0 0; }
+  100% { opacity: 0; translate: var(--dx) var(--dy); }
+}
+
+/* Stress: static over the readout, thicker with each level... */
+#lancer-flight-deck .lfd-dmg-corruption .lfd-cor-static {
+  z-index: 1;
+  background:
+    repeating-conic-gradient(rgb(232 228 214 / 0.55) 0 25%, transparent 0 50%) 0 0 / 3px 3px,
+    repeating-conic-gradient(rgb(232 228 214 / 0.4) 0 25%, transparent 0 50%) 1px 2px / 5px 7px,
+    repeating-conic-gradient(rgb(0 162 86 / 0.45) 0 25%, transparent 0 50%) 2px 1px / 7px 4px;
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+#lancer-flight-deck.lfd-stressed .lfd-cor-static { animation: lfd-cor-snow 0.32s steps(4) infinite; }
+#lancer-flight-deck.lfd-stress-1 .lfd-cor-static { opacity: 0.05; }
+#lancer-flight-deck.lfd-stress-2 .lfd-cor-static { opacity: 0.085; }
+#lancer-flight-deck.lfd-stress-3 .lfd-cor-static { opacity: 0.13; }
+
+#lancer-flight-deck .lfd-dmg-corruption.is-burst .lfd-cor-static {
+  opacity: 0.22;
+  transition: none;
+}
+
+@keyframes lfd-cor-snow {
+  0% { background-position: 0 0, 1px 2px, 2px 1px; }
+  25% { background-position: 1px 2px, 3px 0, 0 3px; }
+  50% { background-position: 2px 1px, 0 5px, 5px 2px; }
+  75% { background-position: 0 2px, 4px 3px, 3px 0; }
+}
+
+/* ...a roll bar from the second level... */
+#lancer-flight-deck .lfd-dmg-corruption .lfd-cor-roll {
+  z-index: 1;
+  display: none;
+  background: linear-gradient(180deg, transparent, rgb(232 228 214 / 0.07) 30%, rgb(232 228 214 / 0.12) 50%, rgb(0 0 0 / 0.25) 56%, transparent) 0 -20% / 100% 46px no-repeat;
+  mix-blend-mode: screen;
+  animation: lfd-cor-roll 6.5s linear infinite;
+}
+
+#lancer-flight-deck:is(.lfd-stress-2, .lfd-stress-3) .lfd-cor-roll { display: block; }
+#lancer-flight-deck.lfd-stress-3 .lfd-cor-roll { animation-duration: 3.8s; }
+
+@keyframes lfd-cor-roll {
+  from { background-position: 0 -20%; }
+  to { background-position: 0 120%; }
+}
+
+/* ...and at the last point, the sigil's eye surfacing in the noise */
+#lancer-flight-deck .lfd-dmg-corruption .lfd-cor-eye {
+  z-index: 1;
+  display: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cpath d='M2 30Q50 -10 98 30Q50 70 2 30Z' fill='none' stroke='%23e8e4d6' stroke-width='2'/%3E%3Ccircle cx='50' cy='30' r='15' fill='none' stroke='%2300a256' stroke-width='5'/%3E%3Ccircle cx='50' cy='30' r='6' fill='%23e8e4d6'/%3E%3C/svg%3E") 50% 46% / 70% auto no-repeat;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+#lancer-flight-deck.lfd-stress-3 .lfd-cor-eye {
+  display: block;
+  animation: lfd-cor-eye 11s steps(1) infinite;
+}
+
+@keyframes lfd-cor-eye {
+  0%, 61% { opacity: 0; }
+  62% { opacity: 0.12; transform: translateX(-3px); }
+  63% { opacity: 0.04; transform: none; }
+  64.5% { opacity: 0.1; }
+  66%, 100% { opacity: 0; }
+}
+
+/* A stress hit: hex garbage scrolls up the edge... */
+#lancer-flight-deck .lfd-dmg-corruption .lfd-cor-fx > .lfd-cor-hex {
+  width: auto;
+  height: auto;
+  translate: var(--side, 0%) 0;
+  font: 400 7.5px/1.2 var(--lfd-font-data);
+  white-space: pre;
+  color: var(--horus-green);
+  text-shadow: 0 0 3px rgb(0 162 86 / 0.6);
+  opacity: 0;
+  animation: lfd-cor-hex 1400ms steps(18) forwards;
+}
+
+@keyframes lfd-cor-hex {
+  0% { opacity: 0.9; transform: translateY(0); }
+  80% { opacity: 0.8; }
+  100% { opacity: 0; transform: translateY(-115%); }
+}
+
+/* ...the feed jams, a line at a time... */
+#lancer-flight-deck.lfd-theme-horus.is-jam .lfd-plate {
+  animation: lfd-horus-jam 700ms steps(1);
+}
+
+@keyframes lfd-horus-jam {
+  0%, 100% { transform: none; }
+  12% { transform: translateY(3px); }
+  26% { transform: translateY(1px); }
+  40% { transform: translateY(5px); }
+  56% { transform: translateY(2px); }
+  72% { transform: translateY(4px); }
+  86% { transform: translateY(1px); }
+}
+
+/* ...and every open eye blinks */
+#lancer-flight-deck.lfd-theme-horus.is-blink .lfd-horus-structure .lfd-pip.is-intact {
+  animation: lfd-horus-blink 360ms ease-in-out;
+}
+
+@keyframes lfd-horus-blink {
+  0%, 100% { transform: scaleY(1); }
+  40%, 55% { transform: scaleY(0.08); }
+}
+
+/* A structure hit tears the plates sideways, each by its own amount, the print splitting */
+#lancer-flight-deck.lfd-theme-horus.is-shaken {
+  animation: none;
+}
+
+#lancer-flight-deck.lfd-theme-horus.is-tear .lfd-plate {
+  animation: lfd-horus-tear 460ms steps(1);
+}
+
+#lancer-flight-deck.lfd-theme-horus [data-application-part="header"] { --tx: -3px; }
+#lancer-flight-deck.lfd-theme-horus [data-application-part="hull"] { --tx: 7px; }
+#lancer-flight-deck.lfd-theme-horus [data-application-part="heat"] { --tx: -5px; }
+#lancer-flight-deck.lfd-theme-horus [data-application-part="integrity"] { --tx: 4px; }
+#lancer-flight-deck.lfd-theme-horus [data-application-part="caution"] { --tx: -8px; }
+#lancer-flight-deck.lfd-theme-horus [data-application-part="actions"] { --tx: 5px; }
+
+@keyframes lfd-horus-tear {
+  0% { transform: translateX(var(--tx, 4px)); filter: drop-shadow(3px 0 0 rgb(0 162 86 / 0.8)) drop-shadow(-2px 0 0 rgb(232 228 214 / 0.5)); }
+  22% { transform: translateX(calc(var(--tx, 4px) * -0.6)); filter: drop-shadow(-3px 0 0 rgb(0 162 86 / 0.8)); }
+  45% { transform: translateX(calc(var(--tx, 4px) * 0.3)); filter: none; }
+  68%, 100% { transform: none; filter: none; }
+}
+
+/* The print slips further out of register with every structure point lost */
+#lancer-flight-deck.lfd-theme-horus .lfd-plate.lfd-body::after,
+#lancer-flight-deck.lfd-theme-horus .lfd-header::after {
+  translate: calc(2px + var(--lfd-dmg-structure, 0) * 1.6px) calc(1px + var(--lfd-dmg-structure, 0) * 0.8px);
+}
+
+#lancer-flight-deck.lfd-theme-horus.lfd-cracked .lfd-plate.lfd-body::after,
+#lancer-flight-deck.lfd-theme-horus.lfd-cracked .lfd-header::after {
+  border-color: rgb(0 162 86 / calc(0.42 + var(--lfd-dmg-structure, 0) * 0.08));
+}
+
+/* Collapsed: a corrupted block on the strip, a pixel at its foot */
+#lancer-flight-deck.lfd-dmg-corruption.is-collapsed:is(.lfd-cracked, .lfd-stressed) .lfd-tab {
+  position: relative;
+}
+
+#lancer-flight-deck.lfd-dmg-corruption.is-collapsed.lfd-cracked .lfd-tab::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 44px;
+  width: 14px;
+  height: 9px;
+  background:
+    repeating-conic-gradient(rgb(232 228 214 / 0.6) 0 25%, transparent 0 50%) 0 0 / 2px 2px,
+    linear-gradient(270deg, rgb(0 162 86 / 0.5), transparent);
+  animation: lfd-cor-flicker 7s steps(1) infinite;
+}
+
+#lancer-flight-deck.lfd-dmg-corruption.is-collapsed.lfd-stressed .lfd-tab::before {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  background: var(--lfd-caution);
+  box-shadow: 0 0 5px var(--lfd-caution);
+  animation: lfd-led 1.6s steps(2, jump-none) infinite;
+}
+
+#lancer-flight-deck.lfd-dmg-corruption.lfd-stress-3.is-collapsed .lfd-tab::before {
+  background: var(--lfd-warning);
+  box-shadow: 0 0 6px var(--lfd-warning);
+}
+
+/* Reduced motion: no static crawl, no roll, no surfacing eye; the blocks stand still */
+#lancer-flight-deck.lfd-reduce-motion :is(.lfd-cor-roll, .lfd-cor-eye) {
+  display: none !important;
+}
+
+#lancer-flight-deck.lfd-theme-horus.lfd-reduce-motion:is(.is-tear, .is-jam) .lfd-plate {
+  animation: none;
+}

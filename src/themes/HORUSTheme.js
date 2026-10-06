@@ -26,6 +26,8 @@ export class HORUSTheme extends BaseTheme {
     integrity: `${TEMPLATE_ROOT}/panel/horus/integrity.hbs`,
   };
 
+  static damage = "corruption";
+
   static boot = {
     caption: "LFD.HORUS.Boot.Caption",
     title: "LFD.HORUS.Boot.Title",

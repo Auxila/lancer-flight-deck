@@ -25,6 +25,8 @@ export class IPSNTheme extends BaseTheme {
     integrity: `${TEMPLATE_ROOT}/panel/ipsn/integrity.hbs`,
   };
 
+  static damage = "hull";
+
   static boot = {
     caption: "LFD.IPSN.Boot.Caption",
     title: "LFD.IPSN.Boot.Title",

@@ -26,6 +26,8 @@ export class HATheme extends BaseTheme {
     integrity: `${TEMPLATE_ROOT}/panel/ha/integrity.hbs`,
   };
 
+  static damage = "concrete";
+
   static boot = {
     caption: "LFD.HA.Boot.Caption",
     title: "LFD.HA.Boot.Title",

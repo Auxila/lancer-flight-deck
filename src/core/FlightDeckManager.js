@@ -766,8 +766,9 @@ export class FlightDeckManager {
     }
     if (has("stressHit")) {
       this.synth.play("geiger");
-      // Steam through the cracks
-      if (this.telemetry && this.telemetry.structure.value < this.telemetry.structure.max) this.synth.play("hiss");
+      // Steam through the cracks (the glass is the only damage that vents)
+      const cracked = this.telemetry && this.telemetry.structure.value < this.telemetry.structure.max;
+      if (cracked && this.shownTheme.damage === "glass") this.synth.play("hiss");
       panel?.pulse('[data-track="stress"]', "is-hit", 2500);
     }
     if (has("overcharge")) panel?.pulse(".lfd-oc", "is-hit", 900);

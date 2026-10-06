@@ -349,9 +349,11 @@ await g.evaluate(async uuid => {
   if (a.system.structure.value > 1) await a.update({ "system.structure.value": a.system.structure.value - 1 });
 }, mechUuid);
 await p.waitForTimeout(2500);
-await step(p, "the player's panel cracks when the GM deals structure damage", async () => {
-  const n = document.querySelectorAll("#lancer-flight-deck .lfd-fracture").length;
-  return { ok: n > 0, detail: n };
+await step(p, "the player's panel takes damage when the GM deals structure damage", async () => {
+  // Whatever the maker's damage looks like (glass, breach, kintsugi, corruption, concrete), each point is marked
+  const n = document.querySelectorAll("#lancer-flight-deck .lfd-dmg-mark").length;
+  const style = document.querySelector("#lancer-flight-deck .lfd-damage")?.dataset.style;
+  return { ok: n > 0, detail: { marks: n, style } };
 });
 await g.evaluate(async ([uuid, s]) => (await fromUuid(uuid)).update({ "system.structure.value": s.s, "system.stress.value": s.st }), [mechUuid, saved]);
 await p.waitForTimeout(1500);

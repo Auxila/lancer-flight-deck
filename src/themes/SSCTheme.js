@@ -23,6 +23,8 @@ export class SSCTheme extends BaseTheme {
     integrity: `${TEMPLATE_ROOT}/panel/ssc/integrity.hbs`,
   };
 
+  static damage = "kintsugi";
+
   static boot = {
     caption: "LFD.SSC.Boot.Caption",
     title: "LFD.SSC.Boot.Title",
