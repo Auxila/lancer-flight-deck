@@ -1,0 +1,1248 @@
+/* ==========================================================================
+   IPS-N: IPS-Northstar. The Union's shipwrights, and the escorts of its lanes.
+   Canon colours (lancer-data manufacturers.json): #0c4d99 light, #1c9ae8 dark.
+
+   A ship's bridge, not a terminal:
+   - DIN signage type (Bahnschrift on Windows, DIN on macOS) instead of Orbitron and monospace
+   - riveted plating with radiused hatch corners (ships round every opening; chamfers are GMS)
+   - the header is a nameboard: the Northstar rose, the maker and a hull number, the frame as a class
+   - section titles fly International Code flags: X (hull), J (reactor: "on fire, keep clear"), N
+   - HP is hull plating marked at every frame station (one per hit point)
+   - the Danger Zone threshold is a load line with its Plimsoll mark
+   - Overcharge is an engine order telegraph pointing at the next cost
+   - integrity is a damage control board: structure as watertight compartments, stress as valve wheels
+   Layout lives in templates/panel/ipsn/; the semantic colours (warning, caution, ok, heat) never change.
+   ========================================================================== */
+
+#lancer-flight-deck.lfd-theme-ipsn,
+.lfd-themed.lfd-theme-ipsn {
+  --lfd-bg: #0c1117;
+  --lfd-plate: #121a23;
+  --lfd-plate-2: #1a2531;
+  --lfd-line: #2f4256;
+  --lfd-ink: #e6eef6;
+  --lfd-ink-dim: #8ea2b6;
+  --lfd-accent: #1c9ae8;
+  --lfd-accent-deep: #0c4d99;
+  --lfd-accent-ink: #04121f;
+  --lfd-well: #070b10;
+  --lfd-well-2: #0a1017;
+  --lfd-edge: #223142;
+  --lfd-off: #1c2836;
+  --lfd-unlit: #5a6673;
+  --lfd-chamfer: 12px;
+  --lfd-font-display: "Bahnschrift", "DIN Alternate", "DIN Condensed", "D-DIN", "Barlow Semi Condensed", "Roboto Condensed", "Signika", sans-serif;
+  --lfd-font-data: "Bahnschrift", "DIN Alternate", "D-DIN", "Barlow", "Roboto", "Signika", sans-serif;
+
+  /* IPS-N's own: hull white, painted steel, and the radius every hatch corner shares */
+  --ipsn-hull: #e3ebf3;
+  --ipsn-steel: #3d5670;
+  --ipsn-steel-hi: #6f8ba6;
+  --ipsn-steel-lo: #263749;
+  --ipsn-radius: 7px;
+  --ipsn-flag-blue: #1f6fd1;
+}
+
+/* --------------------------------------------------------------------------
+   Plating
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-plate {
+  isolation: isolate;
+  clip-path: none;
+  border-radius: var(--ipsn-radius);
+  background:
+    linear-gradient(180deg, rgb(170 205 240 / 0.055), transparent 36%),
+    linear-gradient(90deg, rgb(0 0 0 / 0.16), transparent 10%, transparent 90%, rgb(0 0 0 / 0.16)),
+    var(--lfd-plate);
+  box-shadow:
+    inset 0 1px 0 rgb(200 225 250 / 0.07),
+    inset 0 -1px 0 rgb(0 0 0 / 0.4);
+}
+
+/* A domed rivet in each corner, under the instruments */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-plate.lfd-body::before {
+  --rivet: radial-gradient(circle at 40% 35%, #b8cadb 0 0.6px, #566e86 1px 1.6px, rgb(0 0 0 / 0.55) 1.9px, transparent 2.3px);
+  content: "";
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    var(--rivet) 0 0 / 5px 5px no-repeat,
+    var(--rivet) 100% 0 / 5px 5px no-repeat,
+    var(--rivet) 0 100% / 5px 5px no-repeat,
+    var(--rivet) 100% 100% / 5px 5px no-repeat;
+}
+
+/* Section titles: hull-white signage with a signal flag on a halyard */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-section-title > span:first-child {
+  --flag: var(--ipsn-hull);
+  position: relative;
+  padding-left: 17px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-section-title > span:first-child::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  width: 11px;
+  height: 8px;
+  translate: 0 -50%;
+  background: var(--flag);
+  border-left: 1px solid var(--ipsn-steel-hi);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.5);
+}
+
+/* X: white, blue cross */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-hull .lfd-section-title > span:first-child {
+  --flag:
+    linear-gradient(var(--ipsn-flag-blue), var(--ipsn-flag-blue)) center / 100% 2px no-repeat,
+    linear-gradient(var(--ipsn-flag-blue), var(--ipsn-flag-blue)) center / 2px 100% no-repeat,
+    var(--ipsn-hull);
+}
+
+/* J: blue, white, blue. "I am on fire and have dangerous cargo on board: keep well clear of me." */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-heat .lfd-section-title > span:first-child {
+  --flag: linear-gradient(var(--ipsn-flag-blue) 0 33.4%, var(--ipsn-hull) 0 66.6%, var(--ipsn-flag-blue) 0);
+}
+
+/* N: blue and white chequers */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-integrity .lfd-section-title > span:first-child {
+  --flag: conic-gradient(var(--ipsn-flag-blue) 25%, var(--ipsn-hull) 0 50%, var(--ipsn-flag-blue) 0 75%, var(--ipsn-hull) 0) 0 0 / 5.5px 4px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-readout {
+  font-family: var(--lfd-font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   Nameboard (header)
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-header {
+  padding: 7px 8px 12px;
+}
+
+/* The boot-topping: a hull-white pinstripe over a signal-blue band, like a ship's waterline */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  border-radius: 0 0 var(--ipsn-radius) var(--ipsn-radius);
+  background:
+    linear-gradient(var(--ipsn-hull), var(--ipsn-hull)) 0 0 / 100% 1px no-repeat,
+    linear-gradient(var(--lfd-accent), var(--lfd-accent-deep)) 0 2px / 100% 3px no-repeat;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-header-main {
+  gap: 9px;
+}
+
+/* The Northstar rose: a compass card in a steel bezel. It turns when you reach for it. */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-badge.lfd-ipsn-rose {
+  width: 40px;
+  min-width: 0;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 38%, #17375a, #0a1a2c 68%);
+  box-shadow:
+    inset 0 0 0 1.5px var(--lfd-accent),
+    inset 0 0 0 3.5px #091624,
+    inset 0 0 0 4.5px rgb(28 154 232 / 0.35),
+    0 1px 0 rgb(255 255 255 / 0.06),
+    0 2px 4px rgb(0 0 0 / 0.5);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-badge.lfd-ipsn-rose::after {
+  display: none;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-rose svg {
+  width: 31px;
+  height: 31px;
+  overflow: visible;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.6));
+  transition: rotate 520ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-badge.lfd-ipsn-rose:is(:hover, :focus-visible, [aria-expanded="true"]) svg {
+  rotate: 45deg;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-badge.lfd-ipsn-rose:hover {
+  filter: brightness(1.15);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-badge.lfd-ipsn-rose:focus-visible {
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn :is(.lfd-ipsn-rose, .lfd-ipsn-tab-rose) .lfd-star-la { fill: var(--ipsn-hull); }
+#lancer-flight-deck.lfd-theme-ipsn :is(.lfd-ipsn-rose, .lfd-ipsn-tab-rose) .lfd-star-lb { fill: var(--lfd-accent); }
+#lancer-flight-deck.lfd-theme-ipsn :is(.lfd-ipsn-rose, .lfd-ipsn-tab-rose) .lfd-star-sa { fill: #8cc3ee; }
+#lancer-flight-deck.lfd-theme-ipsn :is(.lfd-ipsn-rose, .lfd-ipsn-tab-rose) .lfd-star-sb { fill: #1765b8; }
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-registry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  font: 700 8.5px/1 var(--lfd-font-display);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--lfd-accent);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-registry span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-registry span::before {
+  content: "";
+  width: 9px;
+  height: 1px;
+  background: var(--lfd-line);
+}
+
+/* The vessel's name, painted large; the frame as its class */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-mech-name {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0.1em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-frame-name {
+  margin-top: 1px;
+  font-family: var(--lfd-font-display);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn.is-standby .lfd-frame-name {
+  font-family: var(--lfd-font-data);
+  letter-spacing: 0.02em;
+}
+
+/* Bridge push-buttons: round, steel-ringed */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-header-controls {
+  gap: 4px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-icon-btn {
+  border-radius: 50%;
+  border-color: var(--ipsn-steel-lo);
+  background: radial-gradient(circle at 50% 35%, #213042, #121b25 70%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 1px 2px rgb(0 0 0 / 0.5);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-icon-btn:hover {
+  border-color: var(--lfd-accent);
+  color: var(--ipsn-hull);
+}
+
+/* Comms strip: a signal lamp that winks while the link holds */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-datalink {
+  gap: 7px;
+  margin-top: 7px;
+  padding: 3px 7px;
+  border-color: var(--lfd-edge);
+  border-radius: 4px;
+  font-family: var(--lfd-font-display);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-lamp {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--lfd-ok);
+  box-shadow: 0 0 0 1.5px var(--ipsn-steel-lo), 0 0 6px color-mix(in srgb, var(--lfd-ok) 70%, transparent);
+  animation: lfd-ipsn-wink 2.6s steps(1) infinite;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-datalink.is-jammed .lfd-ipsn-lamp {
+  background: var(--lfd-caution);
+  box-shadow: 0 0 0 1.5px var(--ipsn-steel-lo), 0 0 6px color-mix(in srgb, var(--lfd-caution) 70%, transparent);
+  animation-duration: 0.5s;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-activation {
+  border-radius: 3px;
+}
+
+@keyframes lfd-ipsn-wink {
+  0%, 88% { opacity: 1; }
+  89%, 95% { opacity: 0.25; }
+}
+
+/* Collapsed: a narrow hatch with the rose on top (the header's own plating steps aside) */
+#lancer-flight-deck.lfd-theme-ipsn.is-collapsed .lfd-header {
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn.is-collapsed .lfd-header::after {
+  display: none;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn.is-collapsed .lfd-tab {
+  width: 36px;
+  padding: 5px 0 10px;
+  border-color: var(--lfd-line);
+  border-radius: 18px 18px var(--ipsn-radius) var(--ipsn-radius);
+  background:
+    linear-gradient(var(--lfd-accent), var(--lfd-accent-deep)) 0 100% / 100% 3px no-repeat,
+    linear-gradient(180deg, rgb(170 205 240 / 0.06), transparent 40%),
+    var(--lfd-plate);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-tab-badge.lfd-ipsn-tab-rose {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 38%, #17375a, #0a1a2c 68%);
+  box-shadow: inset 0 0 0 1px var(--lfd-accent);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-tab-rose svg {
+  width: 22px;
+  height: 22px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-tab-title {
+  font-size: 10px;
+  letter-spacing: 0.24em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-tab-mini {
+  font-family: var(--lfd-font-display);
+  font-size: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   Hull
+   -------------------------------------------------------------------------- */
+
+/* Hull plating, marked at every frame station; heavier marks every fifth */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-hp-bar.lfd-ipsn-plating {
+  height: 14px;
+  border-color: var(--lfd-edge);
+  border-radius: 3px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-plating .lfd-hp-fill {
+  background: linear-gradient(180deg, #f4f8fb, #cfdbe6 55%, #b2c3d3);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-plating .lfd-hp-fill.is-low {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lfd-warning) 80%, #fff), var(--lfd-warning) 60%);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-stations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgb(52 82 112 / 0.75) 0 2px, transparent 2px) -1px 0 / calc(500% / var(--lfd-hp-max)) 100% repeat-x,
+    linear-gradient(90deg, rgb(52 82 112 / 0.45) 0 1px, transparent 1px) 0 0 / calc(100% / var(--lfd-hp-max)) 100% repeat-x,
+    linear-gradient(180deg, transparent 0 62%, rgb(28 154 232 / 0.35) 62% 70%, transparent 70%);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-tag {
+  border-color: var(--lfd-edge);
+  border-radius: 3px;
+  font-family: var(--lfd-font-display);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-tag b {
+  margin-right: 4px;
+  letter-spacing: 0.12em;
+}
+
+/* Armor as plates, one per point */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-plates {
+  display: inline-block;
+  width: calc(var(--n) * 5px);
+  height: 9px;
+  margin-right: calc(min(var(--n), 1) * 4px);
+  vertical-align: -1px;
+  background: repeating-linear-gradient(90deg, var(--ipsn-steel-hi) 0 3px, transparent 3px 5px);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-stats {
+  gap: 4px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-stat {
+  padding: 3px 0 2px;
+  border-top: none;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--lfd-edge);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-stat dt {
+  font-family: var(--lfd-font-display);
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-stat dd {
+  font-family: var(--lfd-font-display);
+  font-size: 15px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-checks {
+  gap: 4px;
+  margin-top: 4px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-check {
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-check-bonus {
+  font-family: var(--lfd-font-display);
+  font-size: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Value editors
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-step {
+  border-color: var(--lfd-edge);
+  border-radius: 4px;
+  font-family: var(--lfd-font-display);
+  font-size: 11px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-editor-value,
+#lancer-flight-deck.lfd-theme-ipsn .lfd-editor-value input {
+  font-family: var(--lfd-font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-editor-value input {
+  font-size: 17px;
+  border-radius: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   Reactor: draft scale, load line, engine order telegraph
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-draft {
+  margin-top: 9px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-draft .lfd-heat-segments {
+  height: 19px;
+  padding: 0;
+  gap: 3px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-draft .lfd-seg {
+  display: grid;
+  place-items: end center;
+  border-color: var(--lfd-edge);
+  border-radius: 3px;
+  transform: none;
+}
+
+/* Each cell carries its number, like draft marks on a hull */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-seg > b {
+  padding-bottom: 2px;
+  font: 700 8px/1 var(--lfd-font-display);
+  color: color-mix(in srgb, var(--lfd-ink-dim) 70%, var(--lfd-unlit));
+  font-variant-numeric: tabular-nums;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-seg.is-dz > b {
+  color: color-mix(in srgb, var(--lfd-heat-danger) 55%, var(--lfd-unlit));
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-seg.is-filled > b {
+  color: rgb(0 0 0 / 0.6);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-seg.is-filled {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lfd-heat-safe) 70%, #fff), var(--lfd-heat-safe) 55%);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-seg.is-filled.is-dz {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lfd-heat-danger) 75%, #fff), var(--lfd-heat-danger) 55%);
+}
+
+/* The load line: the boundary tick runs from the Plimsoll mark down past the gauge */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-draft .lfd-seg.is-boundary::before {
+  left: -2.5px;
+  top: 0;
+  bottom: -4px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-plimsoll {
+  position: absolute;
+  left: -1.5px;
+  top: 0;
+  z-index: 1;
+  width: 13px;
+  height: 13px;
+  translate: -50% -50%;
+  border: 2px solid var(--lfd-heat-danger);
+  border-radius: 50%;
+  background: var(--lfd-plate);
+  pointer-events: none;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-plimsoll::after {
+  content: "";
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  top: 50%;
+  height: 2px;
+  translate: 0 -50%;
+  background: var(--lfd-heat-danger);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-dz-line .lfd-ipsn-plimsoll {
+  left: 1px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-heat-continuous {
+  border-radius: 3px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-dz-label {
+  margin-top: 5px;
+  font-family: var(--lfd-font-display);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+
+/* The same mark in the legend, so the line reads as the Danger Zone */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-loadline {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-loadline::before {
+  content: "";
+  width: 13px;
+  height: 7px;
+  background:
+    linear-gradient(var(--lfd-heat-danger), var(--lfd-heat-danger)) center / 100% 1.5px no-repeat,
+    radial-gradient(circle, transparent 0 2px, var(--lfd-heat-danger) 2.3px 3.4px, transparent 3.7px) center / 7px 7px no-repeat;
+}
+
+/* Engine order telegraph */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-telegraph {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 10px 6px 8px;
+  border-color: var(--lfd-edge);
+  border-radius: 5px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dial {
+  --r: 56px;
+  --step: calc(180deg / var(--n));
+  position: relative;
+  flex: none;
+  width: calc(var(--r) * 2);
+  height: calc(var(--r) + 7px);
+  margin-top: 3px;
+}
+
+/* Steel bezel and the telegraph's base plate */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dial::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  top: -3px;
+  height: calc(var(--r) + 3px);
+  border: 2px solid var(--ipsn-steel-lo);
+  border-bottom: none;
+  border-radius: calc(var(--r) + 3px) calc(var(--r) + 3px) 0 0;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dial::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: calc(var(--r) - 1px);
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(var(--ipsn-steel-hi), var(--ipsn-steel-lo));
+}
+
+/* The face: one sector per rung. Passed orders dim, the next one lit in signal blue. */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dial-face {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: var(--r);
+  border-radius: var(--r) var(--r) 0 0;
+  background:
+    repeating-conic-gradient(from -90deg at 50% 100%, var(--lfd-line) 0 1.2deg, transparent 1.2deg var(--step)),
+    conic-gradient(from calc(-90deg + var(--at) * var(--step)) at 50% 100%, var(--lfd-accent) 0 var(--step), transparent 0),
+    conic-gradient(from -90deg at 50% 100%, color-mix(in srgb, var(--lfd-accent-deep) 30%, var(--lfd-well)) 0 calc(var(--at) * var(--step)), transparent 0),
+    radial-gradient(circle at 50% 100%, transparent 0 calc(var(--r) - 5px), rgb(255 255 255 / 0.05) calc(var(--r) - 5px)),
+    var(--lfd-well);
+  -webkit-mask: radial-gradient(circle at 50% 100%, transparent 0 calc(var(--r) * 0.5), #000 calc(var(--r) * 0.5 + 0.5px) calc(var(--r) - 0.5px), transparent var(--r));
+  mask: radial-gradient(circle at 50% 100%, transparent 0 calc(var(--r) * 0.5), #000 calc(var(--r) * 0.5 + 0.5px) calc(var(--r) - 0.5px), transparent var(--r));
+}
+
+/* Orders around the arc, upright */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dial .lfd-oc-ladder {
+  position: absolute;
+  inset: 0;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dial .lfd-oc-ladder li {
+  --theta: calc(-90deg + (var(--i) + 0.5) * var(--step));
+  position: absolute;
+  left: 50%;
+  top: var(--r);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: none;
+  transform: rotate(var(--theta)) translateY(calc(var(--r) * -0.75)) rotate(calc(-1 * var(--theta)));
+  font: 700 min(9.5px, calc(38px / var(--n)))/1 var(--lfd-font-display);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dial .lfd-oc-ladder li.is-spent {
+  opacity: 0.5;
+  text-decoration: none;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dial .lfd-oc-ladder li.is-current {
+  border: none;
+  color: var(--lfd-accent-ink);
+}
+
+/* Pointer and hub */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-needle {
+  --theta: calc(-90deg + (var(--at) + 0.5) * var(--step));
+  position: absolute;
+  left: calc(50% - 3px);
+  top: calc(var(--r) * 0.55);
+  width: 6px;
+  height: calc(var(--r) * 0.45);
+  transform-origin: 50% 100%;
+  rotate: var(--theta);
+  background: linear-gradient(90deg, var(--ipsn-hull) 0 50%, #9fb4c8 50%);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  transition: rotate 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-hub {
+  position: absolute;
+  left: 50%;
+  top: var(--r);
+  width: 13px;
+  height: 13px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #d2dee9, #607a94 55%, #263749);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+}
+
+/* An Overcharge rings the telegraph over: the pointer swings up from the last order */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-oc.is-hit .lfd-ipsn-needle {
+  animation: lfd-ipsn-swing 900ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+/* From the previous order (never below the first one) */
+@keyframes lfd-ipsn-swing {
+  0% { rotate: max(calc(var(--theta) - var(--step)), calc(-90deg + var(--step) / 2)); }
+  45% { rotate: calc(var(--theta) + 9deg); }
+  70% { rotate: calc(var(--theta) - 3deg); }
+  100% { rotate: var(--theta); }
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-order {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-order .lfd-oc-head {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-oc-label {
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-order .lfd-oc-cost {
+  padding: 2px 10px 1px;
+  border-radius: 4px;
+  font: 700 19px/1.1 var(--lfd-font-display);
+  letter-spacing: 0.04em;
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.25), inset 0 1px 0 rgb(255 255 255 / 0.3);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-order .lfd-oc-odds {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  font-family: var(--lfd-font-display);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+
+/* --------------------------------------------------------------------------
+   Damage control
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dc .lfd-track {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 5px 7px 6px;
+  background: var(--lfd-well-2);
+  border: 1px solid var(--lfd-edge);
+  border-radius: 5px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dc .lfd-track + .lfd-track {
+  margin-top: 0;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dc .lfd-track-head {
+  gap: 5px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dc .lfd-track-label {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-overflow: ellipsis;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dc .lfd-readout {
+  font-size: 16px;
+  line-height: 1;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dc .lfd-odds-alt {
+  flex: none;
+  margin: 0;
+  border-radius: 2px;
+  font-family: var(--lfd-font-display);
+  font-size: 7.5px;
+  text-transform: uppercase;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dc .lfd-pips {
+  flex: none;
+}
+
+/* Structure: the hull in profile, bow forward, cut into watertight compartments */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-pips.lfd-ipsn-structure {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  gap: 2px;
+  height: 26px;
+  background: var(--lfd-well);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 4px) 30%, calc(100% - 15px) 100%, 9px 100%, 3px 82%, 0 50%);
+}
+
+/* The waterline: a signal-blue boot-top across the hull */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-pips.lfd-ipsn-structure::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0 60%, rgb(28 154 232 / 0.55) 60% 66%, transparent 66%);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-structure .lfd-pip {
+  width: auto;
+  height: auto;
+  clip-path: none;
+  background: linear-gradient(180deg, #6a87a3, var(--ipsn-steel) 40%, var(--ipsn-steel-lo));
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.14);
+}
+
+/* Lost: flooded. Water to the deckhead, in the warning colour. */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-structure .lfd-pip.is-lost {
+  background:
+    linear-gradient(180deg, transparent 0 24%, var(--lfd-warning) 24% calc(24% + 1.5px), transparent calc(24% + 1.5px)),
+    linear-gradient(180deg, color-mix(in srgb, var(--lfd-warning) 10%, var(--lfd-well)) 0 24%, transparent 24%),
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--lfd-warning) 80%, transparent) 0 2px, transparent 2px 5px),
+    color-mix(in srgb, var(--lfd-warning) 24%, var(--lfd-well));
+  box-shadow: none;
+}
+
+/* Stress: reactor valve wheels; a lost one has blown */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-pips.lfd-ipsn-stress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-stress .lfd-pip {
+  --spoke: #7d98b2;
+  width: 24px;
+  height: 24px;
+  clip-path: none;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #d2dee9 0 2px, #607a94 2.4px 3.4px, transparent 3.8px),
+    radial-gradient(circle, transparent 0 8.6px, #8ea8c1 9px 10.4px, var(--ipsn-steel-lo) 10.8px 11.4px, transparent 11.8px),
+    linear-gradient(0deg, transparent calc(50% - 1px), var(--spoke) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(90deg, transparent calc(50% - 1px), var(--spoke) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+    radial-gradient(circle, #15212d 0 9px, transparent 9.4px);
+  rotate: 45deg;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-stress .lfd-pip.is-lost {
+  background:
+    radial-gradient(circle, transparent 0 8.6px, var(--lfd-warning) 9px 10.6px, transparent 11px),
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--lfd-warning) 80%, transparent) 0 2px, transparent 2px 5px),
+    color-mix(in srgb, var(--lfd-warning) 22%, var(--lfd-well));
+}
+
+/* The odds: the bar first, then the roll and what's at stake */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dc .lfd-odds {
+  margin-top: 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dc .lfd-odds-bar {
+  height: 6px;
+  border-radius: 3px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dc .lfd-odds-head {
+  flex-wrap: wrap;
+  gap: 0 6px;
+  margin: 4px 0 0;
+  font-family: var(--lfd-font-display);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-ipsn-dc .lfd-odds-final {
+  font-family: var(--lfd-font-display);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+}
+
+/* --------------------------------------------------------------------------
+   Annunciator and actions (base layout, IPS-N hardware)
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-apply-seg {
+  border-color: var(--lfd-edge);
+  border-radius: 4px;
+  font-family: var(--lfd-font-display);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-annunciator {
+  gap: 4px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-tile,
+#lancer-flight-deck.lfd-theme-ipsn button.lfd-tile {
+  min-height: 28px;
+  border-radius: 4px;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-tile-detail {
+  font-family: var(--lfd-font-display);
+  font-size: 10.5px;
+}
+
+/* Action lamps: port-lights in steel bezels */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-action-bus {
+  gap: 4px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-light {
+  gap: 3px;
+  min-height: 40px;
+  padding: 5px 0 3px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #0f1821, var(--lfd-well-2));
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-light-lamp {
+  width: 11px;
+  height: 11px;
+  box-shadow:
+    0 0 0 2px var(--ipsn-steel-lo),
+    0 0 0 3px #060a0e,
+    inset 0 0 3px #000;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-light.is-on .lfd-light-lamp {
+  background: radial-gradient(circle at 40% 35%, color-mix(in srgb, var(--lfd-ok) 45%, #fff), var(--lfd-ok) 60%);
+  box-shadow:
+    0 0 0 2px var(--ipsn-steel-lo),
+    0 0 0 3px #060a0e,
+    0 0 9px color-mix(in srgb, var(--lfd-ok) 75%, transparent);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-light-core.is-on .lfd-light-lamp {
+  background: radial-gradient(circle at 40% 35%, #bfe3fb, var(--lfd-accent) 60%);
+  box-shadow:
+    0 0 0 2px var(--ipsn-steel-lo),
+    0 0 0 3px #060a0e,
+    0 0 9px var(--lfd-accent);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-light-label {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-light-detail {
+  font-family: var(--lfd-font-display);
+  font-size: 10px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-light-sub {
+  font-size: 7px;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-buttons {
+  gap: 5px;
+}
+
+/* Heavy push-plates: a lit edge on top, a hard shadow underneath */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-btn {
+  border-color: var(--lfd-edge);
+  border-bottom: 1px solid var(--lfd-edge);
+  border-radius: 6px;
+  background: linear-gradient(180deg, #223244, var(--lfd-plate-2) 45%, #141e29);
+  box-shadow:
+    inset 0 1px 0 rgb(200 225 250 / 0.12),
+    inset 0 -2px 0 rgb(0 0 0 / 0.35),
+    0 1px 0 rgb(0 0 0 / 0.5);
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-btn span {
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-btn small {
+  font-family: var(--lfd-font-display);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lfd-accent) 30%, #223244), color-mix(in srgb, var(--lfd-accent) 18%, var(--lfd-plate-2)));
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-btn-core:not(:disabled) {
+  border-bottom-color: var(--lfd-edge);
+  box-shadow:
+    inset 0 1px 0 rgb(200 225 250 / 0.12),
+    inset 0 -2px 0 var(--lfd-accent),
+    0 1px 0 rgb(0 0 0 / 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   Cold boot: a sonar sweep, then BATTLE STATIONS under the motto
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot {
+  background:
+    radial-gradient(130% 75% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.6)),
+    repeating-linear-gradient(0deg, rgb(150 200 255 / 0.03) 0 1px, transparent 1px 3px),
+    #03080e;
+}
+
+/* The firmware log stays monospace: its columns line up */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-stream {
+  font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Consolas, "Liberation Mono", monospace;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-badge,
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-stamp {
+  border-radius: 3px;
+}
+
+/* Range rings and a sweeping beam behind the card */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-finish {
+  overflow: hidden;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-finish::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 640px;
+  height: 640px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 0deg, rgb(28 154 232 / 0.32), rgb(28 154 232 / 0.06) 50deg, transparent 70deg),
+    repeating-radial-gradient(circle, transparent 0 39px, rgb(28 154 232 / 0.16) 39px 40px),
+    linear-gradient(rgb(28 154 232 / 0.1), rgb(28 154 232 / 0.1)) center / 1px 100% no-repeat,
+    linear-gradient(rgb(28 154 232 / 0.1), rgb(28 154 232 / 0.1)) center / 100% 1px no-repeat;
+  -webkit-mask: radial-gradient(circle, #000 0 45%, transparent 70%);
+  mask: radial-gradient(circle, #000 0 45%, transparent 70%);
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot.is-finish .lfd-boot-finish::before {
+  opacity: 1;
+  animation: lfd-ipsn-sweep 2.4s linear infinite;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot.is-still .lfd-boot-finish::before {
+  animation: none;
+}
+
+@keyframes lfd-ipsn-sweep {
+  to { rotate: 1turn; }
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-frame {
+  background: radial-gradient(closest-side, rgb(3 8 14 / 0.85), rgb(3 8 14 / 0.6) 70%, transparent);
+}
+
+/* The brackets become radiused hatch corners */
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-corner.is-tl { border-top-left-radius: 7px; }
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-corner.is-tr { border-top-right-radius: 7px; }
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-corner.is-bl { border-bottom-left-radius: 7px; }
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-corner.is-br { border-bottom-right-radius: 7px; }
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-caption {
+  font-size: 9.5px;
+  letter-spacing: 0.26em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-title {
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn .lfd-boot-bar i {
+  border-radius: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   HUD menus: radiused glass, corner rivets, round port-light glyphs
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck-hud.lfd-hud.lfd-theme-ipsn {
+  --hud-hex: circle(50% at 50% 50%);
+  border-radius: 9px;
+}
+
+#lancer-flight-deck-hud.lfd-hud.lfd-theme-ipsn .lfd-hud-frame {
+  border-radius: inherit;
+}
+
+#lancer-flight-deck-hud.lfd-hud.lfd-theme-ipsn::before {
+  --rivet: radial-gradient(circle at 40% 35%, #b8cadb 0 0.6px, #566e86 1px 1.6px, rgb(0 0 0 / 0.55) 1.9px, transparent 2.3px);
+  inset: 3px;
+  background:
+    var(--rivet) 0 0 / 5px 5px no-repeat,
+    var(--rivet) 100% 0 / 5px 5px no-repeat,
+    var(--rivet) 0 100% / 5px 5px no-repeat,
+    var(--rivet) 100% 100% / 5px 5px no-repeat;
+}
+
+/* Plating seams instead of scanlines */
+#lancer-flight-deck-hud.lfd-theme-ipsn .lfd-hud-frame::before {
+  background: repeating-linear-gradient(0deg, rgb(160 200 240 / 0.02) 0 1px, transparent 1px 6px);
+}
+
+#lancer-flight-deck-hud.lfd-theme-ipsn .lfd-hud-glyph {
+  border-radius: 50%;
+}
+
+#lancer-flight-deck-hud.lfd-theme-ipsn .lfd-hud-tiles .lfd-hud-glyph {
+  width: 28px;
+  height: 28px;
+}
+
+#lancer-flight-deck-hud.lfd-theme-ipsn .lfd-hud-rows .lfd-hud-glyph {
+  width: 21px;
+  height: 21px;
+}
+
+#lancer-flight-deck-hud.lfd-theme-ipsn .lfd-hud-tiles .lfd-hud-item {
+  border-radius: 6px;
+}
+
+#lancer-flight-deck-hud.lfd-theme-ipsn .lfd-hud-rows .lfd-hud-item {
+  border-radius: 0 5px 5px 0;
+}
+
+#lancer-flight-deck-hud.lfd-theme-ipsn .lfd-hud-tiles .lfd-hud-label {
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+
+/* --------------------------------------------------------------------------
+   Hover cards and the theme picker
+   -------------------------------------------------------------------------- */
+
+#tooltip.lfd-hud-tip.lfd-theme-ipsn {
+  --lfd-font-body: var(--lfd-font-data);
+  border-radius: 6px;
+}
+
+#tooltip.lfd-hud-tip.lfd-theme-ipsn .lfd-tip {
+  font-family: var(--lfd-font-data);
+  letter-spacing: 0.01em;
+}
+
+#lancer-flight-deck-themes.lfd-theme-menu.lfd-theme-ipsn {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#lancer-flight-deck-themes.lfd-theme-ipsn .lfd-theme-option {
+  border-radius: 0 5px 5px 0;
+}
+
+#lancer-flight-deck-themes.lfd-theme-ipsn .lfd-theme-chip {
+  border-radius: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-ipsn.lfd-reduce-motion :is(.lfd-ipsn-lamp, .lfd-ipsn-needle) {
+  animation: none;
+  transition: none;
+}
+
+#lancer-flight-deck.lfd-theme-ipsn.lfd-reduce-motion .lfd-ipsn-rose svg {
+  transition: none;
+}
+
+/* --------------------------------------------------------------------------
+   The theme picker's chip
+   -------------------------------------------------------------------------- */
+
+.lfd-theme-chip.lfd-theme-ipsn {
+  background: linear-gradient(180deg, var(--lfd-accent), color-mix(in srgb, var(--lfd-accent) 70%, var(--lfd-accent-deep)));
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   NPC Deck (the GM's board): the same hardware, quieter. Portholes for portraits.
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck-npc.lfd-theme-ipsn .lfd-npc-frame {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+#lancer-flight-deck-npc.lfd-theme-ipsn .lfd-npc-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  clip-path: none;
+  box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.25);
+}
+
+#lancer-flight-deck-npc.lfd-theme-ipsn :is(.lfd-init-portrait, .lfd-init-portrait img, .lfd-init-glyph) {
+  clip-path: circle(50% at 50% 50%);
+}
+
+#lancer-flight-deck-npc.lfd-theme-ipsn .lfd-npc-row {
+  border-radius: 0 5px 5px 0;
+}
+
+#lancer-flight-deck-npc.lfd-theme-ipsn .lfd-npc-bar {
+  border-radius: 3px;
+}
+
+#lancer-flight-deck-npc.lfd-theme-ipsn .lfd-npc-pips i {
+  width: 7px;
+  height: 7px;
+  clip-path: none;
+  border-radius: 50%;
+}

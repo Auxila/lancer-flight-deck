@@ -2,9 +2,9 @@ import { formatPct } from "../../core/Odds.js";
 
 /** Structure and stress pips, each with the odds of its next check. */
 export function buildIntegrity(t) {
-  return {
-    tracks: [track("structure", t.structure), track("stress", t.stress)],
-  };
+  const tracks = [track("structure", t.structure), track("stress", t.stress)];
+  // One setting covers both tracks: layouts that show it once read it here
+  return { tracks, altRules: tracks.some(tr => tr.altRules) };
 }
 
 function track(kind, { value, max, next }) {

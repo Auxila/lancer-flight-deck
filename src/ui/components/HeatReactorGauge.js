@@ -8,6 +8,9 @@ export function buildHeat(t, { editable = false } = {}) {
   const ocView = {
     cost: oc.cost ?? "—",
     rungs: oc.rungs.map((label, i) => ({ label, current: i === oc.index, spent: i < oc.index })),
+    // Where the next Overcharge sits on the ladder (dial themes point at it)
+    index: oc.index,
+    count: oc.rungs.length,
     range: odds ? `${odds.heatMin}–${odds.heatMax}` : null,
     pOverCap: odds && max > 0 ? formatPct(odds.pOverCap) : null,
     risk: !odds || max <= 0 ? "none" : odds.pOverCap >= 0.5 ? "high" : odds.pOverCap > 0 ? "some" : "none",

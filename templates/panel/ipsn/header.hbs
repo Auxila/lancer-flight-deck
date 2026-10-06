@@ -1,7 +1,15 @@
-<header class="lfd-header lfd-plate">
-  {{!-- Collapsed tab: a slim vertical strip with the two numbers that matter most --}}
+{{!-- IPS-N: the bridge nameboard. The Northstar rose opens the theme picker; over the mech's name, the
+      maker and a hull number (cosmetic, stable per mech); under it, the frame as a vessel class. --}}
+<header class="lfd-header lfd-plate lfd-ipsn-nameboard">
   <button type="button" class="lfd-tab" data-action="toggleCollapse" data-tooltip="LFD.Header.Expand" aria-label="{{localize 'LFD.Header.Expand'}}">
-    <span class="lfd-tab-badge">{{header.badge}}</span>
+    <span class="lfd-tab-badge lfd-ipsn-tab-rose" aria-hidden="true">
+      <svg viewBox="-16 -16 32 32" focusable="false">
+        <path class="lfd-star-sa" d="M0 0L0 -3.2L6.08 -6.08ZM0 0L3.2 0L6.08 6.08ZM0 0L0 3.2L-6.08 6.08ZM0 0L-3.2 0L-6.08 -6.08Z"/>
+        <path class="lfd-star-sb" d="M0 0L6.08 -6.08L3.2 0ZM0 0L6.08 6.08L0 3.2ZM0 0L-6.08 6.08L-3.2 0ZM0 0L-6.08 -6.08L0 -3.2Z"/>
+        <path class="lfd-star-la" d="M0 0L-2.26 -2.26L0 -15ZM0 0L2.26 -2.26L15 0ZM0 0L2.26 2.26L0 15ZM0 0L-2.26 2.26L-15 0Z"/>
+        <path class="lfd-star-lb" d="M0 0L0 -15L2.26 -2.26ZM0 0L15 0L2.26 2.26ZM0 0L0 15L-2.26 2.26ZM0 0L-15 0L-2.26 -2.26Z"/>
+      </svg>
+    </span>
     <span class="lfd-tab-title">{{localize "LFD.Title"}}</span>
     {{#unless standby}}
     <span class="lfd-tab-mini {{#if header.mini.danger}}is-danger{{/if}}" aria-hidden="true">
@@ -15,15 +23,28 @@
 
   <div class="lfd-header-main">
     <span class="lfd-drag-grip" data-tooltip="LFD.Move.Hint" aria-hidden="true"><i class="fa-solid fa-grip-vertical"></i></span>
-    <button type="button" class="lfd-badge" data-action="themeMenu" data-tooltip="{{themeTip}}" aria-label="{{themeTip}}"
-            aria-haspopup="menu" aria-expanded="false">{{header.badge}}</button>
+    <button type="button" class="lfd-badge lfd-ipsn-rose" data-action="themeMenu" data-tooltip="{{themeTip}}" aria-label="{{themeTip}}"
+            aria-haspopup="menu" aria-expanded="false">
+      <svg viewBox="-16 -16 32 32" aria-hidden="true" focusable="false">
+        <g class="lfd-ipsn-rose-card">
+          <path class="lfd-star-sa" d="M0 0L0 -3.2L6.08 -6.08ZM0 0L3.2 0L6.08 6.08ZM0 0L0 3.2L-6.08 6.08ZM0 0L-3.2 0L-6.08 -6.08Z"/>
+          <path class="lfd-star-sb" d="M0 0L6.08 -6.08L3.2 0ZM0 0L6.08 6.08L0 3.2ZM0 0L-6.08 6.08L-3.2 0ZM0 0L-6.08 -6.08L0 -3.2Z"/>
+          <path class="lfd-star-la" d="M0 0L-2.26 -2.26L0 -15ZM0 0L2.26 -2.26L15 0ZM0 0L2.26 2.26L0 15ZM0 0L-2.26 2.26L-15 0Z"/>
+          <path class="lfd-star-lb" d="M0 0L0 -15L2.26 -2.26ZM0 0L15 0L2.26 2.26ZM0 0L0 15L-2.26 2.26ZM0 0L-15 0L-2.26 -2.26Z"/>
+        </g>
+      </svg>
+    </button>
     <div class="lfd-ident">
       {{#if standby}}
+      <div class="lfd-ipsn-registry"><b>IPS-NORTHSTAR</b></div>
       <div class="lfd-mech-name">{{localize "LFD.Header.Standby"}}</div>
       <div class="lfd-frame-name">{{localize "LFD.Header.StandbyHint"}}</div>
       {{else}}
+      <div class="lfd-ipsn-registry">
+        <b>IPS-N</b>{{#if header.registry}}<span>{{localize "LFD.IPSN.Hull" id=header.registry}}</span>{{/if}}
+      </div>
       <button type="button" class="lfd-mech-name" data-action="openSheet" data-tooltip="LFD.Header.OpenSheet">{{header.mechName}}</button>
-      <div class="lfd-frame-name">{{header.frameName}}</div>
+      <div class="lfd-frame-name">{{#if header.hasFrame}}{{localize "LFD.IPSN.FrameClass" frame=header.frameName}}{{else}}{{header.frameName}}{{/if}}</div>
       {{/if}}
     </div>
     <div class="lfd-header-controls">
@@ -49,6 +70,7 @@
 
   {{#unless standby}}
   <div class="lfd-datalink {{#if header.jammed}}is-jammed{{/if}}">
+    <span class="lfd-ipsn-lamp" aria-hidden="true"></span>
     <span class="lfd-datalink-label">{{localize "LFD.Header.Pilot"}}</span>
     <span class="lfd-datalink-callsign">{{header.callsign}}</span>
     {{#if header.activation}}<span class="lfd-activation">{{localize "LFD.Header.Activation"}}</span>{{/if}}

@@ -48,7 +48,8 @@
     "styles/hud.css",
     "styles/damage.css",
     "styles/npc.css",
-    "styles/themes/gms.css"
+    "styles/themes/gms.css",
+    "styles/themes/ipsn.css"
   ],
   "languages": [
     {

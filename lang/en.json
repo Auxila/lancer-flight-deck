@@ -4,7 +4,15 @@
     "ToolTitle": "Flight Deck (Alt+C)",
     "Theme": {
       "Base": "Base",
-      "GMS": "GMS: General Massive Systems"
+      "GMS": "GMS: General Massive Systems",
+      "IPSN": "IPS-N: IPS-Northstar",
+      "SSC": "SSC: Smith-Shimano Corpro",
+      "HORUS": "HORUS",
+      "HA": "HA: Harrison Armory",
+      "Tagline": {
+        "GMS": "Union standard issue: red on gunmetal",
+        "IPSN": "A ship's bridge: riveted plate, signal flags, a telegraph"
+      }
     },
     "Settings": {
       "Enabled": {
@@ -897,6 +905,24 @@
       "Done": "Flight Deck data removed: {filters} token filters, notes on {actors} actors.",
       "Nothing": "Flight Deck: nothing to remove; this world holds no Flight Deck data.",
       "GmOnly": "Flight Deck: only a GM can remove Flight Deck data."
+    },
+    "ThemeMenu": {
+      "Title": "Cockpit theme",
+      "Open": "Cockpit theme: {badge}. Click to change",
+      "Auto": "Match frame",
+      "AutoDetail": "{frame}: {badge}",
+      "AutoNone": "No mech linked: {badge}",
+      "Footer": "Hover: preview · Click: choose · Esc: close"
+    },
+    "IPSN": {
+      "Hull": "Hull {id}",
+      "FrameClass": "{frame}-class",
+      "DamageControl": "Damage control",
+      "Boot": {
+        "Caption": "Your friend in an unfriendly sea",
+        "Title": "Battle stations",
+        "Stamp": "All hands"
+      }
     }
   }
 }

@@ -241,6 +241,8 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     });
     Hooks.on("canvasReady", () => this.queue());
     Hooks.on("canvasTearDown", () => LookHere.hide());
+    // The GM's own Cockpit theme also dresses the deck
+    Hooks.on("clientSettingChanged", key => key === `${MODULE_ID}.${SETTINGS.THEME}` && this.queue());
     window.addEventListener("resize", foundry.utils.debounce(() => this.rendered && this.frame.apply(), 80));
   }
 

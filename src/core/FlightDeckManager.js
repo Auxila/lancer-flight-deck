@@ -1,6 +1,7 @@
 import { ALERT_MS, MODULE_ID, SCALE_MAX, SCALE_MIN, SETTINGS, STATUS } from "../constants.js";
 import { getSetting, registerSettings, setSetting } from "../settings.js";
 import { resolveTheme } from "../themes/registry.js";
+import { ThemeMenu } from "../ui/ThemeMenu.js";
 import { FlightDeckPanel, PART_IDS } from "../ui/FlightDeckPanel.js";
 import { inActiveCombat, recordReaction, runEntry, trackerChange } from "../actions/runner.js";
 import { mountedWeapons } from "../actions/catalog.js";
@@ -34,6 +35,8 @@ export class FlightDeckManager {
   synth = new SynthesizerEngine();
   /** The HUD menus beside the panel (actions, weapons, systems). */
   hud = new HudMenu(this);
+  /** The theme picker under the header badge. */
+  themeMenu = new ThemeMenu(this);
   /** @type {TelemetryAdapter|null} */
   adapter = null;
   /** @type {Actor|null} */
@@ -41,6 +44,8 @@ export class FlightDeckManager {
   /** Latest telemetry snapshot, or null in standby. */
   telemetry = null;
   theme = resolveTheme(null);
+  /** A theme shown for a moment while the picker hovers it; null shows `theme`. */
+  #previewTheme = null;
 
   /**
    * Newly lit tiles that are still flashing: id -> time lit. They fade on their own after ALERT_MS.
@@ -206,6 +211,7 @@ export class FlightDeckManager {
     const panel = this.panel;
     this.panel = null;
     this.hud.close();
+    this.themeMenu.close();
     this.syncTokenActionHud();
     await panel?.close({ animate: false });
   }
@@ -631,11 +637,13 @@ export class FlightDeckManager {
   /** The full render context, shared by every template part. */
   buildContext() {
     const t = this.telemetry;
-    const theme = this.theme;
+    // The picker's preview renders in full, layout included, since a theme can bring its own templates
+    const theme = this.shownTheme;
     const base = {
       themeId: theme.id,
       // Hover cards (condition tiles) wear the cockpit theme and open away from the docked edge
       tipClass: `lfd-hud-tip lfd-themed ${theme.cssClass}`,
+      themeTip: game.i18n.format("LFD.ThemeMenu.Open", { badge: theme.badge }),
       tipDirection: this.floating ? null : this.dockSide === "right" ? "LEFT" : "RIGHT",
       standby: !t,
       header: {
@@ -654,6 +662,8 @@ export class FlightDeckManager {
     Object.assign(base.header, {
       mechName: t.name,
       frameName: t.frame?.name ?? game.i18n.localize("LFD.Header.NoFrame"),
+      hasFrame: !!t.frame?.name,
+      registry: theme.registry(t),
       callsign: t.callsign ?? t.pilotName ?? game.i18n.localize("LFD.Header.NoPilot"),
       jammed: !!t.flags[STATUS.JAMMED],
       alertWarning: caution.alertWarning,
@@ -677,13 +687,29 @@ export class FlightDeckManager {
     };
   }
 
+  /** The theme on screen: the picker's preview while it shows one, else the mech's theme. */
+  get shownTheme() {
+    return this.#previewTheme ?? this.theme;
+  }
+
+  /** Show a theme on the cockpit for a moment (the picker's hover), or null to put the real one back. */
+  previewTheme(theme) {
+    if ((theme ?? null) === this.#previewTheme) return;
+    this.#previewTheme = theme ?? null;
+    // The skin changes at once; the parts re-render behind it (a theme can bring its own templates)
+    this.applyAppearance();
+    this.refresh();
+  }
+
   /** Root classes and CSS variables that don't need a re-render. */
   applyAppearance() {
     const el = this.panel?.element;
     if (!el) return;
     const t = this.telemetry;
     for (const cls of [...el.classList]) if (cls.startsWith("lfd-theme-")) el.classList.remove(cls);
-    el.classList.add(this.theme.cssClass);
+    el.classList.add(this.shownTheme.cssClass);
+    if (this.collapsed) this.themeMenu.close();
+    this.themeMenu.syncTheme();
     const motion = getSetting(SETTINGS.REDUCE_MOTION);
     const reduce = motion === "on" || (motion === "auto" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
     el.classList.toggle("lfd-reduce-motion", !!reduce);
@@ -795,6 +821,7 @@ export class FlightDeckManager {
       stats: { evasion: t.stats.evasion, edef: t.stats.edef, sensors: t.stats.sensors, speed: t.stats.speed },
       danger: !!t.heat.inDanger,
       flavour: this.theme.bootLines(t).slice(0, 2),
+      boot: this.theme.boot,
     };
   }
 

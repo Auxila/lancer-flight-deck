@@ -1,0 +1,38 @@
+{{!-- IPS-N damage control: structure and stress side by side. Structure is a hull cut into watertight
+      compartments (a lost one floods), stress a row of reactor valve wheels (a lost one has blown). --}}
+<section class="lfd-integrity lfd-plate lfd-body lfd-ipsn-dc" aria-label="{{localize 'LFD.Integrity.Title'}}">
+  {{#unless standby}}
+  <div class="lfd-section-title">
+    <span>{{localize "LFD.IPSN.DamageControl"}}</span>
+    {{#if integrity.altRules}}<span class="lfd-odds-alt" data-tooltip="LFD.Integrity.AltRulesTip">{{localize "LFD.Integrity.AltRules"}}</span>{{/if}}
+  </div>
+  <div class="lfd-ipsn-board">
+    {{#each integrity.tracks}}
+    <div class="lfd-track lfd-state-{{state}}" data-track="{{kind}}">
+      <div class="lfd-track-head">
+        <span class="lfd-track-label">{{localize label}}</span>
+        <span class="lfd-readout">{{value}}<small>/{{max}}</small></span>
+      </div>
+      <span class="lfd-pips lfd-ipsn-{{kind}}" role="img" aria-label="{{localize label}} {{value}}/{{max}}" style="--n:{{max}}">
+        {{#each pips}}<span class="lfd-pip {{#if intact}}is-intact{{else}}is-lost{{/if}}"></span>{{/each}}
+      </span>
+      {{#if segments}}
+      <div class="lfd-odds" data-tooltip-html="{{tooltip}}" data-tooltip-class="{{@root.tipClass}}" {{#if @root.tipDirection}}data-tooltip-direction="{{@root.tipDirection}}"{{/if}}>
+        <div class="lfd-odds-bar">
+          {{#each segments}}<span class="lfd-band lfd-band-{{kind}} {{#if check}}is-check{{/if}}" style="flex-basis:{{width}}%"></span>{{/each}}
+        </div>
+        <div class="lfd-odds-head">
+          <span>{{localize "LFD.Integrity.NextCheck" dice=dice}}</span>
+          <span class="lfd-odds-loss {{#if lossOnCheck}}is-check{{/if}}">{{loss}}</span>
+        </div>
+      </div>
+      {{else if headline}}
+      <div class="lfd-odds lfd-odds-final" {{#if tooltip}}data-tooltip-html="{{tooltip}}" data-tooltip-class="{{@root.tipClass}}" {{#if @root.tipDirection}}data-tooltip-direction="{{@root.tipDirection}}"{{/if}}{{/if}}>
+        <span class="lfd-k-warning">{{headline}}</span>
+      </div>
+      {{/if}}
+    </div>
+    {{/each}}
+  </div>
+  {{/unless}}
+</section>

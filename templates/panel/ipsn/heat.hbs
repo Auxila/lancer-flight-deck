@@ -1,0 +1,74 @@
+{{!-- IPS-N reactor: the gauge is a draft scale (each cell numbered), the Danger Zone threshold is a load line
+      with its Plimsoll mark, and the Overcharge ladder is an engine order telegraph pointing at the next cost. --}}
+<section class="lfd-heat lfd-plate lfd-body {{#if heat.inDanger}}is-danger{{/if}} {{#if heat.over}}is-over{{/if}}" aria-label="{{localize 'LFD.Heat.Title'}}">
+  {{#unless standby}}
+  <div class="lfd-section-title">
+    <span>{{localize "LFD.Heat.Title"}}</span>
+    <div class="lfd-editor {{#if heat.inDanger}}is-danger{{/if}} {{#if heat.over}}is-over{{/if}}" role="group" aria-label="{{localize 'LFD.Heat.Gauge'}}">
+      <button type="button" class="lfd-step" data-action="adjust" data-resource="heat" data-delta="-5" {{#unless heat.editable}}disabled{{/unless}} aria-label="{{localize 'LFD.Edit.Minus' n=5}}">−5</button>
+      <button type="button" class="lfd-step" data-action="adjust" data-resource="heat" data-delta="-1" {{#unless heat.editable}}disabled{{/unless}} aria-label="{{localize 'LFD.Edit.Minus' n=1}}">−1</button>
+      <span class="lfd-editor-value">
+        <input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" data-resource="heat"
+               value="{{heat.value}}" {{#unless heat.editable}}disabled{{/unless}}
+               aria-label="{{localize 'LFD.Heat.Gauge'}}" data-tooltip="LFD.Edit.Hint">
+        {{#if heat.hasCap}}<small>/{{heat.max}}</small>{{/if}}
+      </span>
+      <button type="button" class="lfd-step" data-action="adjust" data-resource="heat" data-delta="1" {{#unless heat.editable}}disabled{{/unless}} aria-label="{{localize 'LFD.Edit.Plus' n=1}}">+1</button>
+      <button type="button" class="lfd-step" data-action="adjust" data-resource="heat" data-delta="5" {{#unless heat.editable}}disabled{{/unless}} aria-label="{{localize 'LFD.Edit.Plus' n=5}}">+5</button>
+    </div>
+  </div>
+
+  {{#if heat.hasCap}}
+  <div class="lfd-heat-gauge lfd-ipsn-draft" role="meter" aria-valuemin="0" aria-valuemax="{{heat.max}}" aria-valuenow="{{heat.value}}"
+       aria-label="{{localize 'LFD.Heat.Gauge'}}">
+    {{#if heat.segmented}}
+    <div class="lfd-heat-segments" style="--lfd-seg-count:{{heat.max}}">
+      {{#each heat.segments}}
+      <span class="lfd-seg {{#if filled}}is-filled{{/if}} {{#if danger}}is-dz{{/if}} {{#if boundary}}is-boundary{{/if}}">
+        <b>{{n}}</b>{{#if boundary}}<i class="lfd-ipsn-plimsoll" aria-hidden="true"></i>{{/if}}
+      </span>
+      {{/each}}
+    </div>
+    {{else}}
+    <div class="lfd-heat-continuous">
+      <div class="lfd-heat-fill" style="width:{{heat.fillPct}}%"></div>
+      <div class="lfd-dz-line" style="left:{{heat.dangerPct}}%"><i class="lfd-ipsn-plimsoll" aria-hidden="true"></i></div>
+    </div>
+    {{/if}}
+    <div class="lfd-dz-label">
+      <span class="lfd-ipsn-loadline {{#if heat.inDanger}}lfd-k-caution{{/if}}">{{#if heat.inDanger}}{{localize "LFD.Heat.InDanger"}}{{else}}{{localize "LFD.Heat.DangerAt" at=heat.dangerAt}}{{/if}}</span>
+      {{#if heat.over}}<span class="lfd-k-warning">{{localize "LFD.Heat.OverCap"}}</span>{{/if}}
+    </div>
+  </div>
+  {{else}}
+  <div class="lfd-muted">{{localize "LFD.Heat.NoCap"}}</div>
+  {{/if}}
+
+  <div class="lfd-oc lfd-risk-{{heat.oc.risk}} lfd-ipsn-telegraph">
+    {{#if heat.oc.count}}
+    <div class="lfd-ipsn-dial" style="--n:{{heat.oc.count}};--at:{{heat.oc.index}}">
+      <i class="lfd-ipsn-dial-face" aria-hidden="true"></i>
+      <ol class="lfd-oc-ladder" aria-label="{{localize 'LFD.Heat.Ladder'}}">
+        {{#each heat.oc.rungs}}
+        <li class="{{#if current}}is-current{{/if}} {{#if spent}}is-spent{{/if}}" style="--i:{{@index}}"><span>{{label}}</span></li>
+        {{/each}}
+      </ol>
+      <i class="lfd-ipsn-needle" aria-hidden="true"></i>
+      <i class="lfd-ipsn-hub" aria-hidden="true"></i>
+    </div>
+    {{/if}}
+    <div class="lfd-ipsn-order">
+      <div class="lfd-oc-head">
+        <span class="lfd-oc-label">{{localize "LFD.Heat.NextOvercharge"}}</span>
+        <span class="lfd-oc-cost">{{heat.oc.cost}}</span>
+      </div>
+      {{#if heat.oc.pOverCap}}
+      <div class="lfd-oc-odds">
+        <span>{{localize "LFD.Heat.OcRange" range=heat.oc.range}}</span>
+        <b>{{localize "LFD.Heat.OcOverCap" pct=heat.oc.pOverCap}}</b>
+      </div>
+      {{/if}}
+    </div>
+  </div>
+  {{/unless}}
+</section>

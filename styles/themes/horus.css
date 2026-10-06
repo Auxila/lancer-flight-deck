@@ -1,0 +1,98 @@
+/* ==========================================================================
+   HORUS: the collective. Black glass, terminal green, a signal that doesn't quite hold still.
+   Canon colours (lancer-data manufacturers.json): #046e3c light, #00a256 dark.
+   Foundation: palette and first ornaments; more to come.
+   ========================================================================== */
+
+#lancer-flight-deck.lfd-theme-horus,
+.lfd-themed.lfd-theme-horus {
+  --lfd-bg: #080c0a;
+  --lfd-plate: #0e1411;
+  --lfd-plate-2: #151d19;
+  --lfd-line: #23362c;
+  --lfd-ink: #d9f2e3;
+  --lfd-ink-dim: #7fa08d;
+  --lfd-accent: #00a256;
+  --lfd-accent-deep: #046e3c;
+  --lfd-accent-ink: #02140b;
+  --lfd-well: #050806;
+  --lfd-well-2: #070b09;
+  --lfd-edge: #1a2a22;
+  --lfd-off: #16211b;
+  --lfd-unlit: #52645a;
+  --lfd-chamfer: 9px;
+}
+
+/* Header: a broken data line underneath */
+#lancer-flight-deck.lfd-theme-horus .lfd-header {
+  padding-bottom: 10px;
+  border-top: 1px solid var(--lfd-accent-deep);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1px;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, var(--lfd-accent) 0 7px, transparent 7px 10px, var(--lfd-accent-deep) 10px 12px, transparent 12px 17px);
+  opacity: 0.85;
+}
+
+/* Badge: a terminal readout, not a nameplate */
+#lancer-flight-deck.lfd-theme-horus .lfd-badge,
+.lfd-theme-chip.lfd-theme-horus {
+  color: var(--lfd-accent);
+  background: var(--lfd-well);
+  box-shadow: inset 0 0 0 1px var(--lfd-accent-deep);
+  text-shadow: 0 0 6px color-mix(in srgb, var(--lfd-accent) 70%, transparent);
+}
+
+/* A bracket at the top-left of every instrument plate */
+#lancer-flight-deck.lfd-theme-horus .lfd-plate.lfd-body::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 4px;
+  height: 11px;
+  border: 1px solid var(--lfd-accent-deep);
+  border-right: none;
+  pointer-events: none;
+}
+
+/* Section titles read like comments */
+#lancer-flight-deck.lfd-theme-horus .lfd-section-title > span:first-child::before {
+  content: "// ";
+  color: var(--lfd-accent-deep);
+}
+
+/* Plate texture: scanlines */
+#lancer-flight-deck.lfd-theme-horus .lfd-plate {
+  background:
+    linear-gradient(180deg, rgb(120 255 180 / 0.03), transparent 40%),
+    repeating-linear-gradient(0deg, rgb(120 255 180 / 0.028) 0 1px, transparent 1px 3px),
+    var(--lfd-plate);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-btn {
+  background: linear-gradient(180deg, var(--lfd-plate-2), var(--lfd-well));
+}
+
+#lancer-flight-deck.lfd-theme-horus.is-collapsed .lfd-header {
+  border-top: none;
+}
+
+#lancer-flight-deck.lfd-theme-horus.is-collapsed .lfd-header::after {
+  display: none;
+}
+
+#lancer-flight-deck.lfd-theme-horus.is-collapsed .lfd-tab {
+  border-left: 2px solid var(--lfd-accent);
+}
+
+#lancer-flight-deck.lfd-theme-horus.lfd-dock-right.is-collapsed .lfd-tab {
+  border-left: 1px solid var(--lfd-line);
+  border-right: 2px solid var(--lfd-accent);
+}

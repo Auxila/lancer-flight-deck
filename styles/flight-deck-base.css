@@ -26,6 +26,13 @@
   --lfd-font-data: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Consolas, "Liberation Mono", monospace;
   --lfd-font-body: "Signika", sans-serif;
   --lfd-chamfer: 9px;
+  /* Cockpit surfaces: recessed wells (readouts, buttons), their edges, unlit lamps, and the grey
+     an unlit legend mixes with. Themes tint these so the whole cockpit follows the maker. */
+  --lfd-well: #0a0a0c;
+  --lfd-well-2: #0d0d0f;
+  --lfd-edge: #26272c;
+  --lfd-off: #24252a;
+  --lfd-unlit: #5c5c5c;
 }
 
 #lancer-flight-deck.lfd-panel {
@@ -208,6 +215,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 }
 
 #lancer-flight-deck .lfd-badge {
+  position: relative;
   flex: none;
   display: grid;
   place-items: center;
@@ -220,6 +228,30 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   letter-spacing: 0.08em;
   color: var(--lfd-accent-ink);
   background: var(--lfd-accent);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+/* It opens the theme picker: a notch in the corner says so on hover and while it's open */
+#lancer-flight-deck .lfd-badge::after {
+  content: "";
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  border-left: 5px solid transparent;
+  border-bottom: 5px solid currentColor;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+#lancer-flight-deck .lfd-badge:is(:hover, :focus-visible, [aria-expanded="true"])::after {
+  opacity: 0.85;
+}
+
+#lancer-flight-deck .lfd-badge:hover {
+  filter: brightness(1.12);
 }
 
 #lancer-flight-deck .lfd-ident {
@@ -304,7 +336,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   margin-top: 6px;
   padding: 3px 6px;
   overflow: hidden;
-  background: #0c0c0e;
+  background: var(--lfd-well-2);
   border: 1px solid var(--lfd-line);
   font-size: 10.5px;
   letter-spacing: 0.06em;
@@ -442,7 +474,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   position: relative;
   height: 10px;
   overflow: hidden;
-  background: #0b0b0d;
+  background: var(--lfd-well);
   border: 1px solid var(--lfd-line);
 }
 
@@ -497,7 +529,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 
 #lancer-flight-deck .lfd-stat {
   padding: 2px 0 1px;
-  background: #0d0d0f;
+  background: var(--lfd-well-2);
   border-top: 1px solid var(--lfd-line);
   text-align: center;
 }
@@ -537,7 +569,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--chk);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--chk) 16%, #0d0d0f), #0d0d0f 75%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--chk) 16%, var(--lfd-well-2)), var(--lfd-well-2) 75%);
   border: 1px solid color-mix(in srgb, var(--chk) 35%, transparent);
   border-bottom: 2px solid var(--chk);
   border-radius: 0;
@@ -554,7 +586,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 }
 
 :is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-check:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--chk) 28%, #0d0d0f);
+  background: color-mix(in srgb, var(--chk) 28%, var(--lfd-well-2));
   box-shadow: 0 0 8px color-mix(in srgb, var(--chk) 45%, transparent);
 }
 
@@ -595,14 +627,14 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 
 #lancer-flight-deck .lfd-seg {
   position: relative;
-  background: #0b0b0d;
+  background: var(--lfd-well);
   border: 1px solid var(--lfd-line);
   transform: skewX(-14deg);
   transition: background 180ms ease, box-shadow 180ms ease;
 }
 
 #lancer-flight-deck .lfd-seg.is-dz {
-  background: color-mix(in srgb, var(--lfd-heat-danger) 12%, #0b0b0d);
+  background: color-mix(in srgb, var(--lfd-heat-danger) 12%, var(--lfd-well));
   border-color: color-mix(in srgb, var(--lfd-heat-danger) 35%, var(--lfd-line));
 }
 
@@ -631,7 +663,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 #lancer-flight-deck .lfd-heat-continuous {
   position: relative;
   height: 15px;
-  background: #0b0b0d;
+  background: var(--lfd-well);
   border: 1px solid var(--lfd-line);
 }
 
@@ -674,7 +706,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 /* Overcharge */
 #lancer-flight-deck .lfd-oc {
   padding: 5px 6px;
-  background: #0d0d0f;
+  background: var(--lfd-well-2);
   border: 1px solid var(--lfd-line);
 }
 
@@ -785,7 +817,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 #lancer-flight-deck .lfd-pip.is-lost {
   background:
     repeating-linear-gradient(45deg, var(--lfd-warning) 0 2px, transparent 2px 5px),
-    color-mix(in srgb, var(--lfd-warning) 22%, #0b0b0d);
+    color-mix(in srgb, var(--lfd-warning) 22%, var(--lfd-well));
 }
 
 #lancer-flight-deck .lfd-track.is-hit {
@@ -799,7 +831,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 #lancer-flight-deck .lfd-odds {
   margin-top: 4px;
   padding: 3px 5px 4px;
-  background: #0d0d0f;
+  background: var(--lfd-well-2);
   border: 1px solid var(--lfd-line);
   cursor: help;
 }
@@ -916,9 +948,9 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   min-width: 0;
   min-height: 27px;
   padding: 2px 4px 2px 7px;
-  background: #0a0a0c;
-  border: 1px solid #26272c;
-  color: color-mix(in srgb, var(--k) 36%, #5c5c5c);
+  background: var(--lfd-well);
+  border: 1px solid var(--lfd-edge);
+  color: color-mix(in srgb, var(--k) 36%, var(--lfd-unlit));
   font-family: var(--lfd-font-display);
   font-size: 8px;
   font-weight: 700;
@@ -952,7 +984,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 }
 
 #lancer-flight-deck .lfd-tile.is-lit {
-  background: color-mix(in srgb, var(--k) 18%, #0a0a0c);
+  background: color-mix(in srgb, var(--k) 18%, var(--lfd-well));
   border-color: var(--k);
   color: var(--k);
   text-shadow: 0 0 6px color-mix(in srgb, var(--k) 70%, transparent);
@@ -1004,8 +1036,8 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   gap: 2px;
   padding: 3px 0 2px;
   overflow: hidden;
-  background: #0d0d0f;
-  border: 1px solid #26272c;
+  background: var(--lfd-well-2);
+  border: 1px solid var(--lfd-edge);
   border-radius: 0;
   cursor: pointer;
   transition: border-color 120ms ease, background 120ms ease;
@@ -1015,7 +1047,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #24252a;
+  background: var(--lfd-off);
   box-shadow: inset 0 0 2px #000;
 }
 
@@ -1679,8 +1711,8 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 }
 
 @keyframes lfd-tile-flash {
-  0% { background: color-mix(in srgb, var(--k) 45%, #0a0a0c); }
-  100% { background: color-mix(in srgb, var(--k) 12%, #0a0a0c); }
+  0% { background: color-mix(in srgb, var(--k) 45%, var(--lfd-well)); }
+  100% { background: color-mix(in srgb, var(--k) 12%, var(--lfd-well)); }
 }
 
 @keyframes lfd-static {
@@ -1759,7 +1791,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   padding: 0;
   border: 1px solid var(--lfd-line);
   border-radius: 0;
-  background: #0d0d0f;
+  background: var(--lfd-well-2);
   color: var(--lfd-ink-dim);
   font-family: var(--lfd-font-data);
   font-size: 10.5px;
@@ -1771,7 +1803,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 #lancer-flight-deck .lfd-step:hover:not(:disabled) {
   border-color: var(--lfd-accent);
   color: var(--lfd-ink);
-  background: color-mix(in srgb, var(--lfd-accent) 18%, #0d0d0f);
+  background: color-mix(in srgb, var(--lfd-accent) 18%, var(--lfd-well-2));
 }
 
 #lancer-flight-deck .lfd-step:active:not(:disabled) {
@@ -1813,7 +1845,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 
 #lancer-flight-deck .lfd-editor-value input:focus {
   border-color: var(--lfd-accent);
-  background: #0b0b0d;
+  background: var(--lfd-well);
   text-align: center;
 }
 
@@ -1856,7 +1888,7 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   gap: 4px;
   min-width: 0;
   padding: 2px 5px;
-  background: #0c0c0e;
+  background: var(--lfd-well-2);
   border: 1px solid var(--lfd-line);
   font-size: 9.5px;
   letter-spacing: 0.05em;
@@ -1905,8 +1937,8 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
 }
 
 #lancer-flight-deck button.lfd-tile:hover {
-  border-color: color-mix(in srgb, var(--k) 70%, #26272c);
-  color: color-mix(in srgb, var(--k) 66%, #5c5c5c);
+  border-color: color-mix(in srgb, var(--k) 70%, var(--lfd-edge));
+  color: color-mix(in srgb, var(--k) 66%, var(--lfd-unlit));
   filter: brightness(1.15);
 }
 
@@ -2069,95 +2101,95 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
    -------------------------------------------------------------------------- */
 
 @keyframes lfd-tile-alert {
-  0.00% { background: color-mix(in srgb, var(--k) 45.0%, #0a0a0c); }
-  1.12% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
-  2.25% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
-  3.38% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
-  4.50% { background: color-mix(in srgb, var(--k) 12.0%, #0a0a0c); }
-  5.62% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
-  6.75% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
-  7.88% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
-  9.00% { background: color-mix(in srgb, var(--k) 45.0%, #0a0a0c); }
-  10.13% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
-  11.25% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
-  12.38% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
-  13.50% { background: color-mix(in srgb, var(--k) 12.0%, #0a0a0c); }
-  14.63% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
-  15.75% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
-  16.88% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
-  18.00% { background: color-mix(in srgb, var(--k) 45.0%, #0a0a0c); }
-  19.13% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
-  20.25% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
-  21.38% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
-  22.50% { background: color-mix(in srgb, var(--k) 12.0%, #0a0a0c); }
-  23.62% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
-  24.75% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
-  25.87% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
-  27.00% { background: color-mix(in srgb, var(--k) 45.0%, #0a0a0c); }
-  28.12% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
-  29.25% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
-  30.37% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
-  31.50% { background: color-mix(in srgb, var(--k) 12.0%, #0a0a0c); }
-  32.62% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
-  33.75% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
-  34.87% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
-  36.00% { background: color-mix(in srgb, var(--k) 45.0%, #0a0a0c); }
-  37.12% { background: color-mix(in srgb, var(--k) 40.2%, #0a0a0c); }
-  38.25% { background: color-mix(in srgb, var(--k) 28.5%, #0a0a0c); }
-  39.37% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
-  40.50% { background: color-mix(in srgb, var(--k) 12.0%, #0a0a0c); }
-  41.62% { background: color-mix(in srgb, var(--k) 16.8%, #0a0a0c); }
-  42.75% { background: color-mix(in srgb, var(--k) 28.4%, #0a0a0c); }
-  43.87% { background: color-mix(in srgb, var(--k) 39.7%, #0a0a0c); }
-  45.00% { background: color-mix(in srgb, var(--k) 44.1%, #0a0a0c); }
-  46.12% { background: color-mix(in srgb, var(--k) 39.0%, #0a0a0c); }
-  47.25% { background: color-mix(in srgb, var(--k) 27.8%, #0a0a0c); }
-  48.37% { background: color-mix(in srgb, var(--k) 16.9%, #0a0a0c); }
-  49.50% { background: color-mix(in srgb, var(--k) 12.7%, #0a0a0c); }
-  50.62% { background: color-mix(in srgb, var(--k) 17.0%, #0a0a0c); }
-  51.75% { background: color-mix(in srgb, var(--k) 26.7%, #0a0a0c); }
-  52.87% { background: color-mix(in srgb, var(--k) 35.8%, #0a0a0c); }
-  54.00% { background: color-mix(in srgb, var(--k) 38.8%, #0a0a0c); }
-  55.12% { background: color-mix(in srgb, var(--k) 34.3%, #0a0a0c); }
-  56.25% { background: color-mix(in srgb, var(--k) 25.4%, #0a0a0c); }
-  57.37% { background: color-mix(in srgb, var(--k) 17.2%, #0a0a0c); }
-  58.50% { background: color-mix(in srgb, var(--k) 14.2%, #0a0a0c); }
-  59.62% { background: color-mix(in srgb, var(--k) 17.3%, #0a0a0c); }
-  60.75% { background: color-mix(in srgb, var(--k) 23.9%, #0a0a0c); }
-  61.87% { background: color-mix(in srgb, var(--k) 29.5%, #0a0a0c); }
-  63.00% { background: color-mix(in srgb, var(--k) 31.1%, #0a0a0c); }
-  64.12% { background: color-mix(in srgb, var(--k) 27.9%, #0a0a0c); }
-  65.25% { background: color-mix(in srgb, var(--k) 22.3%, #0a0a0c); }
-  66.37% { background: color-mix(in srgb, var(--k) 17.6%, #0a0a0c); }
-  67.50% { background: color-mix(in srgb, var(--k) 16.0%, #0a0a0c); }
-  68.62% { background: color-mix(in srgb, var(--k) 17.6%, #0a0a0c); }
-  69.75% { background: color-mix(in srgb, var(--k) 20.8%, #0a0a0c); }
-  70.87% { background: color-mix(in srgb, var(--k) 23.2%, #0a0a0c); }
-  72.00% { background: color-mix(in srgb, var(--k) 23.5%, #0a0a0c); }
-  73.12% { background: color-mix(in srgb, var(--k) 21.8%, #0a0a0c); }
-  74.25% { background: color-mix(in srgb, var(--k) 19.5%, #0a0a0c); }
-  75.37% { background: color-mix(in srgb, var(--k) 17.9%, #0a0a0c); }
-  76.50% { background: color-mix(in srgb, var(--k) 17.4%, #0a0a0c); }
-  77.62% { background: color-mix(in srgb, var(--k) 17.9%, #0a0a0c); }
-  78.75% { background: color-mix(in srgb, var(--k) 18.6%, #0a0a0c); }
-  79.87% { background: color-mix(in srgb, var(--k) 18.8%, #0a0a0c); }
-  81.00% { background: color-mix(in srgb, var(--k) 18.6%, #0a0a0c); }
-  82.12% { background: color-mix(in srgb, var(--k) 18.3%, #0a0a0c); }
-  83.25% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  84.37% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  85.50% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  86.62% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  87.75% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  88.87% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  90.00% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  91.12% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  92.25% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  93.37% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  94.50% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  95.62% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  96.75% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  97.88% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
-  99.00% { background: color-mix(in srgb, var(--k) 18.0%, #0a0a0c); }
+  0.00% { background: color-mix(in srgb, var(--k) 45.0%, var(--lfd-well)); }
+  1.12% { background: color-mix(in srgb, var(--k) 40.2%, var(--lfd-well)); }
+  2.25% { background: color-mix(in srgb, var(--k) 28.5%, var(--lfd-well)); }
+  3.38% { background: color-mix(in srgb, var(--k) 16.8%, var(--lfd-well)); }
+  4.50% { background: color-mix(in srgb, var(--k) 12.0%, var(--lfd-well)); }
+  5.62% { background: color-mix(in srgb, var(--k) 16.8%, var(--lfd-well)); }
+  6.75% { background: color-mix(in srgb, var(--k) 28.5%, var(--lfd-well)); }
+  7.88% { background: color-mix(in srgb, var(--k) 40.2%, var(--lfd-well)); }
+  9.00% { background: color-mix(in srgb, var(--k) 45.0%, var(--lfd-well)); }
+  10.13% { background: color-mix(in srgb, var(--k) 40.2%, var(--lfd-well)); }
+  11.25% { background: color-mix(in srgb, var(--k) 28.5%, var(--lfd-well)); }
+  12.38% { background: color-mix(in srgb, var(--k) 16.8%, var(--lfd-well)); }
+  13.50% { background: color-mix(in srgb, var(--k) 12.0%, var(--lfd-well)); }
+  14.63% { background: color-mix(in srgb, var(--k) 16.8%, var(--lfd-well)); }
+  15.75% { background: color-mix(in srgb, var(--k) 28.5%, var(--lfd-well)); }
+  16.88% { background: color-mix(in srgb, var(--k) 40.2%, var(--lfd-well)); }
+  18.00% { background: color-mix(in srgb, var(--k) 45.0%, var(--lfd-well)); }
+  19.13% { background: color-mix(in srgb, var(--k) 40.2%, var(--lfd-well)); }
+  20.25% { background: color-mix(in srgb, var(--k) 28.5%, var(--lfd-well)); }
+  21.38% { background: color-mix(in srgb, var(--k) 16.8%, var(--lfd-well)); }
+  22.50% { background: color-mix(in srgb, var(--k) 12.0%, var(--lfd-well)); }
+  23.62% { background: color-mix(in srgb, var(--k) 16.8%, var(--lfd-well)); }
+  24.75% { background: color-mix(in srgb, var(--k) 28.5%, var(--lfd-well)); }
+  25.87% { background: color-mix(in srgb, var(--k) 40.2%, var(--lfd-well)); }
+  27.00% { background: color-mix(in srgb, var(--k) 45.0%, var(--lfd-well)); }
+  28.12% { background: color-mix(in srgb, var(--k) 40.2%, var(--lfd-well)); }
+  29.25% { background: color-mix(in srgb, var(--k) 28.5%, var(--lfd-well)); }
+  30.37% { background: color-mix(in srgb, var(--k) 16.8%, var(--lfd-well)); }
+  31.50% { background: color-mix(in srgb, var(--k) 12.0%, var(--lfd-well)); }
+  32.62% { background: color-mix(in srgb, var(--k) 16.8%, var(--lfd-well)); }
+  33.75% { background: color-mix(in srgb, var(--k) 28.5%, var(--lfd-well)); }
+  34.87% { background: color-mix(in srgb, var(--k) 40.2%, var(--lfd-well)); }
+  36.00% { background: color-mix(in srgb, var(--k) 45.0%, var(--lfd-well)); }
+  37.12% { background: color-mix(in srgb, var(--k) 40.2%, var(--lfd-well)); }
+  38.25% { background: color-mix(in srgb, var(--k) 28.5%, var(--lfd-well)); }
+  39.37% { background: color-mix(in srgb, var(--k) 16.8%, var(--lfd-well)); }
+  40.50% { background: color-mix(in srgb, var(--k) 12.0%, var(--lfd-well)); }
+  41.62% { background: color-mix(in srgb, var(--k) 16.8%, var(--lfd-well)); }
+  42.75% { background: color-mix(in srgb, var(--k) 28.4%, var(--lfd-well)); }
+  43.87% { background: color-mix(in srgb, var(--k) 39.7%, var(--lfd-well)); }
+  45.00% { background: color-mix(in srgb, var(--k) 44.1%, var(--lfd-well)); }
+  46.12% { background: color-mix(in srgb, var(--k) 39.0%, var(--lfd-well)); }
+  47.25% { background: color-mix(in srgb, var(--k) 27.8%, var(--lfd-well)); }
+  48.37% { background: color-mix(in srgb, var(--k) 16.9%, var(--lfd-well)); }
+  49.50% { background: color-mix(in srgb, var(--k) 12.7%, var(--lfd-well)); }
+  50.62% { background: color-mix(in srgb, var(--k) 17.0%, var(--lfd-well)); }
+  51.75% { background: color-mix(in srgb, var(--k) 26.7%, var(--lfd-well)); }
+  52.87% { background: color-mix(in srgb, var(--k) 35.8%, var(--lfd-well)); }
+  54.00% { background: color-mix(in srgb, var(--k) 38.8%, var(--lfd-well)); }
+  55.12% { background: color-mix(in srgb, var(--k) 34.3%, var(--lfd-well)); }
+  56.25% { background: color-mix(in srgb, var(--k) 25.4%, var(--lfd-well)); }
+  57.37% { background: color-mix(in srgb, var(--k) 17.2%, var(--lfd-well)); }
+  58.50% { background: color-mix(in srgb, var(--k) 14.2%, var(--lfd-well)); }
+  59.62% { background: color-mix(in srgb, var(--k) 17.3%, var(--lfd-well)); }
+  60.75% { background: color-mix(in srgb, var(--k) 23.9%, var(--lfd-well)); }
+  61.87% { background: color-mix(in srgb, var(--k) 29.5%, var(--lfd-well)); }
+  63.00% { background: color-mix(in srgb, var(--k) 31.1%, var(--lfd-well)); }
+  64.12% { background: color-mix(in srgb, var(--k) 27.9%, var(--lfd-well)); }
+  65.25% { background: color-mix(in srgb, var(--k) 22.3%, var(--lfd-well)); }
+  66.37% { background: color-mix(in srgb, var(--k) 17.6%, var(--lfd-well)); }
+  67.50% { background: color-mix(in srgb, var(--k) 16.0%, var(--lfd-well)); }
+  68.62% { background: color-mix(in srgb, var(--k) 17.6%, var(--lfd-well)); }
+  69.75% { background: color-mix(in srgb, var(--k) 20.8%, var(--lfd-well)); }
+  70.87% { background: color-mix(in srgb, var(--k) 23.2%, var(--lfd-well)); }
+  72.00% { background: color-mix(in srgb, var(--k) 23.5%, var(--lfd-well)); }
+  73.12% { background: color-mix(in srgb, var(--k) 21.8%, var(--lfd-well)); }
+  74.25% { background: color-mix(in srgb, var(--k) 19.5%, var(--lfd-well)); }
+  75.37% { background: color-mix(in srgb, var(--k) 17.9%, var(--lfd-well)); }
+  76.50% { background: color-mix(in srgb, var(--k) 17.4%, var(--lfd-well)); }
+  77.62% { background: color-mix(in srgb, var(--k) 17.9%, var(--lfd-well)); }
+  78.75% { background: color-mix(in srgb, var(--k) 18.6%, var(--lfd-well)); }
+  79.87% { background: color-mix(in srgb, var(--k) 18.8%, var(--lfd-well)); }
+  81.00% { background: color-mix(in srgb, var(--k) 18.6%, var(--lfd-well)); }
+  82.12% { background: color-mix(in srgb, var(--k) 18.3%, var(--lfd-well)); }
+  83.25% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  84.37% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  85.50% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  86.62% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  87.75% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  88.87% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  90.00% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  91.12% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  92.25% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  93.37% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  94.50% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  95.62% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  96.75% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  97.88% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
+  99.00% { background: color-mix(in srgb, var(--k) 18.0%, var(--lfd-well)); }
 }
 
 @keyframes lfd-tab-alert {

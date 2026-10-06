@@ -347,6 +347,22 @@ Every condition has its own look on the token itself. Three techniques, each mat
 - **Lancer QoL** keeps its own visuals for Burn, Overshield, Danger Zone, Invisible, Intangible and Cascading. For Jammed, the world setting **Jammed effect** picks Flight Deck's electricity (default) or QoL's version; with Flight Deck chosen, QoL's darkening Jammed filter is removed where both would stack.
 - **Settings:** "Condition effects on tokens" and "Condition effect strength" are per player. "Condition effects on token art" is per world and removes the saved filters when turned off. Reduced motion freezes the overlays on a still frame.
 
+## Cockpit themes
+
+The cockpit wears the colours and hardware of your frame's manufacturer. Click the maker's badge at the
+top left of the panel to choose another: **Match frame** (the default), or any theme by name. Hovering an
+option previews it on the whole cockpit, layout included; Escape or clicking away puts yours back. The choice
+is yours alone (a client setting) and doesn't touch the mech. Frames from makers without a theme yet,
+including LCP manufacturers, use GMS.
+
+| Theme | Cockpit |
+|---|---|
+| **GMS** | Union standard issue: red on gunmetal, chamfered plates, hazard striping. The baseline layout. |
+| **IPS-N** | A ship's bridge. A nameboard with the Northstar rose (it turns when you reach for it), a hull number and the frame as a vessel class; riveted plating with rounded hatch corners and signal flags on the sections. HP is hull plating marked at every hit point. The Danger Zone threshold is a load line with its Plimsoll mark, the Overcharge ladder an engine order telegraph pointing at the next cost, and integrity a damage control board: structure as watertight compartments that flood, stress as valve wheels that blow. Cold boot: a sonar sweep, then BATTLE STATIONS. |
+
+Every theme shows the same numbers, odds, controls and warnings in the same places; warning, caution and
+Heat colours never change between themes. SSC, HORUS and HA are next.
+
 ## Controls and settings
 
 - **Alt+C** turns the panel on, then collapses and expands it. You can rebind it in Configure Controls.
@@ -397,7 +413,8 @@ src/
     SynthesizerEngine.js       Web Audio cues on game.audio.interface
     Odds.js                    exact check/overcharge maths (pure, Node-testable)
   themes/
-    BaseTheme.js, GMSTheme.js, registry.js
+    BaseTheme.js, registry.js   the theme contract; maker -> theme, the player's override
+    GMSTheme.js, IPSNTheme.js   one per manufacturer
   actions/
     basic.js                   LANCER's basic actions: menu, icon, slot, how each runs
     catalog.js                 every action from equipped gear, weapons, hover cards
@@ -420,6 +437,8 @@ src/
       clock.js                 the effects' clock (slow motion for inspection)
     components/*.js            view models per section
 templates/panel/*.hbs          one Handlebars part per section
+templates/panel/ipsn/*.hbs     IPS-N's own header, hull, heat and integrity layouts
+templates/panel/theme-menu.hbs the theme picker
 templates/hud/menu.hbs         every HUD menu
 styles/flight-deck-base.css    layout, instruments, effects
 styles/hud.css                 action buttons, INVADE terminal, HUD menus, hover cards
@@ -427,16 +446,17 @@ styles/damage.css              battle damage
 styles/npc.css                 the NPC Deck
 templates/npc/deck.hbs         the NPC Deck
 styles/themes/gms.css          GMS palette and ornaments
+styles/themes/ipsn.css         IPS-N: palette, type, hardware, its layouts
 ```
 
 Each section is an ApplicationV2 part, and only the parts whose data changed re-render.
 
 ## Adding a manufacturer theme
 
-1. Subclass `BaseTheme` with `id`, `label`, `badge`, `manufacturers` (frame manufacturer codes, for example `["HA"]`), `audio` and `bootLines()`.
-2. Add `styles/themes/<id>.css` that sets the `--lfd-*` variables on `.lfd-theme-<id>`, then list it in `module.json`.
+1. Subclass `BaseTheme` with `id`, `label`, `tagline` (the picker's one-liner), `badge`, `manufacturers` (frame manufacturer codes, for example `["HA"]`), `audio` and `bootLines()`. Optionally `boot` (i18n keys for the boot's finish card) and `registry(t)` (a cosmetic serial for the header, stable per mech).
+2. Add `styles/themes/<id>.css` that sets the `--lfd-*` variables on `#lancer-flight-deck.lfd-theme-<id>, .lfd-themed.lfd-theme-<id>`, then list it in `module.json` (Foundry reads that list when the server starts).
 3. Register it in `themes/registry.js`, or from another module with `api.registerTheme(MyTheme)`. Its `bootLines()` lead the cold boot's terminal stream, and `audio.boot` tunes the ENGAGED chime.
-4. Optionally override individual part templates with `static templates = { heat: "..." }`.
+4. Optionally bring your own layout per part with `static templates = { heat: "..." }` (IPS-N replaces four). A theme's template must keep every action, field, data hook and class of the base part; `tests/themes.test.js` checks.
 
 Frames whose manufacturer has no theme use GMS.
 

@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased (0.8: manufacturer themes)
+
+**Theme picker**
+- Click the maker's badge at the top left of the panel to choose the cockpit theme: **Match frame** (the default) or any theme by name, each option drawn in its own colours. Hover or arrow onto one to preview it on the whole cockpit, layout included; Enter or a click chooses it (with that theme's chime), Escape closes and returns to the badge. It's the same per-player setting as Configure Settings → Cockpit theme.
+
+**IPS-N: a ship's bridge**
+- Its own layout for the header, hull, reactor and integrity, and IPS-N hardware on everything else: DIN signage type (Bahnschrift on Windows, DIN on macOS, Signika elsewhere), riveted plating with rounded hatch corners, signal flags on the section titles, round bridge push-buttons and port-light lamps.
+- **Nameboard:** the Northstar rose opens the picker and turns as you reach for it; over the mech's name, IPS-N and a Trunk Security style hull number (cosmetic, the same for a mech every session); under it, the frame as a class (GOBLIN-CLASS).
+- **Hull:** HP is hull plating marked at every hit point, heavier every fifth; armor shows as plates.
+- **Reactor:** each heat cell carries its number; the Danger Zone threshold is a load line with its Plimsoll mark (in the legend too). The Overcharge ladder is an engine order telegraph: the next cost lit, passed orders dimmed, the pointer swinging over when you Overcharge.
+- **Damage control:** structure and stress side by side. Structure is the hull in profile, cut into watertight compartments that flood when lost; stress is a row of reactor valve wheels that blow. Odds and the next check under each; ALT TABLE once in the title.
+- HUD menus (round glyphs, radiused glass), hover cards, the NPC Deck (porthole portraits) and the collapsed tab (the rose on top) follow. Cold boot: a sonar sweep behind *Your friend in an unfriendly sea*, BATTLE STATIONS, ALL HANDS.
+- Warning, caution and Heat colours are the same as GMS's, and every number, control and alert is where it always is.
+
+**Under the hood**
+- Theme colours are tokens all the way down (wells, edges, unlit lamps), so every surface follows the maker.
+- Themes can bring their own templates per part, finish-card text and a header serial; `tests/themes.test.js` checks the maker mapping, the override, and that a theme's templates keep every hook of the parts they replace. `npm run smoke` gains a picker step.
+- SSC, HORUS and HA have first-pass palettes in the repo, unregistered until they're finished.
+
 ## 0.7.0
 
 **Ready for the table**

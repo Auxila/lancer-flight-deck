@@ -351,7 +351,7 @@
   flex: 1 1 0;
   height: 11px;
   overflow: hidden;
-  background: #0a0a0c;
+  background: var(--lfd-well);
   border: 1px solid var(--lfd-line);
 }
 
@@ -395,7 +395,7 @@
 #lancer-flight-deck-npc .lfd-npc-pips i {
   width: 6px;
   height: 7px;
-  background: #24252a;
+  background: var(--lfd-off);
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
 }
 
@@ -429,7 +429,7 @@
   text-transform: uppercase;
   color: var(--k);
   text-shadow: 0 0 5px color-mix(in srgb, var(--k) 60%, transparent);
-  background: color-mix(in srgb, var(--k) 16%, #0a0a0c);
+  background: color-mix(in srgb, var(--k) 16%, var(--lfd-well));
   border: 1px solid color-mix(in srgb, var(--k) 70%, transparent);
 }
 
@@ -479,8 +479,8 @@
   flex-direction: column;
   align-items: center;
   padding: 2px 0;
-  background: #0d0d0f;
-  border: 1px solid #26272c;
+  background: var(--lfd-well-2);
+  border: 1px solid var(--lfd-edge);
 }
 
 #lancer-flight-deck-npc .lfd-npc-stats dt {
@@ -630,9 +630,9 @@
   letter-spacing: 0;
   text-transform: uppercase;
   text-align: center;
-  color: color-mix(in srgb, var(--k) 36%, #5c5c5c);
-  background: #0a0a0c;
-  border: 1px solid #26272c;
+  color: color-mix(in srgb, var(--k) 36%, var(--lfd-unlit));
+  background: var(--lfd-well);
+  border: 1px solid var(--lfd-edge);
   transition: border-color 100ms ease, filter 100ms ease;
 }
 
@@ -652,8 +652,8 @@
 }
 
 #lancer-flight-deck-npc .lfd-npc-ctile:hover {
-  color: color-mix(in srgb, var(--k) 66%, #5c5c5c);
-  border-color: color-mix(in srgb, var(--k) 70%, #26272c);
+  color: color-mix(in srgb, var(--k) 66%, var(--lfd-unlit));
+  border-color: color-mix(in srgb, var(--k) 70%, var(--lfd-edge));
   filter: brightness(1.15);
 }
 
@@ -668,7 +668,7 @@
 #lancer-flight-deck-npc .lfd-npc-ctile.is-on {
   color: var(--k);
   text-shadow: 0 0 6px color-mix(in srgb, var(--k) 70%, transparent);
-  background: color-mix(in srgb, var(--k) 18%, #0a0a0c);
+  background: color-mix(in srgb, var(--k) 18%, var(--lfd-well));
   border-color: var(--k);
   box-shadow: inset 0 0 10px color-mix(in srgb, var(--k) 25%, transparent);
 }
@@ -903,7 +903,7 @@
   width: 36px;
   height: 36px;
   padding: 2px;
-  background: color-mix(in srgb, var(--ring) 55%, #0a0a0c);
+  background: color-mix(in srgb, var(--ring) 55%, var(--lfd-well));
   clip-path: polygon(25% 2%, 75% 2%, 100% 50%, 75% 98%, 25% 98%, 0 50%);
   transition: transform 120ms ease, background 120ms ease;
 }
@@ -914,7 +914,7 @@
   height: 100%;
   object-fit: cover;
   border: none;
-  background: #0d0d0f;
+  background: var(--lfd-well-2);
   clip-path: polygon(25% 2%, 75% 2%, 100% 50%, 75% 98%, 25% 98%, 0 50%);
 }
 
@@ -976,7 +976,7 @@
 
 /* Done for the round: still there, clearly spent */
 #lancer-flight-deck-npc .lfd-init-unit:is(.is-done, .is-defeated) .lfd-init-portrait {
-  background: #3a3c42;
+  background: var(--lfd-line);
 }
 
 #lancer-flight-deck-npc .lfd-init-unit:is(.is-done, .is-defeated) .lfd-init-portrait img {
@@ -1004,7 +1004,7 @@
 #lancer-flight-deck-npc .lfd-init-pips i {
   width: 6px;
   height: 4px;
-  background: #2a2b30;
+  background: var(--lfd-off);
   transform: skewX(-20deg);
 }
 
@@ -1131,7 +1131,7 @@
   height: 100%;
   font-size: 17px;
   color: var(--ring);
-  background: #0d0d0f;
+  background: var(--lfd-well-2);
   clip-path: polygon(25% 2%, 75% 2%, 100% 50%, 75% 98%, 25% 98%, 0 50%);
 }
 
@@ -1187,8 +1187,8 @@
 
 /* Some of the selection has it: half-lit */
 #lancer-flight-deck-npc .lfd-npc-ctile.is-some {
-  color: color-mix(in srgb, var(--k) 80%, #5c5c5c);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--k) 30%, #0a0a0c) 50%, #0a0a0c 50%);
+  color: color-mix(in srgb, var(--k) 80%, var(--lfd-unlit));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--k) 30%, var(--lfd-well)) 50%, var(--lfd-well) 50%);
   border-color: color-mix(in srgb, var(--k) 60%, transparent);
 }
 

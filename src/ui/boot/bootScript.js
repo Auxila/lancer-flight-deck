@@ -31,6 +31,7 @@ export function leader(label, status, width = WIDTH) {
  * @property {{evasion: number, edef: number, sensors: number, speed: number}} stats
  * @property {boolean} danger        In the Danger Zone
  * @property {string[]} [flavour]    The theme's own boot lines (manufacturer firmware, etc.)
+ * @property {{caption: string, title: string, stamp: string}} [boot]  i18n keys for the theme's finish card
  */
 
 /**

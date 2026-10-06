@@ -253,6 +253,32 @@ await step(p, "heat editor +1, then back", async () => {
   return { ok: h1 === h0 + 1 && mgr.actor.system.heat.value === h0, detail: [h0, h1, mgr.actor.system.heat.value] };
 });
 
+await step(p, "theme picker: the badge opens it, hover previews a layout, Escape puts it back", async () => {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const panel = () => document.getElementById("lancer-flight-deck");
+  const themeOf = () => [...panel().classList].find(c => c.startsWith("lfd-theme-"));
+  const setting = game.settings.get("lancer-flight-deck", "theme");
+  const before = themeOf();
+  panel().querySelector(".lfd-badge").click();
+  await wait(500);
+  const menu = document.getElementById("lancer-flight-deck-themes");
+  const options = [...(menu?.querySelectorAll("[data-theme]") ?? [])].map(o => o.dataset.theme);
+  // Preview the theme that isn't on screen; IPS-N brings its own templates, so the layout changes too
+  const other = before === "lfd-theme-ipsn" ? "gms" : "ipsn";
+  menu?.querySelector(`[data-theme="${other}"]`)?.dispatchEvent(new PointerEvent("pointerover", { bubbles: true }));
+  await wait(700);
+  const previewed = themeOf();
+  const ipsnLayout = !!panel().querySelector(".lfd-ipsn-rose");
+  const focused = menu?.contains(document.activeElement) ? document.activeElement : menu;
+  focused?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  await wait(700);
+  const closed = !document.getElementById("lancer-flight-deck-themes");
+  const restored = themeOf() === before && game.settings.get("lancer-flight-deck", "theme") === setting;
+  const ok = options[0] === "auto" && options.includes("gms") && options.includes("ipsn") &&
+    previewed === `lfd-theme-${other}` && ipsnLayout === (other === "ipsn") && closed && restored;
+  return { ok, detail: { options, previewed, ipsnLayout, closed, restored } };
+});
+
 await step(p, "hide button, then the toolbar toggle brings it back", async () => {
   document.querySelector('#lancer-flight-deck [data-action="hidePanel"]')?.click();
   await new Promise(r => setTimeout(r, 900));

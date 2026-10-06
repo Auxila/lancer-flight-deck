@@ -8,6 +8,7 @@ import { BaseTheme } from "./BaseTheme.js";
 export class GMSTheme extends BaseTheme {
   static id = "gms";
   static label = "LFD.Theme.GMS";
+  static tagline = "LFD.Theme.Tagline.GMS";
   static manufacturers = ["GMS"];
   static badge = "GMS";
 

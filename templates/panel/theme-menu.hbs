@@ -1,0 +1,18 @@
+<header class="lfd-theme-menu-head">
+  <i class="fa-solid fa-palette" aria-hidden="true"></i>
+  <span>{{title}}</span>
+</header>
+<ul class="lfd-theme-menu-list">
+  {{#each options}}
+  <li>
+    <button type="button" class="lfd-theme-option {{#if checked}}is-checked{{/if}}" role="menuitemradio" tabindex="-1"
+            aria-checked="{{#if checked}}true{{else}}false{{/if}}" data-theme="{{id}}">
+      <span class="lfd-theme-chip lfd-themed {{themeClass}}" aria-hidden="true">{{badge}}</span>
+      <span class="lfd-theme-text"><b>{{label}}</b>{{#if detail}}<small>{{detail}}</small>{{/if}}</span>
+      <span class="lfd-theme-swatch lfd-themed {{themeClass}}" aria-hidden="true"><i></i><i></i><i></i></span>
+      <i class="fa-solid fa-check lfd-theme-check" aria-hidden="true"></i>
+    </button>
+  </li>
+  {{/each}}
+</ul>
+<footer class="lfd-theme-menu-foot">{{#each footer}}<span>{{#if key}}<b>{{key}}</b> {{/if}}{{action}}</span>{{/each}}</footer>

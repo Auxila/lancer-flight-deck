@@ -37,6 +37,7 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     actions: {
       toggleCollapse: FlightDeckPanel.#onToggleCollapse,
       toggleMute: FlightDeckPanel.#onToggleMute,
+      themeMenu: FlightDeckPanel.#onThemeMenu,
       hidePanel: FlightDeckPanel.#onHidePanel,
       rollCheck: FlightDeckPanel.#onRollCheck,
       overcharge: FlightDeckPanel.#onOvercharge,
@@ -71,7 +72,7 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override Theme overrides can swap individual part templates. */
   _configureRenderParts(options) {
     const parts = super._configureRenderParts(options);
-    const overrides = this.manager.theme?.templates ?? {};
+    const overrides = this.manager.shownTheme?.templates ?? {};
     for (const [id, template] of Object.entries(overrides)) if (parts[id]) parts[id].template = template;
     return parts;
   }
@@ -416,6 +417,8 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     this.endBoot({ immediate: true });
     const esc = foundry.utils.escapeHTML;
     const loc = key => game.i18n.localize(key);
+    // The maker's own finish card (IPS-N: BATTLE STATIONS), else the generic one
+    const text = { caption: "LFD.Boot.Caption", title: "LFD.Boot.Title", stamp: "LFD.Boot.Stamp", ...data.boot };
     // Enough rows that one copy is taller than any panel; two copies make the pour loop seamlessly
     const base = bootStream(data, seed);
     let rows = base;
@@ -426,7 +429,7 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     overlay.className = `lfd-boot ${reduce ? "is-still is-finish is-engaged" : ""}`;
     overlay.dataset.action = "skipBoot";
     overlay.setAttribute("role", "status");
-    overlay.setAttribute("aria-label", `${loc("LFD.Boot.Caption")}: ${loc("LFD.Boot.Title")}, ${loc("LFD.Boot.Stamp")}`);
+    overlay.setAttribute("aria-label", `${loc(text.caption)}: ${loc(text.title)}, ${loc(text.stamp)}`);
     // Cover the part of the panel in view (the panel scrolls)
     overlay.style.top = `${root.scrollTop}px`;
     overlay.style.height = `${root.clientHeight}px`;
@@ -445,10 +448,10 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
           <span class="lfd-boot-corner is-tl"></span><span class="lfd-boot-corner is-tr"></span>
           <span class="lfd-boot-corner is-bl"></span><span class="lfd-boot-corner is-br"></span>
           <i class="lfd-boot-rule"></i>
-          <div class="lfd-boot-caption">${esc(loc("LFD.Boot.Caption"))}</div>
-          <div class="lfd-boot-title" data-text="${esc(loc("LFD.Boot.Title"))}">${esc(loc("LFD.Boot.Title"))}</div>
+          <div class="lfd-boot-caption">${esc(loc(text.caption))}</div>
+          <div class="lfd-boot-title" data-text="${esc(loc(text.title))}">${esc(loc(text.title))}</div>
           <div class="lfd-boot-bar">${"<i></i>".repeat(12)}</div>
-          <div class="lfd-boot-meta"><span>${esc(id)}</span><b class="lfd-boot-stamp">${esc(loc("LFD.Boot.Stamp"))}</b></div>
+          <div class="lfd-boot-meta"><span>${esc(id)}</span><b class="lfd-boot-stamp">${esc(loc(text.stamp))}</b></div>
           <i class="lfd-boot-rule"></i>
         </div>
       </div>
@@ -521,6 +524,10 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static #onToggleMute() {
     this.manager.toggleMute();
+  }
+
+  static #onThemeMenu() {
+    this.manager.themeMenu.toggle();
   }
 
   static #onHidePanel() {

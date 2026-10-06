@@ -49,7 +49,7 @@ export class HudMenu {
   #cards = new HoverCards({
     selector: "[data-entry]",
     html: el => this.#entries.get(el.dataset.entry)?.tip?.() ?? null,
-    cssClass: () => `lfd-hud-tip lfd-themed ${this.manager.theme.cssClass}`,
+    cssClass: () => `lfd-hud-tip lfd-themed ${this.manager.shownTheme.cssClass}`,
     direction: () => {
       const { LEFT, RIGHT } = game.tooltip.constructor.TOOLTIP_DIRECTIONS;
       return this.side === "left" ? LEFT : RIGHT;
@@ -185,7 +185,7 @@ export class HudMenu {
     const el = this.element;
     if (!el) return;
     for (const cls of [...el.classList]) if (cls.startsWith("lfd-theme-")) el.classList.remove(cls);
-    el.classList.add(this.manager.theme.cssClass);
+    el.classList.add(this.manager.shownTheme.cssClass);
     el.classList.toggle("lfd-reduce-motion", !!this.manager.panel?.element?.classList.contains("lfd-reduce-motion"));
   }
 

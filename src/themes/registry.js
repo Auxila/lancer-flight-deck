@@ -1,7 +1,13 @@
 import { GMSTheme } from "./GMSTheme.js";
+import { IPSNTheme } from "./IPSNTheme.js";
 
-/** Registered themes, by id. GMS is the fallback and must always exist. */
-const THEMES = new Map([[GMSTheme.id, GMSTheme]]);
+/**
+ * Registered themes, by id: GMS (the fallback, which must always exist), then each core maker as it's
+ * finished. SSC, HORUS and HA have first-pass foundations alongside (SSCTheme.js, HORUSTheme.js,
+ * HATheme.js and their styles/themes/*.css) and are registered, and added to module.json's styles,
+ * when they're done.
+ */
+const THEMES = new Map([GMSTheme, IPSNTheme].map(theme => [theme.id, theme]));
 const FALLBACK = GMSTheme;
 
 /**
@@ -25,13 +31,14 @@ export function themeChoices() {
 }
 
 /**
- * Pick the theme for a frame manufacturer, honouring a player's override.
+ * Pick the theme for a frame manufacturer, honouring a player's override. Makers without a theme yet
+ * (third-party LCPs: BDF, MPAL, Iridia...) use GMS.
  * @param {string|null} manufacturer  e.g. "GMS", "IPS-N", "SSC", "HORUS", "HA"
  * @param {string} override           "auto" or a theme id
  */
 export function resolveTheme(manufacturer, override = "auto") {
   if (override && override !== "auto" && THEMES.has(override)) return THEMES.get(override);
-  const code = String(manufacturer ?? "").toUpperCase();
+  const code = String(manufacturer ?? "").trim().toUpperCase();
   for (const theme of THEMES.values()) {
     if (theme.manufacturers.includes(code)) return theme;
   }

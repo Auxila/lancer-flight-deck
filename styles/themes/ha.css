@@ -1,0 +1,100 @@
+/* ==========================================================================
+   HA: Harrison Armory. Imperial weight: aubergine steel, Purview violet, brass trim.
+   Canon colours (lancer-data manufacturers.json): #6e4373 light, #a15ea8 dark.
+   Foundation: palette and first ornaments; more to come.
+   ========================================================================== */
+
+#lancer-flight-deck.lfd-theme-ha,
+.lfd-themed.lfd-theme-ha {
+  --lfd-bg: #0f0c11;
+  --lfd-plate: #17121a;
+  --lfd-plate-2: #211a25;
+  --lfd-line: #3d3044;
+  --lfd-ink: #f0e8f2;
+  --lfd-ink-dim: #a597ab;
+  --lfd-accent: #a15ea8;
+  --lfd-accent-deep: #6e4373;
+  --lfd-accent-ink: #fbf5fc;
+  --lfd-well: #0a080b;
+  --lfd-well-2: #0d0a0f;
+  --lfd-edge: #2b2230;
+  --lfd-off: #271f2b;
+  --lfd-unlit: #615766;
+  --lfd-chamfer: 10px;
+  /* HA's own: brass trim */
+  --lfd-trim: #c9a45c;
+}
+
+/* Header: a heavy violet crown and a brass-and-violet band beneath */
+#lancer-flight-deck.lfd-theme-ha .lfd-header {
+  padding-bottom: 11px;
+  border-top: 3px solid var(--lfd-accent);
+}
+
+#lancer-flight-deck.lfd-theme-ha .lfd-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background:
+    linear-gradient(var(--lfd-trim) 0 0) 0 0 / 100% 2px no-repeat,
+    linear-gradient(var(--lfd-accent-deep) 0 0) 0 2px / 100% 2px no-repeat;
+  opacity: 0.9;
+}
+
+#lancer-flight-deck.lfd-theme-ha .lfd-badge,
+.lfd-theme-chip.lfd-theme-ha {
+  background: linear-gradient(180deg, var(--lfd-accent), var(--lfd-accent-deep));
+  box-shadow: inset 0 0 0 1px var(--lfd-trim), inset 0 -2px 0 rgb(0 0 0 / 0.3);
+}
+
+/* A brass chevron in the top-left corner of every instrument plate */
+#lancer-flight-deck.lfd-theme-ha .lfd-plate.lfd-body::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(135deg, var(--lfd-trim) 0 45%, transparent 46%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Section titles: a brass bar */
+#lancer-flight-deck.lfd-theme-ha .lfd-section-title > span:first-child {
+  padding-left: 12px;
+  background: linear-gradient(var(--lfd-trim), var(--lfd-trim)) left center / 7px 3px no-repeat;
+}
+
+/* Plate texture: faint diagonal armour striping */
+#lancer-flight-deck.lfd-theme-ha .lfd-plate {
+  background:
+    linear-gradient(180deg, rgb(230 200 255 / 0.035), transparent 40%),
+    repeating-linear-gradient(45deg, rgb(230 200 255 / 0.018) 0 1px, transparent 1px 8px),
+    var(--lfd-plate);
+}
+
+#lancer-flight-deck.lfd-theme-ha .lfd-btn {
+  background: linear-gradient(180deg, var(--lfd-plate-2), var(--lfd-plate));
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--lfd-trim) 40%, transparent);
+}
+
+#lancer-flight-deck.lfd-theme-ha.is-collapsed .lfd-header {
+  border-top: none;
+}
+
+#lancer-flight-deck.lfd-theme-ha.is-collapsed .lfd-header::after {
+  display: none;
+}
+
+#lancer-flight-deck.lfd-theme-ha.is-collapsed .lfd-tab {
+  border-left: 2px solid var(--lfd-accent);
+}
+
+#lancer-flight-deck.lfd-theme-ha.lfd-dock-right.is-collapsed .lfd-tab {
+  border-left: 1px solid var(--lfd-line);
+  border-right: 2px solid var(--lfd-accent);
+}
