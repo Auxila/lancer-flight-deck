@@ -1,10 +1,8 @@
-import { SEAM_CRACK_SPEED, SEAM_GOLD_LAG, SEAM_GOLD_SPEED, generateSeam } from "../geometry.js";
+import { SEAM_CRACK_SPEED, SEAM_GOLD_LAG, SEAM_GOLD_SPEED, VENEER_CELL, generateDropouts, generateSeam } from "../geometry.js";
 import { damageClock as clock } from "../clock.js";
 import { DamageStyle, STAGGER_MS, rand, svg } from "./DamageStyle.js";
 
 const MEND_MS = 1300;
-/** Ferrules (the gold couplings) down each coolant channel, as a fraction of its height. */
-const FERRULES = [0.12, 0.38, 0.64, 0.88];
 
 /**
  * SSC: kintsugi. A Smith-Shimano frame isn't scarred, it's mended in gold.
@@ -14,11 +12,18 @@ const FERRULES = [0.12, 0.38, 0.64, 0.88];
  *   filling the chips along the way, while flakes of gold leaf drift down. The movement stutters like a
  *   watch skipping a beat. The gold seams stay, a glint travelling along them now and then. Repairs
  *   polish them away.
- * - Stress: the liquid cooling. Two gold-ringed glass channels run down the bezel, full of sapphire
- *   coolant, and they drain as stress mounts: three quarters, then half, then a few last fingers boiling
- *   hard. Condensation beads on the glass from the second level, and at the last point the near-dry
- *   channels vent cold vapour. Each hit purges the loop: a bright surge races up the coolant, it
- *   sloshes, vapour bursts from the couplings and droplets spray.
+ * - Stress: the glamour fails. The luxury finish is SSC's Visual Development projecting onto a bare
+ *   chassis, and the pilot sees it through the nerveweave (Full Subjectivity Sync). Stress breaks the
+ *   sync, so the projection loses its lock in two ways at once:
+ *   - the veneer drops out in tiles: patches of the cockpit go to bare grey metal (primer, fasteners, a
+ *     gold projection fringe round each hole), flickering at first, then staying out; at the last point
+ *     the whole finish strobes off now and then;
+ *   - the pilot sees double: a ghost of the whole cockpit, a moment behind (a frozen copy of the parts),
+ *     drifts off-register, further with each level, and swims; a heartbeat pulses at the edges, faster
+ *     as it goes.
+ *   Each hit snaps the sync: the ghost jerks wide and springs back, a wave of dropout sweeps across the
+ *   cockpit, and the heartbeat spikes. Every readout stays legible: a dropout only takes the gold out of
+ *   what's under it, and the ghost only brightens.
  */
 export class KintsugiDamage extends DamageStyle {
   static id = "kintsugi";
@@ -26,24 +31,19 @@ export class KintsugiDamage extends DamageStyle {
   constructor(layer) {
     super(layer);
     this.svg = svg("svg", { class: "lfd-kin-svg" });
-    this.coolant = div("lfd-kin-coolant");
-    for (const side of ["is-left", "is-right"]) {
-      const tube = div(`lfd-kin-tube ${side}`);
-      const fluid = document.createElement("b");
-      fluid.className = "lfd-kin-fluid";
-      fluid.innerHTML = Array.from({ length: 9 }, (_, k) => `<s style="--k:${k};--x:${(18 + ((k * 37) % 64)).toFixed(0)}%"></s>`).join("");
-      tube.append(fluid);
-      for (const at of FERRULES) {
-        const ferrule = document.createElement("em");
-        ferrule.style.top = `${at * 100}%`;
-        tube.append(ferrule);
-      }
-      this.coolant.append(tube);
-    }
-    this.beads = div("lfd-kin-beads");
+    // Stress: the veneer's dropout tiles and the last-point strobe sit under the gold seams (the kintsugi
+    // is real gold, not projection); the hit's sweep, the ghost and the heartbeat sit over them
+    this.veneer = div("lfd-glam-veneer");
+    this.strobe = div("lfd-glam-strobe");
+    this.sweep = div("lfd-glam-sweep");
+    this.ghost = div("lfd-glam-ghost");
+    this.ghost.inert = true;
+    this.heart = div("lfd-glam-heart");
     this.fx = div("lfd-kin-fx");
-    this.host.append(this.svg, this.coolant, this.beads, this.fx);
-    this.beadKey = "";
+    this.host.append(this.veneer, this.strobe, this.svg, this.sweep, this.ghost, this.heart, this.fx);
+    this.veneerKey = "";
+    /** @type {Array<{src: HTMLElement, copy: HTMLElement}>} */
+    this.copies = [];
     this.seams = [];
     this.forming = new Map();
     this.busy = false;
@@ -82,49 +82,73 @@ export class KintsugiDamage extends DamageStyle {
     }, MEND_MS);
   }
 
-  /** The loop purges: a surge races up the coolant, it sloshes, vapour bursts from the couplings. */
+  /** The sync snaps: the ghost jerks wide and springs back, a dropout wave sweeps across, the heart spikes. */
   stressHit() {
-    this.pulse(this.coolant, "is-purge", 1300);
+    this.pulse(this.ghost, "is-snap", 950);
+    this.pulse(this.sweep, "is-sweeping", 800);
+    this.pulse(this.heart, "is-spike", 900);
+  }
+
+  sync(levels) {
+    const level = levels?.stressLevel ?? 0;
+    this.#syncVeneer(level);
+    this.#syncGhost(level);
+  }
+
+  /** The dropout tiles for this level (rebuilt when the level, the mech or the size changes). */
+  #syncVeneer(level) {
     const { W, H } = this;
-    for (const x of [4, W - 4]) {
-      const inward = x < W / 2 ? 1 : -1;
-      for (const at of FERRULES) {
-        this.spot(this.fx, "lfd-kin-vapour", x, H * (0.05 + at * 0.88), {
-          "--dx": `${inward * rand(10, 26)}px`,
-          "--dy": `${-rand(10, 30)}px`,
-          "--s": `${rand(16, 30)}px`,
-          "--d": `${Math.round(rand(0, 260))}ms`,
-        }, 1800);
-      }
-      for (let i = 0; i < 8; i++) {
-        this.spot(this.fx, "lfd-kin-spray", x, H * (0.05 + FERRULES[i % FERRULES.length] * 0.88), {
-          "--dx": `${inward * rand(8, 38)}px`,
-          "--dy": `${rand(-14, 26)}px`,
-          "--s": `${rand(1.5, 3)}px`,
-          "--d": `${Math.round(rand(40, 360))}ms`,
-        }, 1400);
+    const key = `${this.seed}|${level}|${Math.round(W / VENEER_CELL)}x${Math.round(H / VENEER_CELL)}`;
+    if (key === this.veneerKey) return;
+    this.veneerKey = key;
+    this.veneer.replaceChildren();
+    if (!level || !this.seed || !W || !H) return;
+    for (const cluster of generateDropouts(this.seed, level, W, H)) {
+      for (const cell of cluster.cells) {
+        const tile = document.createElement("i");
+        tile.className = `lfd-glam-tile is-${cluster.mode}${cell.bolt ? " has-bolt" : ""}`;
+        for (const edge of cell.edges) tile.classList.add(`e-${edge}`);
+        tile.style.left = `${cell.x}px`;
+        tile.style.top = `${cell.y}px`;
+        tile.style.setProperty("--dur", `${cluster.dur}ms`);
+        tile.style.setProperty("--delay", `${cluster.delay}ms`);
+        this.veneer.append(tile);
       }
     }
   }
 
-  /** Condensation beads on the glass near the channels (placed once per size, the same each time). */
-  sync() {
-    const { W, H } = this;
-    const key = `${Math.round(W)}x${Math.round(H)}`;
-    if (!W || !H || key === this.beadKey) return;
-    this.beadKey = key;
-    this.beads.replaceChildren();
-    let seed = 7;
-    const next = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-    for (let k = 0; k < 16; k++) {
-      const left = k % 2 === 0;
-      const bead = document.createElement("i");
-      bead.style.left = `${left ? 7 + next() * 10 : W - 9 - next() * 10}px`;
-      bead.style.top = `${H * (0.08 + next() * 0.86)}px`;
-      bead.style.setProperty("--s", `${(1.6 + next() * 2.2).toFixed(1)}px`);
-      bead.style.setProperty("--k", String(k));
-      if (k % 5 === 0) bead.classList.add("is-runner");
-      this.beads.append(bead);
+  /**
+   * The double image: a copy of each panel part, laid over its original (the copies are inert, frozen and
+   * screen-blended, so they only ever brighten). Re-copied when a part re-renders, re-placed on scroll.
+   */
+  #syncGhost(level) {
+    const root = this.root;
+    if (!level || !root) {
+      if (this.copies.length) this.ghost.replaceChildren();
+      this.copies = [];
+      return;
+    }
+    const parts = [...root.querySelectorAll(":scope > [data-application-part]")];
+    const fresh = parts.length !== this.copies.length || parts.some((p, i) => p !== this.copies[i].src);
+    if (fresh) {
+      this.ghost.replaceChildren();
+      this.copies = parts.map(src => {
+        const copy = src.cloneNode(true);
+        copy.removeAttribute("data-application-part");
+        for (const node of copy.querySelectorAll("[id]")) node.removeAttribute("id");
+        copy.classList.add("lfd-glam-copy");
+        this.ghost.append(copy);
+        return { src, copy };
+      });
+    }
+    const base = this.layer.element.getBoundingClientRect();
+    const z = base.width / (this.layer.element.offsetWidth || base.width) || 1;
+    for (const { src, copy } of this.copies) {
+      const r = src.getBoundingClientRect();
+      copy.style.left = `${(r.left - base.left) / z}px`;
+      copy.style.top = `${(r.top - base.top) / z}px`;
+      copy.style.width = `${r.width / z}px`;
+      copy.style.height = `${r.height / z}px`;
     }
   }
 

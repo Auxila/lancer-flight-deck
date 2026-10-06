@@ -206,6 +206,63 @@ export function generateSeam(seed, index, W, H) {
 }
 
 /* -------------------------------------------- */
+/*  SSC stress: the veneer dropping out          */
+/* -------------------------------------------- */
+
+/** The projected veneer is laid in square tiles this size (CSS px). */
+export const VENEER_CELL = 14;
+/** Dropout clusters per stress level; they accumulate, so a mech's first patches stay as stress rises. */
+const DROPOUTS = [0, 2, 5, 8];
+
+/**
+ * Where SSC's projected veneer fails at a stress level: clusters of grid tiles (a random walk of 3-8
+ * cells each), seeded per mech and cluster so they're the same every time. The first two clusters
+ * flicker in and out; every one after stays out, so the bare chassis spreads level by level. Each cell
+ * knows which of its sides face the cluster's outside, so the veneer's edge can be drawn there.
+ * @returns {Array<{index: number, mode: "flicker"|"out", dur: number, delay: number, cells: Array<{x: number, y: number, edges: string, bolt: boolean}>}>}
+ */
+export function generateDropouts(seed, level, W, H) {
+  const cols = Math.floor(W / VENEER_CELL);
+  const rows = Math.floor(H / VENEER_CELL);
+  const out = [];
+  if (cols < 3 || rows < 3) return out;
+  const count = DROPOUTS[Math.max(0, Math.min(3, level))];
+  for (let k = 0; k < count; k++) {
+    const rng = mulberry32(hashSeed(`${seed}#veneer#${k}`));
+    const size = 3 + Math.floor(rng() * 6);
+    const taken = new Set();
+    let cx = Math.floor(rng() * cols);
+    let cy = Math.floor(rng() * rows);
+    taken.add(`${cx},${cy}`);
+    for (let guard = 0; taken.size < size && guard < 60; guard++) {
+      const dir = Math.floor(rng() * 4);
+      const nx = cx + [1, -1, 0, 0][dir];
+      const ny = cy + [0, 0, 1, -1][dir];
+      if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+      cx = nx;
+      cy = ny;
+      taken.add(`${cx},${cy}`);
+    }
+    const cells = [...taken].map(key => {
+      const [x, y] = key.split(",").map(Number);
+      const edges = [[0, -1, "t"], [1, 0, "r"], [0, 1, "b"], [-1, 0, "l"]]
+        .filter(([dx, dy]) => !taken.has(`${x + dx},${y + dy}`))
+        .map(e => e[2])
+        .join("");
+      return { x: x * VENEER_CELL, y: y * VENEER_CELL, edges, bolt: rng() < 0.22 };
+    });
+    out.push({
+      index: k,
+      mode: k < 2 ? "flicker" : "out",
+      dur: Math.round(2600 + rng() * 4200),
+      delay: Math.round(-rng() * 6000),
+      cells,
+    });
+  }
+  return out;
+}
+
+/* -------------------------------------------- */
 /*  HORUS: corrupted blocks                     */
 /* -------------------------------------------- */
 

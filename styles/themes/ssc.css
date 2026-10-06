@@ -1104,7 +1104,7 @@
 }
 
 /* ==========================================================================
-   Battle damage: kintsugi and the liquid cooling (src/ui/damage/styles/KintsugiDamage.js)
+   Battle damage: kintsugi and the glamour failing (src/ui/damage/styles/KintsugiDamage.js)
    ========================================================================== */
 
 #lancer-flight-deck .lfd-dmg-kintsugi .lfd-kin-svg {
@@ -1305,243 +1305,218 @@
   100% { opacity: 0; transform: rotate(var(--rot)) rotateY(540deg); }
 }
 
-/* Stress: the liquid cooling. Two gold-ringed glass channels down the bezel, full of sapphire coolant
-   that drains as stress mounts, boiling harder as it goes. */
-#lancer-flight-deck .lfd-dmg-kintsugi .lfd-kin-coolant {
-  z-index: 4;
-  display: none;
-}
+/* Stress: the glamour fails. The finish is a projection the pilot sees through the nerveweave; stress
+   breaks the sync, so the veneer drops out in tiles to the bare chassis, and the cockpit doubles. */
 
-#lancer-flight-deck.lfd-stressed .lfd-kin-coolant { display: block; }
+/* The veneer drops out: each tile turns what's under it to bare grey metal (text stays legible, it only
+   loses the gold), in primer, with a gold projection fringe round the hole and the odd fastener */
+#lancer-flight-deck .lfd-dmg-kintsugi .lfd-glam-veneer { z-index: 1; }
 
-#lancer-flight-deck .lfd-kin-tube {
-  --fill: 78%;
+#lancer-flight-deck .lfd-glam-tile {
   position: absolute;
-  top: 5%;
-  height: 88%;
-  width: 5px;
-  border-radius: 3px;
-  background: linear-gradient(90deg, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.02) 45%, rgb(0 0 0 / 0.35));
-  box-shadow:
-    0 0 0 0.75px color-mix(in srgb, var(--ssc-gold) 75%, transparent),
-    0 0 0 1.75px rgb(0 0 0 / 0.55),
-    0 0 6px rgb(110 200 255 / 0.12);
-  animation: lfd-kin-online 900ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
-}
-
-#lancer-flight-deck .lfd-kin-tube.is-left { left: 2px; }
-#lancer-flight-deck .lfd-kin-tube.is-right { right: 2px; }
-
-#lancer-flight-deck.lfd-stress-2 .lfd-kin-tube { --fill: 50%; }
-#lancer-flight-deck.lfd-stress-3 .lfd-kin-tube { --fill: 17%; }
-
-@keyframes lfd-kin-online {
-  from { clip-path: inset(100% 0 0 0); opacity: 0; }
-  to { clip-path: inset(-4px -4px -4px -4px); opacity: 1; }
-}
-
-/* The coolant: sapphire, flowing (bands sliding up), a bright meniscus on top */
-#lancer-flight-deck .lfd-kin-fluid {
-  position: absolute;
-  left: 0.5px;
-  right: 0.5px;
-  bottom: 0.5px;
-  height: var(--fill);
-  overflow: hidden;
-  border-radius: 2px;
+  width: 14px;
+  height: 14px;
+  -webkit-backdrop-filter: grayscale(1) brightness(1.4) contrast(0.8);
+  backdrop-filter: grayscale(1) brightness(1.4) contrast(0.8);
   background:
-    linear-gradient(90deg, rgb(255 255 255 / 0.45), transparent 35%, transparent 70%, rgb(0 40 80 / 0.4)),
-    repeating-linear-gradient(0deg, rgb(140 225 255 / 0.95) 0 9px, rgb(70 170 235 / 0.9) 9px 18px),
-    #3aa4de;
-  box-shadow: 0 0 6px rgb(110 205 255 / 0.55);
-  transition: height 1.4s cubic-bezier(0.3, 0.1, 0.3, 1);
-  animation: lfd-kin-flow 1.6s linear infinite;
+    linear-gradient(rgb(150 158 166 / 0.2) 0 0),
+    linear-gradient(90deg, rgb(255 255 255 / 0.09) 1px, transparent 1px) 0 0 / 7px 7px,
+    linear-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1px) 0 0 / 7px 7px;
 }
 
-#lancer-flight-deck .lfd-kin-fluid::before {
+#lancer-flight-deck .lfd-glam-tile.has-bolt {
+  background:
+    radial-gradient(circle at 50% 50%, #9aa1a8 0 1.1px, #3a3e43 1.5px 2.1px, transparent 2.4px),
+    linear-gradient(rgb(150 158 166 / 0.2) 0 0),
+    linear-gradient(90deg, rgb(255 255 255 / 0.09) 1px, transparent 1px) 0 0 / 7px 7px,
+    linear-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1px) 0 0 / 7px 7px;
+}
+
+/* The projection's torn edge: a gold fringe on the sides of each hole that face the veneer */
+#lancer-flight-deck .lfd-glam-tile::before {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
+  inset: 0;
+  border: 0 solid rgb(244 220 156 / 0.7);
+  filter: drop-shadow(0 0 1.5px rgb(255 214 120 / 0.8));
+}
+
+#lancer-flight-deck .lfd-glam-tile.e-t::before { border-top-width: 1px; }
+#lancer-flight-deck .lfd-glam-tile.e-r::before { border-right-width: 1px; }
+#lancer-flight-deck .lfd-glam-tile.e-b::before { border-bottom-width: 1px; }
+#lancer-flight-deck .lfd-glam-tile.e-l::before { border-left-width: 1px; }
+
+/* Flickering clusters are mostly there, dropping out in stutters; steady ones stay out, their fringe
+   crawling */
+#lancer-flight-deck .lfd-glam-tile.is-flicker {
+  opacity: 0;
+  animation: lfd-glam-flicker var(--dur, 4s) steps(1) var(--delay, 0ms) infinite;
+}
+
+#lancer-flight-deck .lfd-glam-tile.is-out::before {
+  animation: lfd-glam-fringe 2.2s steps(1) var(--delay, 0ms) infinite;
+}
+
+@keyframes lfd-glam-flicker {
+  0%, 62% { opacity: 0; }
+  63% { opacity: 1; }
+  65% { opacity: 0; }
+  66.5%, 74% { opacity: 1; }
+  75%, 86% { opacity: 0; }
+  87%, 92% { opacity: 1; }
+  93%, 100% { opacity: 0; }
+}
+
+@keyframes lfd-glam-fringe {
+  0%, 100% { opacity: 1; }
+  40% { opacity: 0.55; }
+  42% { opacity: 1; }
+  71% { opacity: 0.3; }
+  72% { opacity: 1; }
+}
+
+/* At the last point the whole finish strobes off now and then */
+#lancer-flight-deck .lfd-dmg-kintsugi .lfd-glam-strobe {
+  z-index: 1;
+  display: none;
+  -webkit-backdrop-filter: grayscale(1) brightness(1.3) contrast(0.84);
+  backdrop-filter: grayscale(1) brightness(1.3) contrast(0.84);
+  background: linear-gradient(rgb(150 158 166 / 0.14) 0 0);
+  opacity: 0;
+}
+
+#lancer-flight-deck.lfd-stress-3 .lfd-glam-strobe {
+  display: block;
+  animation: lfd-glam-strobe 6.8s steps(1) infinite;
+}
+
+@keyframes lfd-glam-strobe {
+  0%, 86% { opacity: 0; }
+  87% { opacity: 1; }
+  88% { opacity: 0; }
+  89.5%, 92% { opacity: 1; }
+  93%, 100% { opacity: 0; }
+}
+
+/* A hit: a wave of dropout sweeps across the cockpit, a gold fringe at its front */
+#lancer-flight-deck .lfd-dmg-kintsugi .lfd-glam-sweep {
+  z-index: 3;
+  display: none;
+  -webkit-backdrop-filter: grayscale(1) brightness(1.25) contrast(0.85);
+  backdrop-filter: grayscale(1) brightness(1.25) contrast(0.85);
+}
+
+#lancer-flight-deck .lfd-glam-sweep.is-sweeping {
+  display: block;
+  animation: lfd-glam-sweep 760ms cubic-bezier(0.4, 0, 0.3, 1) forwards;
+}
+
+#lancer-flight-deck .lfd-glam-sweep.is-sweeping::after {
+  content: "";
+  position: absolute;
   top: 0;
-  height: 1.5px;
-  background: #e8fbff;
-  box-shadow: 0 0 4px #bff0ff;
-}
-
-#lancer-flight-deck.lfd-stress-2 .lfd-kin-fluid { animation-duration: 1s; }
-#lancer-flight-deck.lfd-stress-3 .lfd-kin-fluid {
-  animation-duration: 0.55s;
-  background:
-    linear-gradient(90deg, rgb(255 255 255 / 0.45), transparent 35%, transparent 70%, rgb(0 40 80 / 0.4)),
-    repeating-linear-gradient(0deg, rgb(190 235 255 / 0.95) 0 6px, rgb(90 165 225 / 0.9) 6px 12px),
-    #5aa8dc;
-}
-
-@keyframes lfd-kin-flow {
-  from { background-position: 0 0, 0 0, 0 0; }
-  to { background-position: 0 0, 0 -18px, 0 0; }
-}
-
-/* Bubbles: a few at the first level, more as it boils */
-#lancer-flight-deck .lfd-kin-fluid s {
-  position: absolute;
-  left: var(--x);
-  bottom: -3px;
+  bottom: 0;
   width: 2px;
-  height: 2px;
-  margin-left: -1px;
-  border-radius: 50%;
-  background: rgb(240 252 255 / 0.95);
-  opacity: 0;
-  animation: lfd-kin-bubble 2.4s ease-in infinite;
-  animation-delay: calc(var(--k) * -0.31s);
+  background: rgb(255 236 180 / 0.9);
+  box-shadow: 0 0 8px rgb(255 214 120 / 0.9);
+  animation: lfd-glam-front 760ms cubic-bezier(0.4, 0, 0.3, 1) forwards;
 }
 
-#lancer-flight-deck.lfd-stress-1 .lfd-kin-fluid s:nth-child(n + 4) { display: none; }
-#lancer-flight-deck.lfd-stress-2 .lfd-kin-fluid s { animation-duration: 1.4s; }
-#lancer-flight-deck.lfd-stress-2 .lfd-kin-fluid s:nth-child(n + 7) { display: none; }
-#lancer-flight-deck.lfd-stress-3 .lfd-kin-fluid s { animation-duration: 0.7s; width: 2.6px; height: 2.6px; }
-
-@keyframes lfd-kin-bubble {
-  0% { bottom: -3px; opacity: 0; transform: translateX(0); }
-  15% { opacity: 1; }
-  50% { transform: translateX(0.8px); }
-  90% { opacity: 0.9; }
-  100% { bottom: 100%; opacity: 0; transform: translateX(-0.6px); }
+@keyframes lfd-glam-sweep {
+  0% { clip-path: inset(0 100% 0 0); }
+  45% { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 0 0 100%); }
 }
 
-/* The gold couplings down each channel */
-#lancer-flight-deck .lfd-kin-tube em {
-  position: absolute;
-  left: -1.5px;
-  right: -1.5px;
-  height: 4px;
-  margin-top: -2px;
-  border-radius: 1px;
-  background: linear-gradient(90deg, var(--ssc-gold-lo), var(--ssc-gold-hi) 45%, var(--ssc-gold) 60%, var(--ssc-gold-lo));
-  box-shadow: 0 1px 1px rgb(0 0 0 / 0.6);
+@keyframes lfd-glam-front {
+  0% { left: 0; opacity: 1; }
+  45% { left: 100%; opacity: 1; }
+  46%, 100% { opacity: 0; }
 }
 
-/* A hit purges the loop: a bright surge up the coolant, and it sloshes */
-#lancer-flight-deck .lfd-kin-coolant.is-purge .lfd-kin-fluid {
-  animation: lfd-kin-flow 0.3s linear infinite, lfd-kin-slosh 1100ms cubic-bezier(0.3, 1.6, 0.4, 1);
-}
-
-#lancer-flight-deck .lfd-kin-coolant.is-purge .lfd-kin-fluid::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 24px;
-  background: linear-gradient(0deg, transparent, rgb(255 255 255 / 0.95), transparent);
-  animation: lfd-kin-surge 650ms ease-in 2;
-}
-
-@keyframes lfd-kin-slosh {
-  0% { height: var(--fill); }
-  25% { height: calc(var(--fill) + 12%); }
-  55% { height: calc(var(--fill) - 4%); }
-  100% { height: var(--fill); }
-}
-
-@keyframes lfd-kin-surge {
-  from { bottom: -24px; }
-  to { bottom: 100%; }
-}
-
-#lancer-flight-deck .lfd-kin-vapour::before {
-  content: "";
-  position: absolute;
-  left: calc(var(--s) / -2);
-  top: calc(var(--s) / -2);
-  width: var(--s);
-  height: var(--s);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgb(235 248 255 / 0.55), rgb(190 225 245 / 0.2) 55%, transparent 72%);
-  opacity: 0;
-  animation: lfd-kin-vapour 1500ms ease-out var(--d) forwards;
-}
-
-@keyframes lfd-kin-vapour {
-  0% { opacity: 0; transform: translate(0, 0) scale(0.3); }
-  15% { opacity: 1; }
-  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.7); }
-}
-
-#lancer-flight-deck .lfd-kin-spray::before {
-  content: "";
-  position: absolute;
-  left: calc(var(--s) / -2);
-  top: calc(var(--s) / -2);
-  width: var(--s);
-  height: var(--s);
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff, #7fd0f5 60%);
-  opacity: 0;
-  animation: lfd-kin-spray 900ms cubic-bezier(0.2, 0.7, 0.5, 1) var(--d) forwards;
-}
-
-@keyframes lfd-kin-spray {
-  0% { opacity: 0; translate: 0 0; }
-  12% { opacity: 1; }
-  100% { opacity: 0; translate: var(--dx) calc(var(--dy) + 18px); }
-}
-
-/* Condensation on the glass from the second level; now and then a bead runs */
-#lancer-flight-deck .lfd-dmg-kintsugi .lfd-kin-beads {
+/* The pilot sees double: a frozen copy of the cockpit, a moment behind, drifting off-register and
+   swimming, further with each level. Screen-blended, so it can only brighten what's under it. */
+#lancer-flight-deck .lfd-dmg-kintsugi .lfd-glam-ghost {
+  --drift: 2px;
   z-index: 4;
   display: none;
+  mix-blend-mode: screen;
+  opacity: 0.15;
+  filter: blur(0.45px);
+  translate: var(--drift) calc(var(--drift) * 0.45);
+  animation: lfd-glam-drift 7.5s ease-in-out infinite;
 }
 
-#lancer-flight-deck:is(.lfd-stress-2, .lfd-stress-3) .lfd-kin-beads { display: block; }
+#lancer-flight-deck.lfd-stressed .lfd-glam-ghost { display: block; }
+#lancer-flight-deck.lfd-stress-2 .lfd-glam-ghost { --drift: 3.5px; opacity: 0.2; animation-duration: 5.5s; }
+#lancer-flight-deck.lfd-stress-3 .lfd-glam-ghost { --drift: 5px; opacity: 0.25; animation: lfd-glam-drift 4s ease-in-out infinite, lfd-glam-swim 3.1s ease-in-out infinite; }
 
-#lancer-flight-deck .lfd-kin-beads i {
+/* The copies: frozen, flat, laid exactly over their originals */
+#lancer-flight-deck .lfd-glam-copy {
   position: absolute;
-  width: var(--s);
-  height: calc(var(--s) * 1.15);
-  border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
-  background: radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.85) 0 18%, rgb(190 230 250 / 0.28) 40%, rgb(120 190 230 / 0.12) 70%, transparent 72%);
-  box-shadow: inset 0 -0.5px 0.5px rgb(0 30 60 / 0.4);
+  margin: 0;
+  overflow: hidden;
 }
 
-#lancer-flight-deck.lfd-stress-2 .lfd-kin-beads i:nth-child(3n) { display: none; }
-
-#lancer-flight-deck .lfd-kin-beads i.is-runner {
-  animation: lfd-kin-run 7s cubic-bezier(0.6, 0, 0.9, 0.6) infinite;
-  animation-delay: calc(var(--k) * -1.3s);
+#lancer-flight-deck .lfd-glam-ghost *,
+#lancer-flight-deck .lfd-glam-ghost *::before,
+#lancer-flight-deck .lfd-glam-ghost *::after {
+  animation: none !important;
+  transition: none !important;
 }
 
-@keyframes lfd-kin-run {
-  0%, 70% { transform: translateY(0); opacity: 1; }
-  96% { transform: translateY(34px) scaleY(1.3); opacity: 0.8; }
-  100% { transform: translateY(36px); opacity: 0; }
+@keyframes lfd-glam-drift {
+  0%, 100% { translate: var(--drift) calc(var(--drift) * 0.45); }
+  30% { translate: calc(var(--drift) * -0.55) calc(var(--drift) * 0.8); }
+  62% { translate: calc(var(--drift) * 0.8) calc(var(--drift) * -0.6); }
 }
 
-/* At the last point the near-dry channels vent cold vapour from their tops */
-#lancer-flight-deck.lfd-stress-3 .lfd-kin-tube::before,
-#lancer-flight-deck.lfd-stress-3 .lfd-kin-tube::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: calc(var(--fill) - 4px);
-  width: 22px;
-  height: 22px;
-  margin-left: -11px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgb(230 246 255 / 0.4), transparent 68%);
+@keyframes lfd-glam-swim {
+  0%, 100% { scale: 1; }
+  50% { scale: 1.012 1.006; }
+}
+
+/* A hit snaps the sync: the ghost jerks wide and springs back */
+#lancer-flight-deck .lfd-glam-ghost.is-snap {
+  animation: lfd-glam-snap 950ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes lfd-glam-snap {
+  0% { translate: 13px -4px; opacity: 0.55; filter: blur(0.8px); }
+  25% { translate: -6px 3px; opacity: 0.4; }
+  55% { translate: 3px -1px; }
+  100% { translate: var(--drift) calc(var(--drift) * 0.45); }
+}
+
+/* A heartbeat at the edges, faster as the sync goes */
+#lancer-flight-deck .lfd-dmg-kintsugi .lfd-glam-heart {
+  --beat: 0.3;
+  z-index: 4;
+  display: none;
+  background: radial-gradient(ellipse 85% 70% at 50% 50%, transparent 55%, rgb(120 24 40 / 0.7) 100%);
   opacity: 0;
-  animation: lfd-kin-mist 2.6s ease-out infinite;
+  animation: lfd-glam-beat 1.15s ease-out infinite;
 }
 
-#lancer-flight-deck.lfd-stress-3 .lfd-kin-tube::after {
-  animation-delay: -1.3s;
+#lancer-flight-deck.lfd-stressed .lfd-glam-heart { display: block; }
+#lancer-flight-deck.lfd-stress-2 .lfd-glam-heart { --beat: 0.42; animation-duration: 0.86s; }
+#lancer-flight-deck.lfd-stress-3 .lfd-glam-heart { --beat: 0.58; animation-duration: 0.62s; }
+
+@keyframes lfd-glam-beat {
+  0% { opacity: 0; }
+  9% { opacity: var(--beat); }
+  18% { opacity: calc(var(--beat) * 0.3); }
+  27% { opacity: calc(var(--beat) * 0.85); }
+  50%, 100% { opacity: 0; }
 }
 
-@keyframes lfd-kin-mist {
-  0% { opacity: 0; transform: translateY(0) scale(0.4); }
-  25% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-46px) scale(1.6); }
+#lancer-flight-deck .lfd-glam-heart.is-spike {
+  animation: lfd-glam-spike 900ms ease-out;
+}
+
+@keyframes lfd-glam-spike {
+  0% { opacity: 0.95; }
+  100% { opacity: 0; }
 }
 
 /* A structure hit: the movement skips a beat */
@@ -1558,7 +1533,7 @@
   74% { transform: none; }
 }
 
-/* Collapsed: a gold seam on the strip, and a coolant vial at its foot, draining with stress */
+/* Collapsed: a gold seam on the strip, and a doubled heartbeat at its foot */
 #lancer-flight-deck.lfd-dmg-kintsugi.is-collapsed:is(.lfd-cracked, .lfd-stressed) .lfd-tab {
   position: relative;
 }
@@ -1576,23 +1551,36 @@
 }
 
 #lancer-flight-deck.lfd-dmg-kintsugi.is-collapsed.lfd-stressed .lfd-tab::before {
-  --fill: 78%;
+  --ghost: 2px;
   content: "";
   position: absolute;
-  bottom: 5px;
+  bottom: 6px;
   left: 50%;
-  width: 6px;
-  height: 14px;
-  margin-left: -3px;
-  border-radius: 3px;
-  background: linear-gradient(0deg, #6cc7f2 0 var(--fill), rgb(255 255 255 / 0.06) var(--fill));
-  box-shadow: 0 0 0 0.75px var(--ssc-gold), 0 0 5px rgb(110 205 255 / 0.5);
+  width: 5px;
+  height: 5px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: var(--ssc-gold);
+  box-shadow: var(--ghost) calc(var(--ghost) * -0.5) 0 rgb(244 220 156 / 0.45), 0 0 5px rgb(150 30 50 / 0.8);
+  animation: lfd-glam-beat-dot 1.15s ease-out infinite;
 }
 
-#lancer-flight-deck.lfd-dmg-kintsugi.lfd-stress-2.is-collapsed .lfd-tab::before { --fill: 50%; }
-#lancer-flight-deck.lfd-dmg-kintsugi.lfd-stress-3.is-collapsed .lfd-tab::before { --fill: 17%; }
+#lancer-flight-deck.lfd-dmg-kintsugi.lfd-stress-2.is-collapsed .lfd-tab::before { --ghost: 3px; animation-duration: 0.86s; }
+#lancer-flight-deck.lfd-dmg-kintsugi.lfd-stress-3.is-collapsed .lfd-tab::before { --ghost: 4px; animation-duration: 0.62s; }
 
-/* Reduced motion: no glints, bubbles or vapour; the gold and the coolant levels stand */
-#lancer-flight-deck.lfd-reduce-motion :is(.lfd-seam-glint, .lfd-kin-fluid s) {
+@keyframes lfd-glam-beat-dot {
+  0%, 50%, 100% { scale: 1; }
+  9% { scale: 1.45; }
+  18% { scale: 1.05; }
+  27% { scale: 1.3; }
+}
+
+/* Reduced motion: no glints, flicker, strobe or heartbeat; the steady dropouts and a still ghost show
+   the level */
+#lancer-flight-deck.lfd-reduce-motion :is(.lfd-seam-glint, .lfd-glam-tile.is-flicker, .lfd-glam-strobe) {
   display: none !important;
+}
+
+#lancer-flight-deck.lfd-reduce-motion.lfd-stressed .lfd-glam-heart {
+  opacity: calc(var(--beat) * 0.35);
 }

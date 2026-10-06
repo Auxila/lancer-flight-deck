@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { damageSite, generateBreach, generateCorruption, generateSeam, generateSpall, smoothPath } from "../src/ui/damage/geometry.js";
+import { VENEER_CELL, damageSite, generateBreach, generateCorruption, generateDropouts, generateSeam, generateSpall, smoothPath } from "../src/ui/damage/geometry.js";
 import { DAMAGE_STYLES } from "../src/ui/damage/styles/index.js";
 import { getThemes } from "../src/themes/registry.js";
 
@@ -91,3 +91,22 @@ test("smoothPath curves through the midpoints and ends on the last point", () =>
   assert.equal(smoothPath([[0, 0], [10, 0], [20, 10]]), "M0 0 Q10 0 15 5 L20 10");
   assert.equal(smoothPath([[0, 0], [5, 5]]), "M0 0 L5 5");
 });
+
+test("SSC veneer dropouts accumulate with stress, stay on the grid and on the panel, and know their edges", () => {
+  const counts = [0, 1, 2, 3].map(l => generateDropouts("Actor.abc", l, W, H).length);
+  assert.deepEqual(counts, [0, 2, 5, 8]);
+  // The patches seen at level 1 are still there, unchanged, at level 3
+  assert.deepEqual(generateDropouts("Actor.abc", 3, W, H).slice(0, 2), generateDropouts("Actor.abc", 1, W, H));
+  for (const cluster of generateDropouts("Actor.abc", 3, W, H)) {
+    assert.ok(cluster.cells.length >= 1 && cluster.cells.length <= 8);
+    assert.ok(cluster.mode === "flicker" || cluster.mode === "out");
+    for (const c of cluster.cells) {
+      assert.equal(c.x % VENEER_CELL, 0);
+      assert.equal(c.y % VENEER_CELL, 0);
+      assert.ok(c.x >= 0 && c.x + VENEER_CELL <= W && c.y >= 0 && c.y + VENEER_CELL <= H);
+      assert.match(c.edges, /^t?r?b?l?$/);
+    }
+  }
+  assert.notDeepEqual(generateDropouts("Actor.abc", 2, W, H), generateDropouts("Actor.xyz", 2, W, H));
+});
+
