@@ -22,10 +22,19 @@
 - **Integrity:** two sunburst sub-dials, structure and stress. Each box is an applied index, gold while it holds and hollow red once lost; the count in the centre, the odds below.
 - HUD glyphs and NPC Deck portraits are gem-cut octagons; hover cards and the picker follow. The UI gold is a pale champagne, kept to hairlines and type, so amber still means a lit caution. Cold boot: two guilloché rosettes turning against each other behind *You only need one*, FULL SYNC, BESPOKE.
 
+**HORUS: a leaked readout**
+- Its own header, hull and integrity, and HORUS print on everything else: 1-bit black and bone, all monospace, lowercase except the alarms (condition tiles still shout), plates printed a pixel out of register in HORUS green, dithered blanks. Selections are reverse video, so HORUS green stays out of anything that looks like a lamp and mint still only means ready.
+- **Header:** the HORUS sigil opens the picker (the signal slips when you reach for it; reverse video while its menu is open); over the name a hashed handle (74C8:2EF5; cosmetic, the same for a mech every session); the name tears for a moment now and then; the frame as the UIB's *pattern group*. The comms line is a prompt with a cursor.
+- **Hull:** sections are prompts (`$ hull`); HP prints cell by cell, one per hit point, over a dithered blank; armor as solid blocks; tags and checks in brackets.
+- **Reactor:** heat cells are a memory dump, numbered in hex. The Overcharge ladder is a checklist: `[x]` spent, `[>]` next in reverse video, `[ ]` to come.
+- **Integrity:** watched. Structure is a row of eyes that glance about and shut, in red, as boxes are lost; stress is a row of the sigil's rings that break. The next check hangs under each line as a tree branch: the roll, the odds bar, what's at stake.
+- Push-buttons are executables (`./overcharge`, `./stabilize`) that go reverse video under the pointer; lamps are square pixels. HUD glyphs are kite-cut like the sigil's point, the NPC Deck's portraits square, and both print out of register. Cold boot: the sigil prints in dither, line by line, behind *every door, open*, UNSEALED, RUN ANYWAY.
+- HORUS frames (Goblin, Hydra, Lich...) now match HORUS instead of GMS.
+
 **Under the hood**
 - Theme colours are tokens all the way down (wells, edges, unlit lamps), so every surface follows the maker.
 - Themes can bring their own templates per part, finish-card text and a header serial; `tests/themes.test.js` checks the maker mapping, the override, and that a theme's templates keep every hook of the parts they replace. `npm run smoke` gains a picker step.
-- HORUS and HA have first-pass palettes in the repo, unregistered until they're finished.
+- HA has a first-pass palette in the repo, unregistered until it's finished.
 
 ## 0.7.0
 

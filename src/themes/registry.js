@@ -1,13 +1,14 @@
 import { GMSTheme } from "./GMSTheme.js";
 import { IPSNTheme } from "./IPSNTheme.js";
 import { SSCTheme } from "./SSCTheme.js";
+import { HORUSTheme } from "./HORUSTheme.js";
 
 /**
  * Registered themes, by id: GMS (the fallback, which must always exist), then each core maker as it's
- * finished. HORUS and HA have first-pass foundations alongside (HORUSTheme.js, HATheme.js and their
- * styles/themes/*.css) and are registered, and added to module.json's styles, when they're done.
+ * finished. HA has a first-pass foundation alongside (HATheme.js and styles/themes/ha.css), registered
+ * and added to module.json's styles when it's done.
  */
-const THEMES = new Map([GMSTheme, IPSNTheme, SSCTheme].map(theme => [theme.id, theme]));
+const THEMES = new Map([GMSTheme, IPSNTheme, SSCTheme, HORUSTheme].map(theme => [theme.id, theme]));
 const FALLBACK = GMSTheme;
 
 /**

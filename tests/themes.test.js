@@ -6,6 +6,7 @@ import { getThemes, resolveTheme, themeChoices } from "../src/themes/registry.js
 import { GMSTheme } from "../src/themes/GMSTheme.js";
 import { IPSNTheme } from "../src/themes/IPSNTheme.js";
 import { SSCTheme } from "../src/themes/SSCTheme.js";
+import { HORUSTheme } from "../src/themes/HORUSTheme.js";
 import { TEMPLATE_ROOT } from "../src/constants.js";
 import { buildHeat } from "../src/ui/components/HeatReactorGauge.js";
 
@@ -18,6 +19,7 @@ test("frames pick their maker's theme; makers without one (and LCPs) fall back t
   assert.equal(resolveTheme(" ips-n "), IPSNTheme, "codes are trimmed and case-folded");
   assert.equal(resolveTheme("IPSN"), IPSNTheme);
   assert.equal(resolveTheme("SSC"), SSCTheme);
+  assert.equal(resolveTheme("HORUS"), HORUSTheme);
   for (const code of ["BDF", "MPAL", "IRIDIA", "", null, undefined]) assert.equal(resolveTheme(code), GMSTheme, String(code));
 });
 
@@ -57,6 +59,12 @@ test("SSC commission numbers are four digits, the same for a mech every session"
   assert.equal(SSCTheme.registry({ uuid: "Actor.abc123" }), n);
 });
 
+test("HORUS handles are eight hex digits (7F3A:C91E), the same for a mech every session", () => {
+  const h = HORUSTheme.registry({ uuid: "Actor.abc123" });
+  assert.match(h, /^[0-9A-F]{4}:[0-9A-F]{4}$/);
+  assert.equal(HORUSTheme.registry({ uuid: "Actor.abc123" }), h);
+});
+
 /**
  * A theme's own templates are a different layout of the same instrument: every action, editable field,
  * data hook and class the code looks for in the base part has to be there too.
@@ -86,7 +94,7 @@ test("theme templates keep every hook of the base part they replace", () => {
       checked++;
     }
   }
-  assert.ok(checked >= 8, "IPS-N and SSC each bring their own header, hull, heat and integrity");
+  assert.ok(checked >= 11, "IPS-N and SSC bring four templates each, HORUS three");
 });
 
 test("the Overcharge view says where the next cost sits on the ladder (dial themes point at it)", () => {

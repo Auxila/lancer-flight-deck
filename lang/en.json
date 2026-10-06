@@ -12,7 +12,8 @@
       "Tagline": {
         "GMS": "Union standard issue: red on gunmetal",
         "IPSN": "A ship's bridge: riveted plate, signal flags, a telegraph",
-        "SSC": "An atelier chronometer: lacquer, gold leaf, sub-dials"
+        "SSC": "An atelier chronometer: lacquer, gold leaf, sub-dials",
+        "HORUS": "A leaked readout: 1-bit, monospace, watched"
       }
     },
     "Settings": {
@@ -914,6 +915,15 @@
       "AutoDetail": "{frame}: {badge}",
       "AutoNone": "No mech linked: {badge}",
       "Footer": "Hover: preview · Click: choose · Esc: close"
+    },
+    "HORUS": {
+      "Pattern": "pattern group: {frame}",
+      "NoSignal": "no signal",
+      "Boot": {
+        "Caption": "every door, open",
+        "Title": "Unsealed",
+        "Stamp": "Run anyway"
+      }
     },
     "SSC": {
       "House": "Smith-Shimano",

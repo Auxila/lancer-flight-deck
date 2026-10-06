@@ -1,0 +1,79 @@
+{{!-- HORUS: a leaked readout, not a nameplate. The sigil opens the theme picker; over the mech's name, a
+      hashed handle (cosmetic, stable per mech); under it, the frame as the UIB's pattern group. --}}
+<header class="lfd-header lfd-plate lfd-horus-readout">
+  <button type="button" class="lfd-tab" data-action="toggleCollapse" data-tooltip="LFD.Header.Expand" aria-label="{{localize 'LFD.Header.Expand'}}">
+    <span class="lfd-tab-badge lfd-horus-tab-sigil" aria-hidden="true">
+      <svg viewBox="-16 -16 32 32" focusable="false">
+        <g class="lfd-horus-sigil-mark">
+          <path class="lfd-sigil-body" d="M0 -7.5C3.5 -5 9.5 -6 15.5 -5.5C8.5 -2.5 3.5 2 0 15.5C-3.5 2 -8.5 -2.5 -15.5 -5.5C-9.5 -6 -3.5 -5 0 -7.5Z"/>
+          <circle class="lfd-sigil-ring" cy="-11.6" r="3.1"/>
+          <circle class="lfd-sigil-pupil" cy="-11.6" r="1.1"/>
+        </g>
+      </svg>
+    </span>
+    <span class="lfd-tab-title">{{localize "LFD.Title"}}</span>
+    {{#unless standby}}
+    <span class="lfd-tab-mini {{#if header.mini.danger}}is-danger{{/if}}" aria-hidden="true">
+      <i class="mdi mdi-fire"></i>{{header.mini.heat}}
+    </span>
+    <span class="lfd-tab-mini" aria-hidden="true"><i class="mdi mdi-hexagon-multiple"></i>{{header.mini.structure}}</span>
+    {{#if header.alertWarning}}<span class="lfd-tab-alert lfd-k-warning" style="animation-delay:{{header.warningDelay}}ms" aria-hidden="true">▲</span>
+    {{else if header.alertCaution}}<span class="lfd-tab-alert lfd-k-caution" style="animation-delay:{{header.cautionDelay}}ms" aria-hidden="true">◆</span>{{/if}}
+    {{/unless}}
+  </button>
+
+  <div class="lfd-header-main">
+    <span class="lfd-drag-grip" data-tooltip="LFD.Move.Hint" aria-hidden="true"><i class="fa-solid fa-grip-vertical"></i></span>
+    <button type="button" class="lfd-badge lfd-horus-sigil" data-action="themeMenu" data-tooltip="{{themeTip}}" aria-label="{{themeTip}}"
+            aria-haspopup="menu" aria-expanded="false">
+      <svg viewBox="-16 -16 32 32" aria-hidden="true" focusable="false">
+        <g class="lfd-horus-sigil-mark">
+          <path class="lfd-sigil-body" d="M0 -7.5C3.5 -5 9.5 -6 15.5 -5.5C8.5 -2.5 3.5 2 0 15.5C-3.5 2 -8.5 -2.5 -15.5 -5.5C-9.5 -6 -3.5 -5 0 -7.5Z"/>
+          <circle class="lfd-sigil-ring" cy="-11.6" r="3.1"/>
+          <circle class="lfd-sigil-pupil" cy="-11.6" r="1.1"/>
+        </g>
+      </svg>
+    </button>
+    <div class="lfd-ident">
+      {{#if standby}}
+      <div class="lfd-horus-handle"><b>∴</b><span>{{localize "LFD.HORUS.NoSignal"}}</span></div>
+      <div class="lfd-mech-name">{{localize "LFD.Header.Standby"}}</div>
+      <div class="lfd-frame-name">{{localize "LFD.Header.StandbyHint"}}</div>
+      {{else}}
+      <div class="lfd-horus-handle"><b>∴</b>{{#if header.registry}}<span>{{header.registry}}</span>{{/if}}</div>
+      <button type="button" class="lfd-mech-name" data-action="openSheet" data-tooltip="LFD.Header.OpenSheet" data-text="{{header.mechName}}">{{header.mechName}}</button>
+      <div class="lfd-frame-name">{{#if header.hasFrame}}{{localize "LFD.HORUS.Pattern" frame=header.frameName}}{{else}}{{header.frameName}}{{/if}}</div>
+      {{/if}}
+    </div>
+    <div class="lfd-header-controls">
+      {{#if header.floating}}
+      <button type="button" class="lfd-icon-btn" data-action="dock" data-tooltip="LFD.Move.Dock" aria-label="{{localize 'LFD.Move.Dock'}}">
+        <i class="fa-solid fa-thumbtack"></i>
+      </button>
+      {{/if}}
+      <button type="button" class="lfd-icon-btn" data-action="toggleMute"
+              data-tooltip="{{#if header.muted}}LFD.Header.Unmute{{else}}LFD.Header.Mute{{/if}}"
+              aria-label="{{#if header.muted}}{{localize 'LFD.Header.Unmute'}}{{else}}{{localize 'LFD.Header.Mute'}}{{/if}}"
+              aria-pressed="{{#if header.muted}}true{{else}}false{{/if}}">
+        <i class="fa-solid {{#if header.muted}}fa-volume-xmark{{else}}fa-volume-low{{/if}}"></i>
+      </button>
+      <button type="button" class="lfd-icon-btn" data-action="hidePanel" data-tooltip="LFD.Header.Hide" aria-label="{{localize 'LFD.Header.Hide'}}">
+        <i class="fa-solid fa-eye-slash"></i>
+      </button>
+      <button type="button" class="lfd-icon-btn" data-action="toggleCollapse" data-tooltip="LFD.Header.Collapse" aria-label="{{localize 'LFD.Header.Collapse'}}">
+        <i class="fa-solid fa-angles-left lfd-collapse-icon"></i>
+      </button>
+    </div>
+  </div>
+
+  {{#unless standby}}
+  <div class="lfd-datalink {{#if header.jammed}}is-jammed{{/if}}">
+    <span class="lfd-horus-prompt" aria-hidden="true">&gt;</span>
+    <span class="lfd-datalink-label">{{localize "LFD.Header.Pilot"}}</span>
+    <span class="lfd-datalink-callsign">{{header.callsign}}</span>
+    {{#if header.activation}}<span class="lfd-activation">{{localize "LFD.Header.Activation"}}</span>{{/if}}
+    <span class="lfd-datalink-status">{{#if header.jammed}}{{localize "LFD.Header.LinkJammed"}}{{else}}{{localize "LFD.Header.LinkOk"}}{{/if}}</span>
+    <span class="lfd-horus-caret" aria-hidden="true"></span>
+  </div>
+  {{/unless}}
+</header>

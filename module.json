@@ -50,7 +50,8 @@
     "styles/npc.css",
     "styles/themes/gms.css",
     "styles/themes/ipsn.css",
-    "styles/themes/ssc.css"
+    "styles/themes/ssc.css",
+    "styles/themes/horus.css"
   ],
   "languages": [
     {

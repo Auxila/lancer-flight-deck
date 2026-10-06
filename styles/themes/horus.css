@@ -1,87 +1,298 @@
 /* ==========================================================================
-   HORUS: the collective. Black glass, terminal green, a signal that doesn't quite hold still.
+   HORUS: the collective. Nobody has mapped it; its mechs come out of other people's printers.
    Canon colours (lancer-data manufacturers.json): #046e3c light, #00a256 dark.
-   Foundation: palette and first ornaments; more to come.
+
+   A leaked black-box readout, not a product:
+   - 1-bit black and bone, everything in monospace; status words shout, everything else is lowercase
+   - sections are shell prompts ($ hull); selections and the next Overcharge are reverse video
+   - plates print slightly out of register: a HORUS-green ghost of each edge, offset by a pixel or two
+   - the header carries the sigil, a hashed handle and the UIB's "pattern group" for the frame
+   - HP prints cell by cell over a dithered blank; heat is a memory dump numbered in hex
+   - integrity is watched: eyes that close as structure goes, sigil rings that break as stress does
+   HORUS green stays out of anything that looks like a lamp, so mint still means only "ready".
+   Layout lives in templates/panel/horus/; the semantic colours never change.
    ========================================================================== */
+
+@counter-style lfd-hex {
+  system: numeric;
+  symbols: "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F";
+  pad: 2 "0";
+}
 
 #lancer-flight-deck.lfd-theme-horus,
 .lfd-themed.lfd-theme-horus {
-  --lfd-bg: #080c0a;
-  --lfd-plate: #0e1411;
-  --lfd-plate-2: #151d19;
-  --lfd-line: #23362c;
-  --lfd-ink: #d9f2e3;
-  --lfd-ink-dim: #7fa08d;
-  --lfd-accent: #00a256;
-  --lfd-accent-deep: #046e3c;
-  --lfd-accent-ink: #02140b;
-  --lfd-well: #050806;
-  --lfd-well-2: #070b09;
-  --lfd-edge: #1a2a22;
-  --lfd-off: #16211b;
-  --lfd-unlit: #52645a;
-  --lfd-chamfer: 9px;
+  --lfd-bg: #050605;
+  --lfd-plate: #0a0b0a;
+  --lfd-plate-2: #131513;
+  --lfd-line: #2d302d;
+  --lfd-ink: #e8e4d6;
+  --lfd-ink-dim: #8f9087;
+  /* Reverse video: the "accent" is bone, the way a terminal highlights */
+  --lfd-accent: #e8e4d6;
+  --lfd-accent-deep: #00a256;
+  --lfd-accent-ink: #050605;
+  --lfd-well: #000;
+  --lfd-well-2: #030403;
+  --lfd-edge: #1e211e;
+  --lfd-off: #1b1d1b;
+  --lfd-unlit: #5e605a;
+  --lfd-font-display: "Cascadia Mono", "Consolas", "SF Mono", "Menlo", "DejaVu Sans Mono", "Liberation Mono", monospace;
+  --lfd-font-data: var(--lfd-font-display);
+  --lfd-font-body: var(--lfd-font-display);
+
+  /* HORUS's own: the green, a ghost of it for misregistration, and the 1-bit dither */
+  --horus-green: #00a256;
+  --horus-green-lo: #046e3c;
+  --horus-ghost: rgb(0 162 86 / 0.42);
+  --horus-dither: repeating-conic-gradient(rgb(232 228 214 / 0.13) 0 25%, transparent 0 50%) 0 0 / 4px 4px;
 }
 
-/* Header: a broken data line underneath */
-#lancer-flight-deck.lfd-theme-horus .lfd-header {
-  padding-bottom: 10px;
-  border-top: 1px solid var(--lfd-accent-deep);
+/* --------------------------------------------------------------------------
+   Print: square, black, out of register
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-horus .lfd-plate {
+  isolation: isolate;
+  clip-path: none;
+  border-radius: 0;
+  background: var(--lfd-plate);
+  box-shadow: none;
 }
 
+/* The ghost: the same edge printed again in green, a pixel off */
+#lancer-flight-deck.lfd-theme-horus .lfd-plate.lfd-body::after,
 #lancer-flight-deck.lfd-theme-horus .lfd-header::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  translate: 2px 1px;
+  border: 1px solid var(--horus-ghost);
+  pointer-events: none;
+}
+
+/* A band of dither along the top of each plate, fading out */
+#lancer-flight-deck.lfd-theme-horus .lfd-plate.lfd-body::before {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 1px;
-  height: 2px;
-  background: repeating-linear-gradient(90deg, var(--lfd-accent) 0 7px, transparent 7px 10px, var(--lfd-accent-deep) 10px 12px, transparent 12px 17px);
-  opacity: 0.85;
-}
-
-/* Badge: a terminal readout, not a nameplate */
-#lancer-flight-deck.lfd-theme-horus .lfd-badge,
-.lfd-theme-chip.lfd-theme-horus {
-  color: var(--lfd-accent);
-  background: var(--lfd-well);
-  box-shadow: inset 0 0 0 1px var(--lfd-accent-deep);
-  text-shadow: 0 0 6px color-mix(in srgb, var(--lfd-accent) 70%, transparent);
-}
-
-/* A bracket at the top-left of every instrument plate */
-#lancer-flight-deck.lfd-theme-horus .lfd-plate.lfd-body::before {
-  content: "";
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 4px;
-  height: 11px;
-  border: 1px solid var(--lfd-accent-deep);
-  border-right: none;
+  top: 0;
+  height: 22px;
+  z-index: -1;
+  background: repeating-conic-gradient(rgb(232 228 214 / 0.045) 0 25%, transparent 0 50%) 0 0 / 4px 4px;
+  -webkit-mask: linear-gradient(#000, transparent);
+  mask: linear-gradient(#000, transparent);
   pointer-events: none;
 }
 
-/* Section titles read like comments */
+/* Sections are prompts */
+#lancer-flight-deck.lfd-theme-horus .lfd-section-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  color: var(--lfd-ink);
+}
+
 #lancer-flight-deck.lfd-theme-horus .lfd-section-title > span:first-child::before {
-  content: "// ";
-  color: var(--lfd-accent-deep);
+  content: "$ ";
+  color: var(--horus-green);
 }
 
-/* Plate texture: scanlines */
-#lancer-flight-deck.lfd-theme-horus .lfd-plate {
-  background:
-    linear-gradient(180deg, rgb(120 255 180 / 0.03), transparent 40%),
-    repeating-linear-gradient(0deg, rgb(120 255 180 / 0.028) 0 1px, transparent 1px 3px),
-    var(--lfd-plate);
+#lancer-flight-deck.lfd-theme-horus .lfd-readout {
+  font-weight: 700;
 }
 
-#lancer-flight-deck.lfd-theme-horus .lfd-btn {
-  background: linear-gradient(180deg, var(--lfd-plate-2), var(--lfd-well));
+/* Everything that isn't an alarm whispers in lowercase */
+#lancer-flight-deck.lfd-theme-horus :is(.lfd-track-label, .lfd-oc-label, .lfd-dz-label, .lfd-stat dt, .lfd-datalink,
+  .lfd-apply-seg, .lfd-light-label, .lfd-btn span, .lfd-frame-name, .lfd-tab-title, .lfd-tag b, .lfd-odds-head,
+  .lfd-oc-odds) {
+  text-transform: lowercase;
 }
 
+/* --------------------------------------------------------------------------
+   The readout (header)
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-horus .lfd-header {
+  padding: 7px 8px 8px;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-header-main {
+  gap: 9px;
+}
+
+/* The sigil: black, ghosted; reverse video while its menu is open */
+#lancer-flight-deck.lfd-theme-horus .lfd-badge.lfd-horus-sigil {
+  width: 38px;
+  min-width: 0;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--horus-green-lo);
+  background: #000;
+  box-shadow: 2px 1px 0 var(--horus-ghost);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-badge.lfd-horus-sigil::after {
+  display: none;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-sigil svg {
+  width: 29px;
+  height: 29px;
+  overflow: visible;
+}
+
+#lancer-flight-deck.lfd-theme-horus :is(.lfd-horus-sigil, .lfd-horus-tab-sigil) .lfd-sigil-body { fill: var(--horus-green); }
+#lancer-flight-deck.lfd-theme-horus :is(.lfd-horus-sigil, .lfd-horus-tab-sigil) .lfd-sigil-ring { fill: none; stroke: var(--lfd-ink); stroke-width: 1.7; }
+#lancer-flight-deck.lfd-theme-horus :is(.lfd-horus-sigil, .lfd-horus-tab-sigil) .lfd-sigil-pupil { fill: var(--lfd-ink); }
+
+/* Reaching for it makes the signal slip */
+#lancer-flight-deck.lfd-theme-horus .lfd-badge.lfd-horus-sigil:is(:hover, :focus-visible) svg {
+  animation: lfd-horus-slip 460ms steps(1) 1;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-badge.lfd-horus-sigil[aria-expanded="true"] {
+  background: var(--lfd-ink);
+  border-color: var(--lfd-ink);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-badge.lfd-horus-sigil[aria-expanded="true"] :is(.lfd-sigil-body, .lfd-sigil-pupil) { fill: #000; }
+#lancer-flight-deck.lfd-theme-horus .lfd-badge.lfd-horus-sigil[aria-expanded="true"] .lfd-sigil-ring { stroke: #000; }
+
+@keyframes lfd-horus-slip {
+  0% { translate: 0 0; filter: none; }
+  15% { translate: -2px 0; filter: drop-shadow(3px 0 0 rgb(232 228 214 / 0.8)) drop-shadow(-2px 0 0 rgb(0 162 86 / 0.9)); }
+  35% { translate: 1px -1px; filter: drop-shadow(-3px 0 0 rgb(232 228 214 / 0.7)); }
+  55% { translate: 0 1px; filter: drop-shadow(2px 0 0 rgb(0 162 86 / 0.9)); }
+  75%, 100% { translate: 0 0; filter: none; }
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-handle {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 2px;
+  font: 400 9.5px/1 var(--lfd-font-data);
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-handle b {
+  font-weight: 700;
+  color: var(--horus-green);
+}
+
+/* The name glitches now and then: two slices slip sideways for a moment */
+#lancer-flight-deck.lfd-theme-horus .lfd-mech-name {
+  position: relative;
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-mech-name[data-text]::before,
+#lancer-flight-deck.lfd-theme-horus .lfd-mech-name[data-text]::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: var(--lfd-plate);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-mech-name[data-text]::before {
+  color: var(--horus-green);
+  animation: lfd-horus-tear-a 9s steps(1) infinite;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-mech-name[data-text]::after {
+  color: var(--lfd-ink);
+  animation: lfd-horus-tear-b 9s steps(1) infinite 0.06s;
+}
+
+@keyframes lfd-horus-tear-a {
+  0%, 94% { opacity: 0; translate: 0; clip-path: inset(0); }
+  94.5% { opacity: 1; translate: -3px 0; clip-path: inset(10% 0 58% 0); }
+  95.5% { opacity: 1; translate: 2px 0; clip-path: inset(62% 0 8% 0); }
+  96.5%, 100% { opacity: 0; translate: 0; clip-path: inset(0); }
+}
+
+@keyframes lfd-horus-tear-b {
+  0%, 94.8% { opacity: 0; translate: 0; clip-path: inset(0); }
+  95.2% { opacity: 1; translate: 3px 0; clip-path: inset(40% 0 30% 0); }
+  96%, 100% { opacity: 0; translate: 0; clip-path: inset(0); }
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-frame-name {
+  margin-top: 1px;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+
+#lancer-flight-deck.lfd-theme-horus.is-standby .lfd-frame-name {
+  text-transform: none;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-icon-btn {
+  border-color: var(--lfd-line);
+  border-radius: 0;
+  background: none;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-icon-btn:hover {
+  border-color: var(--lfd-ink);
+  background: var(--lfd-ink);
+  color: #000;
+}
+
+/* Comms: a prompt line, with a cursor */
+#lancer-flight-deck.lfd-theme-horus .lfd-datalink {
+  gap: 6px;
+  margin-top: 7px;
+  padding: 3px 6px;
+  background: none;
+  border: 1px dashed var(--lfd-line);
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-prompt {
+  flex: none;
+  font-weight: 700;
+  color: var(--horus-green);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-datalink-callsign {
+  text-transform: uppercase;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-caret {
+  flex: none;
+  width: 6px;
+  height: 11px;
+  margin-left: -2px;
+  background: var(--lfd-ink);
+  animation: lfd-horus-caret 1.1s steps(1) infinite;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-activation {
+  background: var(--lfd-ink);
+  color: #000;
+  text-transform: uppercase;
+}
+
+@keyframes lfd-horus-caret {
+  50% { opacity: 0; }
+}
+
+/* Collapsed: a narrow strip with the sigil on top */
 #lancer-flight-deck.lfd-theme-horus.is-collapsed .lfd-header {
-  border-top: none;
+  padding: 0;
+  background: none;
+  border: none;
 }
 
 #lancer-flight-deck.lfd-theme-horus.is-collapsed .lfd-header::after {
@@ -89,10 +300,649 @@
 }
 
 #lancer-flight-deck.lfd-theme-horus.is-collapsed .lfd-tab {
-  border-left: 2px solid var(--lfd-accent);
+  width: 34px;
+  padding: 4px 0 9px;
+  border-color: var(--lfd-line);
+  border-radius: 0;
+  background: var(--lfd-plate);
+  box-shadow: 2px 1px 0 var(--horus-ghost);
 }
 
-#lancer-flight-deck.lfd-theme-horus.lfd-dock-right.is-collapsed .lfd-tab {
-  border-left: 1px solid var(--lfd-line);
-  border-right: 2px solid var(--lfd-accent);
+#lancer-flight-deck.lfd-theme-horus .lfd-tab-badge.lfd-horus-tab-sigil {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  background: #000;
+  border: 1px solid var(--horus-green-lo);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-tab-sigil svg {
+  width: 20px;
+  height: 20px;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-tab-title {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+
+/* --------------------------------------------------------------------------
+   Hull: printing
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-horus .lfd-hp-bar.lfd-horus-print {
+  height: 12px;
+  border-color: var(--lfd-line);
+  background: var(--horus-dither), #000;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-print .lfd-hp-fill {
+  background: var(--lfd-ink);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-print .lfd-hp-fill.is-low {
+  background: var(--lfd-warning);
+}
+
+/* One cell per hit point */
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-cells {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, #000 0 2px, transparent 2px) -1px 0 / calc(100% / var(--lfd-hp-max)) 100% repeat-x;
+}
+
+/* Tags in brackets */
+#lancer-flight-deck.lfd-theme-horus .lfd-tag {
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: 11px;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-tag::before { content: "["; color: var(--lfd-ink-dim); }
+#lancer-flight-deck.lfd-theme-horus .lfd-tag::after { content: "]"; color: var(--lfd-ink-dim); }
+
+#lancer-flight-deck.lfd-theme-horus .lfd-tag b {
+  margin-right: 5px;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-hull-tags {
+  gap: 10px;
+}
+
+/* Armor as solid blocks */
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-blocks {
+  display: inline-block;
+  width: calc(var(--n) * 7px);
+  height: 9px;
+  margin-right: calc(min(var(--n), 1) * 5px);
+  vertical-align: -1px;
+  background: repeating-linear-gradient(90deg, var(--lfd-ink) 0 5px, transparent 5px 7px);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-stats {
+  gap: 4px;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-stat {
+  background: none;
+  border-top: 1px dashed var(--lfd-line);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-stat dt {
+  font-size: 9px;
+  letter-spacing: 0.02em;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-stat dd {
+  font-size: 14px;
+}
+
+/* Checks in brackets, in their own colours */
+#lancer-flight-deck.lfd-theme-horus .lfd-check {
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--chk);
+  font: 700 10px/1.25 var(--lfd-font-display);
+  letter-spacing: 0.04em;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-check-name::before { content: "["; }
+#lancer-flight-deck.lfd-theme-horus .lfd-check-bonus::after { content: "]"; color: var(--chk); }
+
+#lancer-flight-deck.lfd-theme-horus .lfd-check:hover:not(:disabled) {
+  background: var(--chk);
+  color: #000;
+  box-shadow: none;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-check:hover:not(:disabled) :is(.lfd-check-bonus, .lfd-check-bonus::after) {
+  color: #000;
+}
+
+/* --------------------------------------------------------------------------
+   Value editors
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-horus .lfd-step {
+  background: none;
+  border-color: var(--lfd-line);
+  border-radius: 0;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-step:hover:not(:disabled) {
+  background: var(--lfd-ink);
+  border-color: var(--lfd-ink);
+  color: #000;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-editor-value input:focus {
+  border-color: var(--horus-green);
+}
+
+/* --------------------------------------------------------------------------
+   Reactor: a memory dump, numbered in hex
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-horus .lfd-heat-segments {
+  counter-reset: lfd-heat;
+  height: 18px;
+  gap: 2px;
+  padding: 0;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-seg {
+  display: grid;
+  place-items: center;
+  border-color: var(--lfd-line);
+  border-radius: 0;
+  background: #000;
+  transform: none;
+  counter-increment: lfd-heat;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-seg::after {
+  content: counter(lfd-heat, lfd-hex);
+  font: 400 9px/1 var(--lfd-font-data);
+  color: var(--lfd-unlit);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-seg.is-dz {
+  background: var(--horus-dither), #000;
+  border-color: color-mix(in srgb, var(--lfd-heat-danger) 40%, var(--lfd-line));
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-seg.is-dz::after {
+  color: color-mix(in srgb, var(--lfd-heat-danger) 75%, var(--lfd-unlit));
+}
+
+/* Filled cells keep the Heat colours (they outrank the blanks above) */
+#lancer-flight-deck.lfd-theme-horus .lfd-seg.is-filled {
+  background: var(--lfd-heat-safe);
+  border-color: var(--lfd-heat-safe);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-seg.is-filled.is-dz {
+  background: var(--lfd-heat-danger);
+  border-color: var(--lfd-heat-danger);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-seg.is-filled::after {
+  font-weight: 700;
+  color: #000;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-heat-continuous {
+  background: var(--horus-dither), #000;
+  border-color: var(--lfd-line);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-dz-label {
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-dz-label > span:first-child::before {
+  content: "// ";
+  color: var(--horus-green);
+}
+
+/* Overcharge as a checklist: [x] spent, [>] next in reverse video, [ ] still to come */
+#lancer-flight-deck.lfd-theme-horus .lfd-oc {
+  padding: 5px 7px;
+  background: none;
+  border: 1px dashed var(--lfd-line);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-oc-label {
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-oc-label::before {
+  content: "> ";
+  color: var(--horus-green);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-oc-cost {
+  padding: 1px 7px;
+  font-size: 13px;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-oc-ladder {
+  gap: 4px;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-oc-ladder li {
+  padding: 2px 0;
+  border: none;
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-oc-ladder li::before {
+  content: "[ ] ";
+  color: var(--lfd-unlit);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-oc-ladder li.is-spent {
+  opacity: 0.6;
+  text-decoration: none;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-oc-ladder li.is-spent::before {
+  content: "[x] ";
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-oc-ladder li.is-current {
+  background: var(--lfd-ink);
+  color: #000;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-oc-ladder li.is-current::before {
+  content: "[>] ";
+  color: #000;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-oc-odds {
+  font-size: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   Integrity: watched
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-watch .lfd-track + .lfd-track {
+  margin-top: 8px;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-watch .lfd-track-label {
+  width: 74px;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-watch .lfd-pips {
+  align-items: center;
+  gap: 6px;
+  min-height: 16px;
+}
+
+/* Structure: eyes. They glance about now and then; a lost box is an eye shut, in red. */
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-structure .lfd-pip {
+  width: 22px;
+  height: 13px;
+  clip-path: path("M0 6.5Q11 -4.5 22 6.5Q11 17.5 0 6.5Z");
+  background:
+    radial-gradient(circle at 50% 50%, #000 0 1.7px, var(--horus-green) 2.1px 3.9px, #023d21 4.2px 4.8px, transparent 5.2px) 50% 50% / 140% 100% no-repeat,
+    var(--lfd-ink);
+  animation: lfd-horus-glance 7s steps(1) infinite;
+  animation-delay: calc(var(--i, 0) * -1.7s);
+}
+
+@keyframes lfd-horus-glance {
+  0%, 70% { background-position: 50% 50%, 0 0; }
+  71%, 82% { background-position: 18% 50%, 0 0; }
+  83%, 90% { background-position: 82% 50%, 0 0; }
+  91%, 100% { background-position: 50% 50%, 0 0; }
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-structure .lfd-pip.is-lost {
+  background:
+    radial-gradient(ellipse 70% 120% at 50% -10%, transparent 64%, var(--lfd-warning) 67% 82%, transparent 85%),
+    color-mix(in srgb, var(--lfd-warning) 16%, #000);
+  animation: none;
+}
+
+/* Stress: the sigil's ring with its pupil; a lost one breaks, in red */
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-stress .lfd-pip {
+  width: 15px;
+  height: 15px;
+  clip-path: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--lfd-ink) 0 1.7px, transparent 2.1px 4px, var(--horus-green) 4.4px 6px, transparent 6.4px);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-stress .lfd-pip.is-lost {
+  background: radial-gradient(circle, transparent 0 4px, var(--lfd-warning) 4.4px 6.2px, transparent 6.6px);
+  -webkit-mask: conic-gradient(#000 0 30deg, transparent 30deg 66deg, #000 66deg 196deg, transparent 196deg 232deg, #000 232deg);
+  mask: conic-gradient(#000 0 30deg, transparent 30deg 66deg, #000 66deg 196deg, transparent 196deg 232deg, #000 232deg);
+}
+
+/* The next check, as a tree branch under its line */
+#lancer-flight-deck.lfd-theme-horus .lfd-odds.lfd-horus-branch {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(40px, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  margin-top: 3px;
+  padding: 0 0 0 20px;
+  background: none;
+  border: none;
+  font-size: 10px;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-odds.lfd-horus-branch::before {
+  content: "└─";
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  translate: 0 -55%;
+  color: var(--horus-green-lo);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-roll {
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-branch .lfd-odds-bar {
+  height: 6px;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-branch .lfd-odds-loss {
+  text-align: right;
+  text-transform: lowercase;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-horus-branch.lfd-odds-final {
+  display: block;
+  font-size: 10px;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-odds-alt {
+  border-radius: 0;
+  font-size: 8px;
+  text-transform: lowercase;
+}
+
+/* --------------------------------------------------------------------------
+   Annunciator and actions (base layout, HORUS print)
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-horus .lfd-apply-seg {
+  background: none;
+  border-style: dashed;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-tile,
+#lancer-flight-deck.lfd-theme-horus button.lfd-tile {
+  border-radius: 0;
+  font-size: 8.5px;
+  letter-spacing: 0.02em;
+}
+
+/* Lamps are square pixels */
+#lancer-flight-deck.lfd-theme-horus .lfd-light {
+  border-color: var(--lfd-edge);
+  border-radius: 0;
+  background: #000;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-light-lamp {
+  width: 8px;
+  height: 8px;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 1px #000;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-light-core.is-on .lfd-light-lamp {
+  background: var(--lfd-ink);
+  box-shadow: 0 0 7px rgb(232 228 214 / 0.7);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-light-label {
+  font-size: 8.5px;
+  letter-spacing: 0.02em;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-light:hover {
+  border-color: var(--lfd-ink);
+}
+
+/* Push-buttons are executables: ./stabilize, reverse video when you point at one */
+#lancer-flight-deck.lfd-theme-horus .lfd-btn {
+  border-color: var(--lfd-line);
+  border-bottom: 1px solid var(--lfd-line);
+  border-radius: 0;
+  background: none;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-btn > span:first-of-type {
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-btn:not(.lfd-btn-systems) > span:first-of-type::before {
+  content: "./";
+  color: var(--horus-green);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-btn:hover:not(:disabled) {
+  background: var(--lfd-ink);
+  border-color: var(--lfd-ink);
+  color: #000;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-btn:hover:not(:disabled) :is(small, span::before) {
+  color: #000;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-btn-core:not(:disabled) {
+  border-bottom: 2px solid var(--horus-green);
+}
+
+/* --------------------------------------------------------------------------
+   Cold boot: the printer wakes, the sigil prints, UNSEALED
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-horus .lfd-boot {
+  background:
+    radial-gradient(130% 75% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.7)),
+    repeating-linear-gradient(0deg, rgb(232 228 214 / 0.03) 0 1px, transparent 1px 3px),
+    #000;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-boot-finish {
+  overflow: hidden;
+}
+
+/* The sigil, printed in dither behind the card, line by line from the top */
+#lancer-flight-deck.lfd-theme-horus .lfd-boot-finish::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 300px;
+  height: 300px;
+  translate: -50% -50%;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-16 -16 32 32'%3E%3Cpath fill='%2300a256' d='M0 -7.5C3.5 -5 9.5 -6 15.5 -5.5C8.5 -2.5 3.5 2 0 15.5C-3.5 2 -8.5 -2.5 -15.5 -5.5C-9.5 -6 -3.5 -5 0 -7.5Z'/%3E%3Ccircle cy='-11.6' r='3.1' fill='none' stroke='%2300a256' stroke-width='1.7'/%3E%3Ccircle cy='-11.6' r='1.1' fill='%2300a256'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: repeating-conic-gradient(#000 0 25%, transparent 0 50%) 0 0 / 4px 4px;
+  mask: repeating-conic-gradient(#000 0 25%, transparent 0 50%) 0 0 / 4px 4px;
+  opacity: 0;
+  clip-path: inset(0 0 100% 0);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-boot.is-finish .lfd-boot-finish::before {
+  opacity: 0.32;
+  animation: lfd-horus-print 900ms steps(18) forwards;
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-boot.is-still .lfd-boot-finish::before {
+  animation: none;
+  clip-path: inset(0);
+}
+
+@keyframes lfd-horus-print {
+  to { clip-path: inset(0); }
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-boot-frame {
+  background: rgb(0 0 0 / 0.72);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-boot-caption {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: lowercase;
+  color: var(--horus-green);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-boot-caption::before {
+  content: "// ";
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-boot-title {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--lfd-ink);
+  text-shadow: 2px 1px 0 rgb(0 162 86 / 0.55);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-boot-badge,
+#lancer-flight-deck.lfd-theme-horus .lfd-boot-stamp {
+  border-radius: 0;
+  box-shadow: 2px 1px 0 var(--horus-ghost);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-boot-corner {
+  border-color: var(--horus-green);
+}
+
+/* --------------------------------------------------------------------------
+   HUD menus: printed out of register, kite-cut glyphs (the sigil's point)
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck-hud.lfd-hud.lfd-theme-horus {
+  --hud-hex: polygon(50% 0, 100% 36%, 50% 100%, 0 36%);
+  --hud-line: rgb(232 228 214 / 0.22);
+  border-radius: 0;
+}
+
+#lancer-flight-deck-hud.lfd-hud.lfd-theme-horus::before {
+  inset: -1px;
+  translate: 2px 1px;
+  z-index: -1;
+  background: none;
+  border: 1px solid var(--horus-ghost);
+}
+
+#lancer-flight-deck-hud.lfd-theme-horus .lfd-hud-frame::before {
+  background: repeating-conic-gradient(rgb(232 228 214 / 0.025) 0 25%, transparent 0 50%) 0 0 / 4px 4px;
+}
+
+#lancer-flight-deck-hud.lfd-theme-horus .lfd-hud-tiles .lfd-hud-glyph {
+  width: 28px;
+  height: 30px;
+}
+
+#lancer-flight-deck-hud.lfd-theme-horus .lfd-hud-rows .lfd-hud-glyph {
+  width: 20px;
+  height: 22px;
+}
+
+#lancer-flight-deck-hud.lfd-theme-horus .lfd-hud-glyph {
+  color: var(--horus-green);
+  background: var(--horus-green);
+}
+
+#lancer-flight-deck-hud.lfd-theme-horus .lfd-hud-glyph::before {
+  background: #000;
+}
+
+#lancer-flight-deck-hud.lfd-theme-horus .lfd-hud-item:is(:hover, :focus-visible) .lfd-hud-glyph::before {
+  background: var(--horus-green-lo);
+}
+
+#lancer-flight-deck-hud.lfd-theme-horus .lfd-hud-tiles .lfd-hud-item {
+  border-radius: 0;
+}
+
+#lancer-flight-deck-hud.lfd-theme-horus .lfd-hud-tiles .lfd-hud-label {
+  font-size: 7.6px;
+  letter-spacing: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Hover cards and the theme picker
+   -------------------------------------------------------------------------- */
+
+#tooltip.lfd-hud-tip.lfd-theme-horus {
+  border-left-color: var(--horus-green);
+  border-radius: 0;
+  box-shadow: 3px 2px 0 var(--horus-ghost), 0 8px 24px rgb(0 0 0 / 0.5);
+}
+
+#tooltip.lfd-hud-tip.lfd-theme-horus .lfd-tip {
+  font-family: var(--lfd-font-data);
+  font-size: 11.5px;
+}
+
+#lancer-flight-deck-themes.lfd-theme-menu.lfd-theme-horus {
+  border-radius: 0;
+  border-top-color: var(--horus-green);
+  box-shadow: 3px 2px 0 var(--horus-ghost), 0 10px 30px rgb(0 0 0 / 0.5);
+}
+
+.lfd-theme-chip.lfd-theme-horus {
+  color: var(--horus-green);
+  background: #000;
+  box-shadow: inset 0 0 0 1px var(--horus-green-lo), 2px 1px 0 var(--horus-ghost);
+}
+
+/* --------------------------------------------------------------------------
+   NPC Deck: the same print, square portraits
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck-npc.lfd-theme-horus .lfd-npc-frame {
+  border-top-color: var(--horus-green);
+  box-shadow: 3px 2px 0 var(--horus-ghost);
+}
+
+#lancer-flight-deck-npc.lfd-theme-horus .lfd-npc-badge {
+  clip-path: none;
+  background: #000;
+  color: var(--horus-green);
+  box-shadow: inset 0 0 0 1px var(--horus-green-lo);
+}
+
+#lancer-flight-deck-npc.lfd-theme-horus :is(.lfd-init-portrait, .lfd-init-portrait img, .lfd-init-glyph) {
+  clip-path: inset(0);
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion: no glances, no blinking cursor, no tearing, no printing
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck.lfd-theme-horus.lfd-reduce-motion :is(.lfd-horus-structure .lfd-pip, .lfd-horus-caret, .lfd-horus-sigil svg),
+#lancer-flight-deck.lfd-theme-horus.lfd-reduce-motion .lfd-mech-name[data-text]::before,
+#lancer-flight-deck.lfd-theme-horus.lfd-reduce-motion .lfd-mech-name[data-text]::after {
+  animation: none;
 }
