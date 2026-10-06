@@ -1428,12 +1428,12 @@
 #lancer-flight-deck .lfd-hull-flash::before {
   content: "";
   position: absolute;
-  left: -55px;
-  top: -55px;
-  width: 110px;
-  height: 110px;
+  left: -80px;
+  top: -80px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(255 255 255 / 0.95) 0 7%, rgb(190 225 255 / 0.6) 20%, rgb(28 154 232 / 0.25) 42%, transparent 70%);
+  background: radial-gradient(circle, rgb(255 255 255 / 0.98) 0 7%, rgb(255 220 170 / 0.7) 16%, rgb(190 225 255 / 0.5) 28%, rgb(28 154 232 / 0.22) 46%, transparent 70%);
   mix-blend-mode: screen;
   animation: lfd-impact-flash 520ms cubic-bezier(0.2, 0.6, 0.35, 1) forwards;
 }
@@ -1594,10 +1594,10 @@
 
 @keyframes lfd-ipsn-roll {
   0%, 100% { transform: none; }
-  10% { transform: translateX(-3px) rotate(1.1deg); }
-  34% { transform: translateX(2px) rotate(-0.7deg); }
-  58% { transform: translateX(-1px) rotate(0.35deg); }
-  80% { transform: rotate(-0.12deg); }
+  8% { transform: translateX(-5px) translateY(2px) rotate(1.7deg); }
+  30% { transform: translateX(3px) rotate(-1deg); }
+  54% { transform: translateX(-1.5px) rotate(0.5deg); }
+  78% { transform: rotate(-0.18deg); }
 }
 
 /* Collapsed: a hazard patch on the strip, and a red beacon at its foot */
@@ -1636,4 +1636,73 @@
 #lancer-flight-deck.lfd-reduce-motion .lfd-hull-beacon,
 #lancer-flight-deck.lfd-reduce-motion .lfd-hull-drip i {
   display: none !important;
+}
+
+/* Heavier hull damage: buckled plating dented round the breach, a seam torn open inboard */
+#lancer-flight-deck .lfd-dent-shade {
+  fill: none;
+  stroke: rgb(0 0 0 / 0.6);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+#lancer-flight-deck .lfd-dent-lip {
+  fill: none;
+  stroke: rgb(200 225 250 / 0.24);
+  stroke-width: 0.8;
+  stroke-linecap: round;
+}
+
+#lancer-flight-deck .lfd-breach-tear {
+  fill: none;
+  stroke: #020406;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: miter;
+}
+
+#lancer-flight-deck .lfd-breach-tear-lip {
+  fill: none;
+  stroke: rgb(170 200 230 / 0.35);
+  stroke-width: 0.8;
+  stroke-linejoin: miter;
+}
+
+#lancer-flight-deck .lfd-breach.is-forming .lfd-breach-tear {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: lfd-crack-draw 320ms cubic-bezier(0.1, 0.8, 0.3, 1) calc(var(--t0, 0ms) + 40ms) forwards;
+}
+
+#lancer-flight-deck .lfd-breach.is-forming .lfd-breach-tear-lip {
+  animation: lfd-hull-tear-hot 1500ms ease-out var(--t0, 0ms) both;
+}
+
+#lancer-flight-deck .lfd-breach.is-forming .lfd-breach-dents {
+  transform-origin: var(--ox) var(--oy);
+  animation: lfd-hull-dent 380ms cubic-bezier(0.2, 1.6, 0.4, 1) calc(var(--t0, 0ms) + 30ms) both;
+}
+
+@keyframes lfd-hull-tear-hot {
+  0%, 20% { stroke: #ffd29a; opacity: 1; }
+  100% { stroke: rgb(170 200 230 / 0.35); }
+}
+
+@keyframes lfd-hull-dent {
+  0% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* The shell's shockwave ring */
+#lancer-flight-deck .lfd-hull-shock::before {
+  content: "";
+  position: absolute;
+  left: -36px;
+  top: -36px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid rgb(220 240 255 / 0.85);
+  mix-blend-mode: screen;
+  animation: lfd-impact-ring 520ms cubic-bezier(0.1, 0.6, 0.3, 1) forwards;
 }

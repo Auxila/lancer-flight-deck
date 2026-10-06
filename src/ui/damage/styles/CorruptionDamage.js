@@ -9,8 +9,9 @@ const MEND_MS = 900;
  * HORUS: the readout corrupts.
  *
  * - Structure: each point lost is a fault. The plates tear sideways in a datamosh, the open eyes blink,
- *   and a FAULT stamp flashes where it hit; a block of noise prints in against the edge with pixel-sort
- *   smears dragging out of it, an error code and dead pixels around it, flickering now and then. And
+ *   and a FAULT stamp flashes where it hit; a bad sector prints in against the edge, a glitch band torn
+ *   across the readout beside it, pixel-sort smears dragging out of it, an error code and clusters of dead
+ *   pixels around it, flickering and jittering now and then. And
  *   the print slips further out of register with every point lost (the green ghost of every edge moves
  *   further off; styles/themes/horus.css). Repairs defragment the blocks away.
  * - Stress: interference. Static over the readout, thicker with each level, a roll bar drifting down
@@ -122,6 +123,13 @@ export class CorruptionDamage extends DamageStyle {
       code.className = "lfd-corrupt-code";
       code.textContent = `ERR 0x${f.code}`;
       block.append(noise, code);
+      // The glitch band, torn and shoved sideways
+      const band = document.createElement("i");
+      band.className = "lfd-corrupt-band";
+      band.style.setProperty("--at", `${f.band.at}px`);
+      band.style.setProperty("--thick", `${f.band.thick}px`);
+      band.style.setProperty("--len", `${f.band.len}px`);
+      block.append(band);
       for (const s of f.smears) {
         const smear = document.createElement("i");
         smear.className = "lfd-corrupt-smear";
@@ -150,7 +158,7 @@ export class CorruptionDamage extends DamageStyle {
     const y = Math.max(12, Math.min(this.H - 12, f.y + f.h / 2));
     const stamp = this.spot(this.fx, "lfd-cor-fault", x, y, {}, 900);
     stamp.textContent = `∴ FAULT 0x${f.code}`;
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 24; i++) {
       this.spot(this.fx, "lfd-cor-bit", f.x + rand(0, f.w), f.y + rand(0, f.h), {
         "--dx": `${Math.cos(f.inward) * rand(10, 60)}px`,
         "--dy": `${rand(-8, 8)}px`,

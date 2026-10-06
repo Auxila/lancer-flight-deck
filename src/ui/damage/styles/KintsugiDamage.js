@@ -1,10 +1,10 @@
-import { SEAM_CRACK_SPEED, SEAM_GOLD_LAG, SEAM_GOLD_SPEED, generateSeam, smoothPath } from "../geometry.js";
+import { SEAM_CRACK_SPEED, SEAM_GOLD_LAG, SEAM_GOLD_SPEED, generateSeam } from "../geometry.js";
 import { damageClock as clock } from "../clock.js";
 import { DamageStyle, STAGGER_MS, rand, svg } from "./DamageStyle.js";
 
 const MEND_MS = 1300;
-/** Moths drawn to the reactor, per stress level. */
-const MOTHS = [0, 1, 2, 4];
+/** Ferrules (the gold couplings) down each coolant channel, as a fraction of its height. */
+const FERRULES = [0.12, 0.38, 0.64, 0.88];
 
 /**
  * SSC: kintsugi. A Smith-Shimano frame isn't scarred, it's mended in gold.
@@ -14,8 +14,11 @@ const MOTHS = [0, 1, 2, 4];
  *   filling the chips along the way, while flakes of gold leaf drift down. The movement stutters like a
  *   watch skipping a beat. The gold seams stay, a glint travelling along them now and then. Repairs
  *   polish them away.
- * - Stress: moths to the flame. Gold-dust moths circle the reactor, more of them as stress mounts, and
- *   the gold leaf everywhere tarnishes. Each hit flares the reactor and startles the moths.
+ * - Stress: the liquid cooling. Two gold-ringed glass channels run down the bezel, full of sapphire
+ *   coolant, and they drain as stress mounts: three quarters, then half, then a few last fingers boiling
+ *   hard. Condensation beads on the glass from the second level, and at the last point the near-dry
+ *   channels vent cold vapour. Each hit purges the loop: a bright surge races up the coolant, it
+ *   sloshes, vapour bursts from the couplings and droplets spray.
  */
 export class KintsugiDamage extends DamageStyle {
   static id = "kintsugi";
@@ -23,15 +26,28 @@ export class KintsugiDamage extends DamageStyle {
   constructor(layer) {
     super(layer);
     this.svg = svg("svg", { class: "lfd-kin-svg" });
-    this.moths = div("lfd-kin-moths");
+    this.coolant = div("lfd-kin-coolant");
+    for (const side of ["is-left", "is-right"]) {
+      const tube = div(`lfd-kin-tube ${side}`);
+      const fluid = document.createElement("b");
+      fluid.className = "lfd-kin-fluid";
+      fluid.innerHTML = Array.from({ length: 9 }, (_, k) => `<s style="--k:${k};--x:${(18 + ((k * 37) % 64)).toFixed(0)}%"></s>`).join("");
+      tube.append(fluid);
+      for (const at of FERRULES) {
+        const ferrule = document.createElement("em");
+        ferrule.style.top = `${at * 100}%`;
+        tube.append(ferrule);
+      }
+      this.coolant.append(tube);
+    }
+    this.beads = div("lfd-kin-beads");
     this.fx = div("lfd-kin-fx");
-    this.flare = div("lfd-kin-flare");
-    this.host.append(this.svg, this.moths, this.flare, this.fx);
+    this.host.append(this.svg, this.coolant, this.beads, this.fx);
+    this.beadKey = "";
     this.seams = [];
     this.forming = new Map();
     this.busy = false;
     this.mendTimer = null;
-    this.flightKey = "";
   }
 
   reset() {
@@ -66,49 +82,53 @@ export class KintsugiDamage extends DamageStyle {
     }, MEND_MS);
   }
 
-  /** The reactor flares; gold dust rises off it and the moths scatter. */
+  /** The loop purges: a surge races up the coolant, it sloshes, vapour bursts from the couplings. */
   stressHit() {
-    const r = this.rectOf(".lfd-heat");
-    if (r) {
-      Object.assign(this.flare.style, { left: `${r.x}px`, top: `${r.y}px`, width: `${r.w}px`, height: `${r.h}px` });
-      this.pulse(this.flare, "is-flaring", 1100);
-      for (let i = 0; i < 14; i++) {
-        this.spot(this.fx, "lfd-kin-dust", r.x + rand(0.08, 0.92) * r.w, r.y + rand(0.2, 0.9) * r.h, {
-          "--dx": `${rand(-18, 18)}px`,
-          "--dy": `${rand(-70, -26)}px`,
-          "--d": `${Math.round(rand(0, 380))}ms`,
-          "--s": `${rand(1.2, 2.4)}px`,
+    this.pulse(this.coolant, "is-purge", 1300);
+    const { W, H } = this;
+    for (const x of [4, W - 4]) {
+      const inward = x < W / 2 ? 1 : -1;
+      for (const at of FERRULES) {
+        this.spot(this.fx, "lfd-kin-vapour", x, H * (0.05 + at * 0.88), {
+          "--dx": `${inward * rand(10, 26)}px`,
+          "--dy": `${-rand(10, 30)}px`,
+          "--s": `${rand(16, 30)}px`,
+          "--d": `${Math.round(rand(0, 260))}ms`,
         }, 1800);
       }
+      for (let i = 0; i < 8; i++) {
+        this.spot(this.fx, "lfd-kin-spray", x, H * (0.05 + FERRULES[i % FERRULES.length] * 0.88), {
+          "--dx": `${inward * rand(8, 38)}px`,
+          "--dy": `${rand(-14, 26)}px`,
+          "--s": `${rand(1.5, 3)}px`,
+          "--d": `${Math.round(rand(40, 360))}ms`,
+        }, 1400);
+      }
     }
-    this.pulse(this.moths, "is-startled", 2200);
-    this.pulse(this.root, "is-tick", 520);
   }
 
-  sync(levels) {
-    const want = this.reduce ? 0 : MOTHS[levels?.stressLevel ?? 0] ?? 0;
-    const r = want ? this.rectOf(".lfd-heat") : null;
-    const count = r ? want : 0;
-    while (this.moths.children.length > count) this.moths.lastElementChild.remove();
-    while (this.moths.children.length < count) {
-      const moth = div("lfd-kin-moth");
-      const k = this.moths.children.length;
-      moth.style.setProperty("--dur", `${(6.5 + k * 1.7 + Math.random() * 1.5).toFixed(2)}s`);
-      moth.style.setProperty("--d", `${(-Math.random() * 8).toFixed(2)}s`);
-      moth.style.setProperty("--flap", `${(105 + Math.random() * 40).toFixed(0)}ms`);
-      moth.innerHTML = "<i><b></b><b></b></i>";
-      this.moths.append(moth);
-      this.flightKey = "";
+  /** Condensation beads on the glass near the channels (placed once per size, the same each time). */
+  sync() {
+    const { W, H } = this;
+    const key = `${Math.round(W)}x${Math.round(H)}`;
+    if (!W || !H || key === this.beadKey) return;
+    this.beadKey = key;
+    this.beads.replaceChildren();
+    let seed = 7;
+    const next = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (let k = 0; k < 16; k++) {
+      const left = k % 2 === 0;
+      const bead = document.createElement("i");
+      bead.style.left = `${left ? 7 + next() * 10 : W - 9 - next() * 10}px`;
+      bead.style.top = `${H * (0.08 + next() * 0.86)}px`;
+      bead.style.setProperty("--s", `${(1.6 + next() * 2.2).toFixed(1)}px`);
+      bead.style.setProperty("--k", String(k));
+      if (k % 5 === 0) bead.classList.add("is-runner");
+      this.beads.append(bead);
     }
-    if (!count) return;
-    // Each moth loops round the reactor plate on its own wobbly orbit
-    const key = `${Math.round(r.x)},${Math.round(r.y)},${Math.round(r.w)},${Math.round(r.h)},${count}`;
-    if (key === this.flightKey) return;
-    this.flightKey = key;
-    [...this.moths.children].forEach((moth, k) => moth.style.setProperty("offset-path", `path("${orbit(r, k)}")`));
   }
 
-  destroy() {
+    destroy() {
     clearTimeout(this.mendTimer);
     super.destroy();
   }
@@ -194,25 +214,4 @@ function path(cls, d, vars) {
   const p = svg("path", { class: cls, d, pathLength: 1 });
   for (const [k, v] of Object.entries(vars)) p.style.setProperty(k, String(v));
   return p;
-}
-
-/** A closed, wobbly loop round a rect: the moth's flight. */
-function orbit(r, k) {
-  const cx = r.x + r.w / 2;
-  const cy = r.y + r.h / 2;
-  const rx = r.w * (0.42 + (k % 3) * 0.06) + 8;
-  const ry = r.h * (0.42 + ((k + 1) % 3) * 0.07) + 6;
-  const n = 9;
-  const phase = Math.random() * Math.PI * 2;
-  const dir = k % 2 ? -1 : 1;
-  const pts = [];
-  for (let i = 0; i <= n + 1; i++) {
-    const a = phase + dir * (i / n) * Math.PI * 2;
-    const j = 0.82 + Math.random() * 0.36;
-    pts.push([Math.round((cx + Math.cos(a) * rx * j) * 10) / 10, Math.round((cy + Math.sin(a) * ry * j) * 10) / 10]);
-  }
-  // Close the loop on itself
-  pts[n] = pts[0];
-  pts[n + 1] = pts[1];
-  return smoothPath(pts) + " Z";
 }

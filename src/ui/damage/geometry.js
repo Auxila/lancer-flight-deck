@@ -76,49 +76,72 @@ function blob(rng, cx, cy, count, rMin, rMax, phase = 0) {
 /* -------------------------------------------- */
 
 /**
- * A shell through the hull plating: a jagged hole with metal petals torn outward, scorching, rivets
- * popped out of the seam beside it, and the damage control patch that ends up bolted over it.
+ * A shell through the hull plating: a jagged hole with metal petals torn outward and scorching round it,
+ * the plating buckled into dents around it, a seam torn open running inboard, rivets popped out of the
+ * seam beside it, and the damage control patch that ends up bolted over the hole.
  */
 export function generateBreach(seed, index, W, H) {
   const { rng, r, site: edge, severity } = damageSite(seed, "breach", index, W, H);
-  // A shell hole is centred a few pixels inboard, so it reads as a hole in the plating, not a nick in the edge
-  const step = r(3.5, 5.5);
+  // A shell hole is centred inboard, so it reads as a hole in the plating, not a nick in the edge
+  const step = r(5, 7);
   const site = { ...edge, x: round1(edge.x + Math.cos(edge.inward) * step), y: round1(edge.y + Math.sin(edge.inward) * step) };
-  const n = 10 + Math.floor(rng() * 4);
-  const R = r(6, 8.5) * Math.sqrt(severity);
+  const n = 12 + Math.floor(rng() * 4);
+  const R = r(8.5, 11) * Math.sqrt(severity);
   const hole = [];
   for (let k = 0; k < n; k++) {
     const a = (k / n) * Math.PI * 2 + r(-0.15, 0.15);
-    const rr = R * (k % 2 ? r(0.55, 0.75) : r(0.9, 1.1));
+    const rr = R * (k % 2 ? r(0.5, 0.72) : r(0.9, 1.12));
     hole.push([round1(site.x + Math.cos(a) * rr), round1(site.y + Math.sin(a) * rr)]);
   }
   const petals = [];
   for (let k = 0; k < n; k += 2) {
-    if (rng() < 0.25) continue;
+    if (rng() < 0.2) continue;
     const a = (k / n) * Math.PI * 2;
-    const tip = [round1(site.x + Math.cos(a) * R * r(1.5, 2.1)), round1(site.y + Math.sin(a) * R * r(1.5, 2.1))];
-    petals.push([hole[k], tip, hole[(k + 1) % n]]);
+    const reach = R * r(1.6, 2.3);
+    petals.push([hole[k], [round1(site.x + Math.cos(a) * reach), round1(site.y + Math.sin(a) * reach)], hole[(k + 1) % n]]);
+  }
+  // Buckled plating: dents ringing the hole on the inboard side
+  const dents = [R * r(1.9, 2.2), R * r(2.7, 3.1)].map(rr => ({ r: round1(rr), a0: round1(edge.inward - r(1.0, 1.25)), a1: round1(edge.inward + r(1.0, 1.25)) }));
+  // A seam torn open, running inboard from the hole
+  const tear = [];
+  {
+    let a = edge.inward + (rng() < 0.5 ? -1 : 1) * r(0.35, 0.8);
+    let x = site.x + Math.cos(a) * R * 0.9;
+    let y = site.y + Math.sin(a) * R * 0.9;
+    tear.push([round1(x), round1(y)]);
+    const length = r(30, 52) * Math.sqrt(severity);
+    for (let t = 0; t < length; ) {
+      const stepLen = r(4, 8);
+      a += r(-0.55, 0.55);
+      const nx = x + Math.cos(a) * stepLen;
+      const ny = y + Math.sin(a) * stepLen;
+      if (nx < 1 || nx > W - 1 || ny < 1 || ny > H - 1) break;
+      x = nx;
+      y = ny;
+      t += stepLen;
+      tear.push([round1(x), round1(y)]);
+    }
   }
   // Popped rivets: holes along the seam that runs past the breach (along the edge)
   const along = site.side === "left" || site.side === "right" ? [0, 1] : [1, 0];
   const inward = [Math.cos(site.inward), Math.sin(site.inward)];
   const rivets = [];
-  const rivetCount = 3 + Math.floor(rng() * 3);
+  const rivetCount = 4 + Math.floor(rng() * 3);
   for (let k = 0; k < rivetCount; k++) {
-    const t = (k % 2 ? 1 : -1) * r(R * 1.9, R * 3.4);
-    const d = r(4, 7);
-    rivets.push([round1(site.x + along[0] * t + inward[0] * d), round1(site.y + along[1] * t + inward[1] * d)]);
+    const t = (k % 2 ? 1 : -1) * r(R * 1.8, R * 3.6);
+    const d = r(3, 7);
+    rivets.push([round1(edge.x + along[0] * t + inward[0] * d), round1(edge.y + along[1] * t + inward[1] * d)]);
   }
   const patch = {
-    x: round1(site.x + inward[0] * 2.5),
-    y: round1(site.y + inward[1] * 2.5),
-    w: round1(r(22, 27)),
-    h: round1(r(14, 17)),
-    angle: round1(r(-13, 13)),
+    x: round1(site.x),
+    y: round1(site.y),
+    w: round1(r(28, 34)),
+    h: round1(r(18, 22)),
+    angle: round1(r(-14, 14)),
   };
   // Water finds its way out under the breach
-  const drip = site.side === "top" ? null : { x: round1(site.x + inward[0] * R * 0.9), y: round1(site.y + R * 0.9), len: round1(r(26, 64)) };
-  return { index, side: site.side, impact: [site.x, site.y], inward: site.inward, radius: round1(R), hole, petals, rivets, patch, drip, scorch: round1(r(20, 28) * Math.sqrt(severity)) };
+  const drip = site.side === "top" ? null : { x: round1(site.x + inward[0] * R * 0.6), y: round1(site.y + R * 1.05), len: round1(r(40, 90)) };
+  return { index, side: site.side, impact: [site.x, site.y], inward: site.inward, radius: round1(R), hole, petals, dents, tear, rivets, patch, drip, scorch: round1(r(32, 42) * Math.sqrt(severity)) };
 }
 
 /* -------------------------------------------- */
@@ -187,33 +210,39 @@ export function generateSeam(seed, index, W, H) {
 /* -------------------------------------------- */
 
 /**
- * A region of the readout gone bad: a block of noise against the edge, pixel-sort smears dragging out
- * of it, an error code, and dead pixels around it.
+ * A region of the readout gone bad: a bad sector against the edge, a glitch band torn across the panel
+ * beside it, pixel-sort smears dragging out of it, an error code, and dead pixels scattered round it.
  */
 export function generateCorruption(seed, index, W, H) {
   const { rng, r, site } = damageSite(seed, "corrupt", index, W, H);
   const vertical = site.side === "left" || site.side === "right";
-  // On the side edges a bad sector is a thin upright strip (its code runs vertically), so it stays on
-  // the bezel and clear of the labels; on the top and bottom, a low bar
-  const w = round1(vertical ? r(9, 11) : r(46, 80));
-  const h = round1(vertical ? r(40, 58) : r(10, 15));
+  // On the side edges a bad sector is an upright strip (its code runs vertically), so it stays on the
+  // bezel and clear of the labels; on the top and bottom, a low bar
+  const w = round1(vertical ? r(12, 15) : r(70, 110));
+  const h = round1(vertical ? r(58, 86) : r(12, 16));
   let x = site.side === "right" ? W - w : site.side === "left" ? 0 : site.x - w / 2;
   let y = site.side === "bottom" ? H - h : site.side === "top" ? 0 : site.y - h / 2;
   x = round1(Math.max(0, Math.min(W - w, x)));
   y = round1(Math.max(0, Math.min(H - h, y)));
   const smears = [];
-  const smearCount = 3 + Math.floor(rng() * 4);
+  const smearCount = 6 + Math.floor(rng() * 5);
   for (let k = 0; k < smearCount; k++) {
-    smears.push({ at: round1(r(0.08, 0.92) * (vertical ? h : w)), len: round1(r(10, vertical ? W * 0.32 : 26)), thick: rng() < 0.3 ? 2 : 1 });
+    smears.push({ at: round1(r(0.04, 0.96) * (vertical ? h : w)), len: round1(r(18, vertical ? W * 0.46 : 40)), thick: rng() < 0.35 ? 2 + Math.floor(rng() * 2) : 1 });
   }
+  // The glitch band: a strip of the readout torn and shoved sideways, running in from the sector
+  const band = vertical
+    ? { at: round1(r(0.2, 0.8) * h), thick: round1(r(4, 7)), len: round1(W * r(0.4, 0.62)) }
+    : { at: round1(r(0.2, 0.8) * w), thick: round1(r(4, 7)), len: round1(H * r(0.08, 0.14)) };
   const dead = [];
-  for (let k = 0; k < 4 + Math.floor(rng() * 5); k++) {
-    const px = x + w / 2 + Math.cos(site.inward + r(-1.2, 1.2)) * r(w * 0.6, w * 1.4);
-    const py = y + h / 2 + Math.sin(site.inward + r(-1.2, 1.2)) * r(h * 0.6, h * 2.2) + (vertical ? r(-h, h) : 0);
+  for (let k = 0; k < 10 + Math.floor(rng() * 8); k++) {
+    // Some alone, some in clusters
+    const cluster = dead.length && rng() < 0.4 ? dead[dead.length - 1] : null;
+    const px = cluster ? cluster[0] + r(-4, 4) : x + w / 2 + Math.cos(site.inward + r(-1.2, 1.2)) * r(w * 0.8, w * 2.4 + 30);
+    const py = cluster ? cluster[1] + r(-4, 4) : y + h / 2 + Math.sin(site.inward + r(-1.2, 1.2)) * r(h * 0.3, h * 1.4) + (vertical ? r(-h * 0.6, h * 0.6) : 0);
     if (px > 0 && px < W && py > 0 && py < H) dead.push([round1(px), round1(py)]);
   }
   const code = Math.floor(rng() * 256).toString(16).toUpperCase().padStart(2, "0");
-  return { index, side: site.side, impact: [site.x, site.y], inward: site.inward, x, y, w, h, smears, dead, code };
+  return { index, side: site.side, impact: [site.x, site.y], inward: site.inward, x, y, w, h, smears, band, dead, code };
 }
 
 /* -------------------------------------------- */
@@ -221,25 +250,44 @@ export function generateCorruption(seed, index, W, H) {
 /* -------------------------------------------- */
 
 /**
- * A hit on poured concrete: a chunk bitten out of the slab's edge with the rebar showing, and blocky,
- * straight-run cracks that turn in hard steps (concrete doesn't web like glass).
+ * A hit on poured concrete: a chunk bitten out of the slab's edge with the bent rebar showing, crazing
+ * round the rim, a violet energy scorch and a dust stain, and blocky, straight-run cracks that turn in
+ * hard steps (concrete doesn't web like glass).
  */
 export function generateSpall(seed, index, W, H) {
   const { rng, r, site: edge, severity } = damageSite(seed, "spall", index, W, H);
-  // The bite is centred just inboard, so it reads as a chunk out of the slab
-  const step = r(2.5, 4);
+  // The bite is centred inboard, so it reads as a chunk out of the slab
+  const step = r(3.5, 5.5);
   const site = { ...edge, x: round1(edge.x + Math.cos(edge.inward) * step), y: round1(edge.y + Math.sin(edge.inward) * step) };
-  const R = r(6.5, 10) * Math.sqrt(severity);
-  const bite = blob(rng, site.x, site.y, 8, R * 0.7, R * 1.15, rng());
+  const R = r(9.5, 13.5) * Math.sqrt(severity);
+  const bite = blob(rng, site.x, site.y, 10, R * 0.68, R * 1.15, rng());
   const inward = [Math.cos(site.inward), Math.sin(site.inward)];
   const along = site.side === "left" || site.side === "right" ? [0, 1] : [1, 0];
-  const rebar = [R * 0.35, R * 0.7].map(depth => {
+  // Three bars across the hole, bent where the blast caught them
+  const rebar = [R * 0.25, R * 0.55, R * 0.85].map(depth => {
     const cx = site.x + inward[0] * depth;
     const cy = site.y + inward[1] * depth;
-    const half = R * 1.05;
-    return [[round1(cx - along[0] * half), round1(cy - along[1] * half)], [round1(cx + along[0] * half), round1(cy + along[1] * half)]];
+    const half = R * 1.1;
+    const bend = r(-3.5, 3.5);
+    return [
+      [round1(cx - along[0] * half), round1(cy - along[1] * half)],
+      [round1(cx + inward[0] * bend + along[0] * r(-2, 2)), round1(cy + inward[1] * bend + along[1] * r(-2, 2))],
+      [round1(cx + along[0] * half), round1(cy + along[1] * half)],
+    ];
   });
-  const ok = reachTest(site.side, W, H, 0.45);
+  // Crazing: short hairlines round the rim
+  const crazing = [];
+  for (let k = 0; k < 9 + Math.floor(rng() * 5); k++) {
+    const a = site.inward + r(-1.6, 1.6);
+    const r0 = R * r(1.0, 1.3);
+    const len = r(5, 13);
+    const b = a + r(-0.5, 0.5);
+    crazing.push([
+      [round1(site.x + Math.cos(a) * r0), round1(site.y + Math.sin(a) * r0)],
+      [round1(site.x + Math.cos(a) * r0 + Math.cos(b) * len), round1(site.y + Math.sin(a) * r0 + Math.sin(b) * len)],
+    ]);
+  }
+  const ok = reachTest(site.side, W, H, 0.55);
   const span = site.side === "left" || site.side === "right" ? W : H;
   const cracks = [];
   const walk = (start, angle, length, depth, delay) => {
@@ -249,30 +297,30 @@ export function generateSpall(seed, index, W, H) {
     let travelled = 0;
     const branches = [];
     while (travelled < length) {
-      const step = r(8, 17);
+      const stepLen = r(8, 17);
       // Hard turns, in steps, pulled back toward the heading
       const turn = rng();
       if (turn < 0.22) a -= r(0.4, 0.7);
       else if (turn > 0.78) a += r(0.4, 0.7);
       a += (angle - a) * 0.3;
-      const nx = x + Math.cos(a) * step;
-      const ny = y + Math.sin(a) * step;
+      const nx = x + Math.cos(a) * stepLen;
+      const ny = y + Math.sin(a) * stepLen;
       if (!ok([nx, ny])) break;
       x = nx;
       y = ny;
-      travelled += step;
+      travelled += stepLen;
       points.push([round1(x), round1(y)]);
-      if (depth === 0 && points.length > 2 && rng() < 0.18) branches.push({ at: [x, y], a, travelled });
+      if (depth === 0 && points.length > 2 && rng() < 0.24) branches.push({ at: [x, y], a, travelled });
     }
     if (points.length < 2) return;
     const len = polylineLength(points);
-    cracks.push({ points, length: round1(len), depth, delay: Math.round(delay), dur: Math.round(Math.max(40, len / 0.55)), width: depth ? 0.8 : 1.15 });
-    for (const b of branches.slice(0, 2)) walk(b.at, b.a + (rng() < 0.5 ? -1 : 1) * r(0.7, 1.3), r(10, 26), 1, delay + b.travelled / 0.55);
+    cracks.push({ points, length: round1(len), depth, delay: Math.round(delay), dur: Math.round(Math.max(40, len / 0.55)), width: depth ? 1.05 : 1.6 });
+    for (const b of branches.slice(0, 3)) walk(b.at, b.a + (rng() < 0.5 ? -1 : 1) * r(0.7, 1.3), r(14, 34), 1, delay + b.travelled / 0.55);
   };
-  const count = 2 + (rng() < 0.5 ? 1 : 0);
+  const count = 3 + (rng() < 0.5 ? 1 : 0);
   for (let k = 0; k < count; k++) {
-    const a = site.inward + (k - (count - 1) / 2) * r(0.45, 0.75);
-    walk([site.x + Math.cos(a) * R * 0.8, site.y + Math.sin(a) * R * 0.8], a, span * r(0.16, 0.3) * severity, 0, 30 + k * 40);
+    const a = site.inward + (k - (count - 1) / 2) * r(0.42, 0.65);
+    walk([site.x + Math.cos(a) * R * 0.85, site.y + Math.sin(a) * R * 0.85], a, span * r(0.22, 0.4) * severity, 0, 30 + k * 40);
   }
   return {
     index,
@@ -282,6 +330,9 @@ export function generateSpall(seed, index, W, H) {
     radius: round1(R),
     bite,
     rebar,
+    crazing,
+    scorch: round1(R * r(2.4, 3)),
+    stain: { x: round1(site.x + inward[0] * R * 0.6), y: round1(site.y + R * 1.6), r: round1(R * r(1.8, 2.4)) },
     cracks,
     duration: Math.max(0, ...cracks.map(c => c.delay + c.dur)),
   };

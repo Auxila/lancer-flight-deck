@@ -9,9 +9,10 @@ const MEND_MS = 1100;
  * HA: Armory concrete takes the hit, then the heat.
  *
  * - Structure: each point lost lands like a shell on poured concrete. A heavy thud (the panel drops and
- *   settles, it doesn't shake), a chunk bitten out of the slab's edge with the rebar showing, blocky
- *   cracks running out from it in hard steps, a cloud of dust and chunks of debris falling. The spall and
- *   the cracks stay. Repairs pour them full again in violet resin.
+ *   settles, it doesn't shake) and a violet energy flash, a chunk bitten out of the slab's edge with the
+ *   bent rebar showing and crazing round its rim, blocky cracks running out from it in hard steps, a cloud
+ *   of dust and chunks of debris falling. The spall, its scorch and dust stain, and the cracks stay.
+ *   Repairs pour them full again in violet resin.
  * - Stress: heat soak, the Armory's own discipline. The slabs glow from the edges in, violet going
  *   orange, deeper with each level; heat haze rises from the second; at the last point the insignia burn
  *   (styles/themes/ha.css). Each hit vents: plasma jets from the bottom corners and a flare through the
@@ -105,7 +106,15 @@ export class ConcreteDamage extends DamageStyle {
     const defs = svg("defs");
     const hole = svg("radialGradient", { id: "lfd-ha-hole" });
     hole.append(svg("stop", { offset: 0, "stop-color": "#050406" }), svg("stop", { offset: 0.7, "stop-color": "#0d0b0f" }), svg("stop", { offset: 1, "stop-color": "#2a2530" }));
-    defs.append(hole);
+    const scorch = svg("radialGradient", { id: "lfd-ha-scorch" });
+    scorch.append(
+      svg("stop", { offset: 0, "stop-color": "#1a0c1e", "stop-opacity": 0.7 }),
+      svg("stop", { offset: 0.45, "stop-color": "#6e4373", "stop-opacity": 0.3 }),
+      svg("stop", { offset: 1, "stop-color": "#6e4373", "stop-opacity": 0 })
+    );
+    const stain = svg("radialGradient", { id: "lfd-ha-stain" });
+    stain.append(svg("stop", { offset: 0, "stop-color": "#b4aab8", "stop-opacity": 0.22 }), svg("stop", { offset: 1, "stop-color": "#b4aab8", "stop-opacity": 0 }));
+    defs.append(hole, scorch, stain);
     this.svg.append(defs);
     for (const s of this.spalls) {
       const g = svg("g", { class: "lfd-spall lfd-dmg-mark", "data-index": s.index });
@@ -123,6 +132,14 @@ export class ConcreteDamage extends DamageStyle {
           }, formMs - elapsed);
         } else this.forming.delete(s.index);
       }
+      const [ix, iy] = s.impact;
+      g.append(
+        svg("ellipse", { class: "lfd-spall-stain", cx: s.stain.x, cy: s.stain.y, rx: s.stain.r * 0.8, ry: s.stain.r * 1.3, fill: "url(#lfd-ha-stain)" }),
+        svg("circle", { class: "lfd-spall-scorch", cx: ix, cy: iy, r: s.scorch, fill: "url(#lfd-ha-scorch)" })
+      );
+      const crazing = svg("g", { class: "lfd-spall-crazing" });
+      for (const line of s.crazing) crazing.append(svg("path", { d: pathData(line) }));
+      g.append(crazing);
       for (const c of s.cracks) {
         const d = pathData(c.points);
         const vars = `--w:${c.width};--delay:${c.delay}ms;--dur:${c.dur}ms`;
@@ -133,7 +150,7 @@ export class ConcreteDamage extends DamageStyle {
       }
       const bite = s.bite.map(p => p.join(",")).join(" ");
       g.append(svg("polygon", { class: "lfd-spall-bite", points: bite, fill: "url(#lfd-ha-hole)" }));
-      for (const [[x1, y1], [x2, y2]] of s.rebar) g.append(svg("line", { class: "lfd-spall-rebar", x1, y1, x2, y2 }));
+      for (const bar of s.rebar) g.append(svg("polyline", { class: "lfd-spall-rebar", points: bar.map(p => p.join(",")).join(" ") }));
       g.append(svg("polygon", { class: "lfd-spall-lip", points: bite }));
       this.svg.append(g);
     }
@@ -144,7 +161,7 @@ export class ConcreteDamage extends DamageStyle {
     if (!s) return;
     const [x, y] = s.impact;
     this.spot(this.fx, "lfd-ha-strike", x, y, {}, 700);
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 12; i++) {
       const a = s.inward + rand(-1.1, 1.1);
       this.spot(this.fx, "lfd-ha-dust", x + Math.cos(a) * rand(2, 10), y + Math.sin(a) * rand(2, 10), {
         "--dx": `${Math.cos(a) * rand(14, 40)}px`,
@@ -153,13 +170,13 @@ export class ConcreteDamage extends DamageStyle {
         "--d": `${Math.round(rand(0, 160))}ms`,
       }, 1900);
     }
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 14; i++) {
       const a = s.inward + rand(-1.3, 1.3);
       this.spot(this.fx, "lfd-ha-chunk", x, y, {
-        "--dx": `${Math.cos(a) * rand(10, 34)}px`,
-        "--dy": `${rand(70, 150)}px`,
+        "--dx": `${Math.cos(a) * rand(12, 46)}px`,
+        "--dy": `${rand(80, 180)}px`,
         "--rot": `${rand(-300, 300)}deg`,
-        "--s": `${rand(2.5, 5.5)}px`,
+        "--s": `${rand(3, 7.5)}px`,
         "--d": `${Math.round(rand(20, 140))}ms`,
         "--dur": `${Math.round(rand(520, 760))}ms`,
       }, 1300).append(document.createElement("i"));

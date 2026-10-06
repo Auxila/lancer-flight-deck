@@ -13,7 +13,7 @@ const RESHAPE_FRACTION = 0.2;
  * compares what it last drew for this mech with what the mech has now, so reloads, mech switches and
  * theme switches draw quietly and only real changes animate. What it looks like is the manufacturer's
  * damage style (BaseTheme.damage → styles/*.js): GMS's cracked glass and steam, IPS-N's hull breaches
- * and battle lanterns, SSC's kintsugi and moths, HORUS's corruption and interference, HA's spalled
+ * and battle lanterns, SSC's kintsugi and liquid cooling, HORUS's corruption and interference, HA's spalled
  * concrete and heat soak.
  *
  * The panel root carries the shared state for theme stylesheets: `lfd-cracked`, `lfd-stressed`,

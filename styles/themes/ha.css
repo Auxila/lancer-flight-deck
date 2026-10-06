@@ -881,6 +881,8 @@
 }
 
 #lancer-flight-deck .lfd-spall-rebar {
+  fill: none;
+  stroke-linejoin: round;
   stroke: #7d4b33;
   stroke-width: 1.5;
   stroke-linecap: round;
@@ -925,12 +927,12 @@
 #lancer-flight-deck .lfd-ha-strike::before {
   content: "";
   position: absolute;
-  left: -30px;
-  top: -30px;
-  width: 60px;
-  height: 60px;
+  left: -55px;
+  top: -55px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(255 245 255 / 0.95) 0 8%, rgb(194 134 200 / 0.6) 25%, transparent 70%);
+  background: radial-gradient(circle, rgb(255 245 255 / 0.98) 0 8%, rgb(194 134 200 / 0.65) 22%, rgb(110 67 115 / 0.3) 42%, transparent 70%);
   mix-blend-mode: screen;
   animation: lfd-impact-flash 420ms cubic-bezier(0.2, 0.6, 0.35, 1) forwards;
 }
@@ -984,10 +986,10 @@
 
 @keyframes lfd-ha-thud {
   0%, 100% { transform: none; }
-  12% { transform: translateY(4px); }
-  34% { transform: translateY(-1.5px); }
-  56% { transform: translateY(1px); }
-  78% { transform: translateY(-0.3px); }
+  10% { transform: translateY(7px) scaleY(0.992); }
+  30% { transform: translateY(-2.5px); }
+  52% { transform: translateY(1.5px); }
+  76% { transform: translateY(-0.5px); }
 }
 
 /* Stress: heat soak. The slabs glow from the edges in, violet going orange... */
@@ -1144,4 +1146,37 @@
 /* Reduced motion: the soak glows, nothing rises */
 #lancer-flight-deck.lfd-reduce-motion .lfd-ha-wisps {
   display: none !important;
+}
+
+/* Heavier spalls: crazing round the rim, a violet energy scorch, a dust stain under the bite */
+#lancer-flight-deck .lfd-spall-crazing path {
+  fill: none;
+  stroke: rgb(4 3 6 / 0.6);
+  stroke-width: 0.75;
+  stroke-linecap: square;
+}
+
+#lancer-flight-deck .lfd-spall-scorch,
+#lancer-flight-deck .lfd-spall-stain {
+  pointer-events: none;
+}
+
+#lancer-flight-deck .lfd-spall.is-forming .lfd-spall-crazing {
+  animation: lfd-fade-in 1ms steps(1) calc(var(--t0, 0ms) + 90ms) both;
+}
+
+#lancer-flight-deck .lfd-spall.is-forming .lfd-spall-scorch {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lfd-ha-scorch 900ms ease-out var(--t0, 0ms) both;
+}
+
+#lancer-flight-deck .lfd-spall.is-forming .lfd-spall-stain {
+  animation: lfd-fade-in 1600ms ease-out calc(var(--t0, 0ms) + 300ms) both;
+}
+
+@keyframes lfd-ha-scorch {
+  0% { opacity: 0; transform: scale(0.3); filter: brightness(3); }
+  30% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); filter: none; }
 }

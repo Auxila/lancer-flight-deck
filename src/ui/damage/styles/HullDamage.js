@@ -10,7 +10,7 @@ const MEND_MS = 1200;
  * IPS-N: damage on a ship's bridge.
  *
  * - Structure: each point lost holes the hull. The shell punches a jagged breach with metal petals torn
- *   outward and scorching around it; rivets pop out of the seam and spin away, sea spray bursts in, and
+ *   outward and scorching around it, buckles the plating into dents and tears a seam open inboard; rivets pop out of the seam and spin away, sea spray bursts in, and
  *   the panel rolls like a ship taking a hit. A second later damage control slams a patch plate over it
  *   (hazard tape, four bolts welded down one after another). The patch stays, with the torn petals
  *   showing round it, popped rivet holes beside it, and water slowly dripping out from under it. Repairs
@@ -127,8 +127,19 @@ export class HullDamage extends DamageStyle {
       // The burst grows out of the impact point
       g.style.setProperty("--ox", `${x}px`);
       g.style.setProperty("--oy", `${y}px`);
+      g.append(svg("circle", { class: "lfd-breach-scorch", cx: x, cy: y, r: b.scorch, fill: "url(#lfd-hull-scorch)" }));
+      // Buckled plating: each dent is a shadowed crease with a lit lip
+      const dents = svg("g", { class: "lfd-breach-dents" });
+      for (const d of b.dents) {
+        const arc = arcPath(x, y, d.r, d.a0, d.a1);
+        dents.append(svg("path", { class: "lfd-dent-shade", d: arc }), svg("path", { class: "lfd-dent-lip", d: arc, transform: "translate(0.9 0.9)" }));
+      }
+      // The torn seam running inboard
+      const tear = pathOf(b.tear);
       g.append(
-        svg("circle", { class: "lfd-breach-scorch", cx: x, cy: y, r: b.scorch, fill: "url(#lfd-hull-scorch)" }),
+        dents,
+        svg("path", { class: "lfd-breach-tear-lip", d: tear, transform: "translate(0.8 0.8)" }),
+        svg("path", { class: "lfd-breach-tear", d: tear, pathLength: 1 }),
         svg("polygon", { class: "lfd-breach-hole", points: pts(b.hole) })
       );
       const petals = svg("g", { class: "lfd-breach-petals" });
@@ -169,7 +180,8 @@ export class HullDamage extends DamageStyle {
     const [x, y] = b.impact;
     const fx = this.fx;
     this.spot(fx, "lfd-hull-flash", x, y, {}, 900);
-    for (let i = 0; i < 6; i++) {
+    this.spot(fx, "lfd-hull-shock", x, y, {}, 900);
+    for (let i = 0; i < 10; i++) {
       const a = b.inward + rand(-1.1, 1.1);
       const dist = rand(18, 44);
       this.spot(fx, "lfd-hull-spark", x, y, { "--rot": `${a}rad`, "--dx": `${Math.cos(a) * dist}px`, "--dy": `${Math.sin(a) * dist}px`, "--d": `${Math.round(rand(0, 80))}ms` }, 900);
@@ -185,9 +197,9 @@ export class HullDamage extends DamageStyle {
         "--dur": `${Math.round(rand(700, 1000))}ms`,
       }, 1500).append(document.createElement("i"));
     }
-    for (let i = 0; i < 12; i++) {
-      const a = b.inward + rand(-0.8, 0.8);
-      const dist = rand(16, 58);
+    for (let i = 0; i < 22; i++) {
+      const a = b.inward + rand(-0.9, 0.9);
+      const dist = rand(18, 80);
       this.spot(fx, "lfd-hull-spray", x, y, { "--dx": `${Math.cos(a) * dist}px`, "--dy": `${Math.sin(a) * dist + rand(4, 16)}px`, "--d": `${Math.round(rand(30, 220))}ms`, "--s": `${rand(1.2, 2.6)}px` }, 1200);
     }
   }
@@ -197,6 +209,16 @@ function div(cls) {
   const d = document.createElement("div");
   d.className = cls;
   return d;
+}
+
+function pathOf(points) {
+  return points.map((p, i) => `${i ? "L" : "M"}${p[0]} ${p[1]}`).join(" ");
+}
+
+/** An arc of radius r round (x, y), from angle a0 to a1 (radians). */
+function arcPath(x, y, r, a0, a1) {
+  const p = a => `${Math.round((x + Math.cos(a) * r) * 10) / 10} ${Math.round((y + Math.sin(a) * r) * 10) / 10}`;
+  return `M${p(a0)} A${r} ${r} 0 0 1 ${p(a1)}`;
 }
 
 function pts(list) {

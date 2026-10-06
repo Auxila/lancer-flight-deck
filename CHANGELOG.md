@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased (0.8: manufacturer themes)
+## 0.8.0
+
+Manufacturer themes: IPS-N, SSC, HORUS and HA each get their own cockpit, layout and battle damage; GMS stays the baseline (and the fallback for LCP makers).
 
 **Theme picker**
 - Click the maker's badge at the top left of the panel to choose the cockpit theme: **Match frame** (the default) or any theme by name, each option drawn in its own colours. Hover or arrow onto one to preview it on the whole cockpit, layout included; Enter or a click chooses it (with that theme's chime), Escape closes and returns to the badge. It's the same per-player setting as Configure Settings → Cockpit theme.
@@ -42,10 +44,10 @@ All four of the Big Four now have their own cockpit; LCP manufacturers keep GMS.
 
 **Battle damage, by maker**
 - Each cockpit now takes structure and stress damage its own way; GMS keeps its cracked glass and steam.
-- **IPS-N, hull breach and battle lanterns:** a shell punches through the plating (petals torn outward and white-hot, rivets popping out, sea spray), the panel rolls like a struck ship, and damage control bolts a hazard-taped patch over it a second later, welding each bolt; the patch stays, dripping. Stress brings a red rotating beacon and red emergency light; each hit is a pressure wave through the bulkheads.
-- **SSC, kintsugi and moths:** a white hairline races in and molten gold flows in behind it and sets, gold leaf drifting down as the movement skips a beat; the gold seams stay, a glint running along them. Stress draws gold-dust moths to the reactor (one, two, four) and tarnishes the gold leaf toward pewter; each hit flares the reactor.
-- **HORUS, corruption and interference:** a datamosh tear, a FAULT stamp, and a bad sector printed against the edge with its error code and pixel-sort smears; the print slips further out of register with every point lost. Stress brings static, a roll bar and, at the last point, the sigil's eye in the noise; each hit jams the feed and every eye blinks.
-- **HA, spalled concrete and heat soak:** a heavy thud, a chunk out of the slab with the rebar showing, stepped cracks, dust and debris. Stress soaks the slabs with heat from the edges in, violet to orange, with rising haze and burning insignia; each hit vents plasma from the bottom corners.
+- **IPS-N, hull breach and battle lanterns:** a shell punches through the plating (petals torn outward and white-hot, the plating buckled into dents, a seam torn open inboard, rivets popping out, sea spray), the panel rolls like a struck ship, and damage control bolts a hazard-taped patch over it a second later, welding each bolt; the patch stays, dripping. Stress brings a red rotating beacon and red emergency light; each hit is a pressure wave through the bulkheads.
+- **SSC, kintsugi and liquid cooling:** a white hairline races in and molten gold flows in behind it and sets, gold leaf drifting down as the movement skips a beat; the gold seams stay, a glint running along them. Stress brings the cooling loop online: two gold-ringed glass channels of sapphire coolant down the bezel, draining and boiling harder with each level, condensation beading on the glass, cold vapour venting from the near-dry channels at the last point; each hit purges the loop with a surge, a slosh and vapour from the couplings.
+- **HORUS, corruption and interference:** a hard datamosh tear, a FAULT stamp, and a bad sector printed against the edge with its error code, a glitch band torn across the readout, pixel-sort smears and dead-pixel clusters; the print slips further out of register with every point lost. Stress brings static, a roll bar and, at the last point, the sigil's eye in the noise; each hit jams the feed and every eye blinks.
+- **HA, spalled concrete and heat soak:** a heavy thud and a violet energy flash, a chunk out of the slab with the bent rebar showing, crazing, scorch and a dust stain, stepped cracks, dust and debris. Stress soaks the slabs with heat from the edges in, violet to orange, with rising haze and burning insignia; each hit vents plasma from the bottom corners.
 - Repairs undo each in kind (welded smooth, polished away, defragmented, poured full of resin). Switching theme while damaged redraws the same damage in the new style without replaying it; reduced motion shows it all, still. Steam's hiss only plays where there's glass.
 
 **Under the hood**

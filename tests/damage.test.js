@@ -35,11 +35,13 @@ test("breaches sit on the edge: hole, petals, rivets and patch stay near it", ()
     for (let i = 0; i < 6; i++) {
       const b = generateBreach(seed, i, W, H);
       const [x, y] = b.impact;
-      for (const [px, py] of [...b.hole, ...b.petals.flat(), ...b.rivets]) assert.ok(Math.hypot(px - x, py - y) < 45, `${seed}#${i} strays`);
-      assert.ok(b.patch.w > 18 && b.patch.w < 32 && b.patch.h < 20);
+      for (const [px, py] of [...b.hole, ...b.petals.flat(), ...b.rivets]) assert.ok(Math.hypot(px - x, py - y) < 62, `${seed}#${i} strays`);
+      for (const [px, py] of b.tear) assert.ok(px >= 0 && px <= W && py >= 0 && py <= H && Math.hypot(px - x, py - y) < 90, `${seed}#${i} tear strays`);
+      assert.equal(b.dents.length, 2);
+      assert.ok(b.patch.w >= 28 && b.patch.w <= 34 && b.patch.h <= 22);
       // A few pixels inboard of the edge, never further
-      if (b.side === "right") assert.ok(x > W - 10 && x < W - 3);
-      if (b.side === "left") assert.ok(x < 10 && x > 3);
+      if (b.side === "right") assert.ok(x > W - 11 && x < W - 5);
+      if (b.side === "left") assert.ok(x < 11 && x > 5);
     }
   }
 });
@@ -61,11 +63,12 @@ test("kintsugi seams and concrete cracks stay on the panel and stop short of the
       for (const c of spall.cracks) {
         for (const [x, y] of c.points) {
           assert.ok(x >= 0 && x <= W && y >= 0 && y <= H, `spall ${seed}#${i} off the panel`);
-          if (spall.side === "right") assert.ok(x >= W * 0.55 - spall.radius, `spall crack reached x=${x}`);
-          if (spall.side === "left") assert.ok(x <= W * 0.45 + spall.radius, `spall crack reached x=${x}`);
+          if (spall.side === "right") assert.ok(x >= W * 0.45 - spall.radius, `spall crack reached x=${x}`);
+          if (spall.side === "left") assert.ok(x <= W * 0.55 + spall.radius, `spall crack reached x=${x}`);
         }
       }
-      assert.equal(spall.rebar.length, 2);
+      assert.equal(spall.rebar.length, 3);
+      assert.ok(spall.crazing.length >= 9);
     }
   }
 });
@@ -78,7 +81,8 @@ test("corrupted blocks fit on the panel against their edge, with an error code",
       if (c.side === "right") assert.ok(c.x + c.w > W - 1);
       if (c.side === "left") assert.equal(c.x, 0);
       assert.match(c.code, /^[0-9A-F]{2}$/);
-      assert.ok(c.smears.length >= 3);
+      assert.ok(c.smears.length >= 6);
+      assert.ok(c.band.len > 0 && c.band.thick >= 4);
     }
   }
 });
