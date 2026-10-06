@@ -1,0 +1,78 @@
+{{!-- HA: the Armory's banner hangs from the header, its mark on it, and opens the theme picker; over the
+      mech's name, the battlegroup it was raised with (the banner already says whose) (cosmetic, stable per mech); under it, the frame. --}}
+<header class="lfd-header lfd-plate lfd-ha-decree">
+  <button type="button" class="lfd-tab" data-action="toggleCollapse" data-tooltip="LFD.Header.Expand" aria-label="{{localize 'LFD.Header.Expand'}}">
+    <span class="lfd-tab-badge lfd-ha-tab-banner" aria-hidden="true">
+      <svg viewBox="-16 -16 32 32" focusable="false">
+        <g class="lfd-ha-mark">
+          <path class="lfd-ha-tri" d="M0 -14.5L15.5 12.5L-15.5 12.5Z"/>
+          <path class="lfd-ha-gap" d="M0.00 -4.00L7.10 0.10L7.10 8.30L0.00 12.40L-7.10 8.30L-7.10 0.10Z"/>
+          <path class="lfd-ha-hex" d="M0.00 -1.90L5.28 1.15L5.28 7.25L0.00 10.30L-5.28 7.25L-5.28 1.15Z"/>
+        </g>
+      </svg>
+    </span>
+    <span class="lfd-tab-title">{{localize "LFD.Title"}}</span>
+    {{#unless standby}}
+    <span class="lfd-tab-mini {{#if header.mini.danger}}is-danger{{/if}}" aria-hidden="true">
+      <i class="mdi mdi-fire"></i>{{header.mini.heat}}
+    </span>
+    <span class="lfd-tab-mini" aria-hidden="true"><i class="mdi mdi-hexagon-multiple"></i>{{header.mini.structure}}</span>
+    {{#if header.alertWarning}}<span class="lfd-tab-alert lfd-k-warning" style="animation-delay:{{header.warningDelay}}ms" aria-hidden="true">▲</span>
+    {{else if header.alertCaution}}<span class="lfd-tab-alert lfd-k-caution" style="animation-delay:{{header.cautionDelay}}ms" aria-hidden="true">◆</span>{{/if}}
+    {{/unless}}
+  </button>
+
+  <div class="lfd-header-main">
+    <span class="lfd-drag-grip" data-tooltip="LFD.Move.Hint" aria-hidden="true"><i class="fa-solid fa-grip-vertical"></i></span>
+    <button type="button" class="lfd-badge lfd-ha-banner" data-action="themeMenu" data-tooltip="{{themeTip}}" aria-label="{{themeTip}}"
+            aria-haspopup="menu" aria-expanded="false">
+      <svg viewBox="-16 -16 32 32" aria-hidden="true" focusable="false">
+        <g class="lfd-ha-mark">
+          <path class="lfd-ha-tri" d="M0 -14.5L15.5 12.5L-15.5 12.5Z"/>
+          <path class="lfd-ha-gap" d="M0.00 -4.00L7.10 0.10L7.10 8.30L0.00 12.40L-7.10 8.30L-7.10 0.10Z"/>
+          <path class="lfd-ha-hex" d="M0.00 -1.90L5.28 1.15L5.28 7.25L0.00 10.30L-5.28 7.25L-5.28 1.15Z"/>
+        </g>
+      </svg>
+    </button>
+    <div class="lfd-ident">
+      {{#if standby}}
+      <div class="lfd-ha-unit"><b>{{localize "LFD.HA.House"}}</b></div>
+      <div class="lfd-mech-name">{{localize "LFD.Header.Standby"}}</div>
+      <div class="lfd-frame-name">{{localize "LFD.Header.StandbyHint"}}</div>
+      {{else}}
+      <div class="lfd-ha-unit">{{#if header.registry}}<span>{{header.registry}}</span>{{else}}<b>{{localize "LFD.HA.House"}}</b>{{/if}}</div>
+      <button type="button" class="lfd-mech-name" data-action="openSheet" data-tooltip="LFD.Header.OpenSheet">{{header.mechName}}</button>
+      <div class="lfd-frame-name">{{header.frameName}}</div>
+      {{/if}}
+    </div>
+    <div class="lfd-header-controls">
+      {{#if header.floating}}
+      <button type="button" class="lfd-icon-btn" data-action="dock" data-tooltip="LFD.Move.Dock" aria-label="{{localize 'LFD.Move.Dock'}}">
+        <i class="fa-solid fa-thumbtack"></i>
+      </button>
+      {{/if}}
+      <button type="button" class="lfd-icon-btn" data-action="toggleMute"
+              data-tooltip="{{#if header.muted}}LFD.Header.Unmute{{else}}LFD.Header.Mute{{/if}}"
+              aria-label="{{#if header.muted}}{{localize 'LFD.Header.Unmute'}}{{else}}{{localize 'LFD.Header.Mute'}}{{/if}}"
+              aria-pressed="{{#if header.muted}}true{{else}}false{{/if}}">
+        <i class="fa-solid {{#if header.muted}}fa-volume-xmark{{else}}fa-volume-low{{/if}}"></i>
+      </button>
+      <button type="button" class="lfd-icon-btn" data-action="hidePanel" data-tooltip="LFD.Header.Hide" aria-label="{{localize 'LFD.Header.Hide'}}">
+        <i class="fa-solid fa-eye-slash"></i>
+      </button>
+      <button type="button" class="lfd-icon-btn" data-action="toggleCollapse" data-tooltip="LFD.Header.Collapse" aria-label="{{localize 'LFD.Header.Collapse'}}">
+        <i class="fa-solid fa-angles-left lfd-collapse-icon"></i>
+      </button>
+    </div>
+  </div>
+
+  {{#unless standby}}
+  <div class="lfd-datalink {{#if header.jammed}}is-jammed{{/if}}">
+    <span class="lfd-ha-lamp" aria-hidden="true"></span>
+    <span class="lfd-datalink-label">{{localize "LFD.Header.Pilot"}}</span>
+    <span class="lfd-datalink-callsign">{{header.callsign}}</span>
+    {{#if header.activation}}<span class="lfd-activation">{{localize "LFD.Header.Activation"}}</span>{{/if}}
+    <span class="lfd-datalink-status">{{#if header.jammed}}{{localize "LFD.Header.LinkJammed"}}{{else}}{{localize "LFD.Header.LinkOk"}}{{/if}}</span>
+  </div>
+  {{/unless}}
+</header>

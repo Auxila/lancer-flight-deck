@@ -1,5 +1,8 @@
 import { TEMPLATE_ROOT } from "../constants.js";
 import { BaseTheme } from "./BaseTheme.js";
+import { HorusEyes } from "../ui/HorusEyes.js";
+
+const eyes = new HorusEyes();
 
 /**
  * HORUS: the collective nobody can map, printing mechs out of other people's printers. The cockpit is
@@ -7,7 +10,7 @@ import { BaseTheme } from "./BaseTheme.js";
  * sections as shell prompts, selections in reverse video, plates printed slightly out of register in
  * HORUS green. The header carries the sigil, a hashed handle and the UIB's "pattern group" for the
  * frame; HP prints in dithered cells; heat is a memory dump in hex; integrity is watched by eyes that
- * close as structure goes, and sigil rings that break as stress does. Its own templates
+ * follow your pointer and close as structure goes, and sigil rings that break as stress does. Its own templates
  * (templates/panel/horus/) keep every action, field and state of the base layout.
  */
 export class HORUSTheme extends BaseTheme {
@@ -40,6 +43,15 @@ export class HORUSTheme extends BaseTheme {
     const pilot = (t.callsign ?? t.pilotName ?? "NO PILOT LINKED").toUpperCase();
     const reactor = t.heat?.inDanger ? "REACTOR // DANGER ZONE // KEEP GOING" : "REACTOR // QUIET";
     return ["H0RUS // NULL-SIGNED BUILD", "FIRMWARE UNVERIFIED // RUN ANYWAY", `FRAME ${frame}`, `PILOT ${pilot}`, reactor, "// > HANDSHAKE ACCEPTED"];
+  }
+
+  /** The structure eyes follow the pointer. */
+  static mount(root) {
+    eyes.mount(root);
+  }
+
+  static unmount() {
+    eyes.unmount();
   }
 
   /** A handle, not a name: eight hex digits hashed from the mech (7F3A:C91E), the same every session. */

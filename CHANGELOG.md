@@ -27,14 +27,22 @@
 - **Header:** the HORUS sigil opens the picker (the signal slips when you reach for it; reverse video while its menu is open); over the name a hashed handle (74C8:2EF5; cosmetic, the same for a mech every session); the name tears for a moment now and then; the frame as the UIB's *pattern group*. The comms line is a prompt with a cursor.
 - **Hull:** sections are prompts (`$ hull`); HP prints cell by cell, one per hit point, over a dithered blank; armor as solid blocks; tags and checks in brackets.
 - **Reactor:** heat cells are a memory dump, numbered in hex. The Overcharge ladder is a checklist: `[x]` spent, `[>]` next in reverse video, `[ ]` to come.
-- **Integrity:** watched. Structure is a row of eyes that glance about and shut, in red, as boxes are lost; stress is a row of the sigil's rings that break. The next check hangs under each line as a tree branch: the roll, the odds bar, what's at stake.
+- **Integrity:** watched. Structure is a row of eyes that follow your pointer (and glance about on their own once it rests), shutting in red as boxes are lost; stress is a row of the sigil's rings that break. The next check hangs under each line as a tree branch: the roll, the odds bar, what's at stake.
 - Push-buttons are executables (`./overcharge`, `./stabilize`) that go reverse video under the pointer; lamps are square pixels. HUD glyphs are kite-cut like the sigil's point, the NPC Deck's portraits square, and both print out of register. Cold boot: the sigil prints in dither, line by line, behind *every door, open*, UNSEALED, RUN ANYWAY.
 - HORUS frames (Goblin, Hydra, Lich...) now match HORUS instead of GMS.
 
+**HA: imperial brutalism**
+- Its own header and integrity, and the Armory's finish on everything else: poured-concrete slabs (a fine aggregate grain, one corner sheared off, a violet insignia triangle in the other), poster capitals (Franklin Gothic on Windows), Roman numerals on the sections (I HULL, II REACTOR HEAT, III INTEGRITY).
+- **Header:** the Armory's banner hangs from a violet rail with its mark, opens the picker and stirs as you reach for it; over the name, the battlegroup the mech was raised with, named the way the Armory names them (*2nd Capitol Peak, Planetwatch*; cosmetic, the same for a mech every session).
+- **Hull and reactor:** HP is a sheared slab; heat runs in hexagonal cells, the Danger Zone hatched. The Overcharge ladder, HA's own discipline, climbs as a stair: each rung a step higher, the next one lit violet, the climbed ones struck.
+- **Integrity:** two banners of rank insignia, chevrons for structure and bars for stress, white while they hold and struck in red once lost; the count and the next check stand beside each.
+- Lamps are the mark's triangle; push-buttons are slabs on a violet sill. HUD glyphs and NPC Deck portraits are cut as heraldic shields. Cold boot: the Bruise (a world's heraldry turning violet on annexation) spreads from the centre behind the mark, *Superior by design*, ASCENDANT, FOR THE PURVIEW.
+
+All four of the Big Four now have their own cockpit; LCP manufacturers keep GMS.
+
 **Under the hood**
 - Theme colours are tokens all the way down (wells, edges, unlit lamps), so every surface follows the maker.
-- Themes can bring their own templates per part, finish-card text and a header serial; `tests/themes.test.js` checks the maker mapping, the override, and that a theme's templates keep every hook of the parts they replace. `npm run smoke` gains a picker step.
-- HA has a first-pass palette in the repo, unregistered until it's finished.
+- Themes can bring their own templates per part, finish-card text, a header serial and live behaviour (`mount`/`unmount`, started after each render while the theme is on screen: HORUS's eyes, `src/ui/HorusEyes.js`); `tests/themes.test.js` checks the maker mapping, the override, and that a theme's templates keep every hook of the parts they replace. `npm run smoke` gains a picker step.
 
 ## 0.7.0
 

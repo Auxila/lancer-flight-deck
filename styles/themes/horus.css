@@ -592,7 +592,8 @@
   min-height: 16px;
 }
 
-/* Structure: eyes. They glance about now and then; a lost box is an eye shut, in red. */
+/* Structure: eyes. They follow your pointer (src/ui/HorusEyes.js sets --lx/--ly) and glance about on
+   their own once it's still; a lost box is an eye shut, in red. */
 #lancer-flight-deck.lfd-theme-horus .lfd-horus-structure .lfd-pip {
   width: 22px;
   height: 13px;
@@ -600,8 +601,15 @@
   background:
     radial-gradient(circle at 50% 50%, #000 0 1.7px, var(--horus-green) 2.1px 3.9px, #023d21 4.2px 4.8px, transparent 5.2px) 50% 50% / 140% 100% no-repeat,
     var(--lfd-ink);
+  background-position: calc(50% + var(--lx, 0px)) calc(50% + var(--ly, 0px)), 0 0;
+  transition: background-position 110ms ease-out;
   animation: lfd-horus-glance 7s steps(1) infinite;
   animation-delay: calc(var(--i, 0) * -1.7s);
+}
+
+/* While they follow the pointer, the idle glance stands down */
+#lancer-flight-deck.lfd-theme-horus.lfd-horus-tracking .lfd-horus-structure .lfd-pip {
+  animation: none;
 }
 
 @keyframes lfd-horus-glance {

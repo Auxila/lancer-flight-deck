@@ -63,6 +63,16 @@ export class BaseTheme {
   }
 
   /**
+   * Live behaviour beyond CSS, started after every render while this theme is on screen (HORUS: eyes
+   * that follow the pointer). Must be idempotent: each render brings fresh part elements.
+   * @param {HTMLElement} _root  The panel element
+   */
+  static mount(_root) {}
+
+  /** Stop whatever mount() started: another theme took over, or the panel closed. */
+  static unmount() {}
+
+  /**
    * A stable 32-bit hash of the mech (FNV-1a over its uuid), for cosmetic serials.
    * @param {object} t  Telemetry snapshot
    */

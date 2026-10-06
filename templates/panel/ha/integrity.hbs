@@ -1,0 +1,38 @@
+{{!-- HA integrity: each track hangs as a banner of rank insignia (structure: chevrons; stress: bars), top
+      down, white while they hold and struck in red once lost; the count and the next check stand beside it. --}}
+<section class="lfd-integrity lfd-plate lfd-body lfd-ha-standards" aria-label="{{localize 'LFD.Integrity.Title'}}">
+  {{#unless standby}}
+  <div class="lfd-section-title">
+    <span>{{localize "LFD.Integrity.Title"}}</span>
+    {{#if integrity.altRules}}<span class="lfd-odds-alt" data-tooltip="LFD.Integrity.AltRulesTip">{{localize "LFD.Integrity.AltRules"}}</span>{{/if}}
+  </div>
+  <div class="lfd-ha-board">
+    {{#each integrity.tracks}}
+    <div class="lfd-track lfd-state-{{state}}" data-track="{{kind}}">
+      <span class="lfd-pips lfd-ha-{{kind}}" role="img" aria-label="{{localize label}} {{value}}/{{max}}">
+        {{#each pips}}<span class="lfd-pip {{#if intact}}is-intact{{else}}is-lost{{/if}}"></span>{{/each}}
+      </span>
+      <div class="lfd-ha-orders">
+        <div class="lfd-track-head">
+          <span class="lfd-track-label">{{localize label}}</span>
+          <span class="lfd-readout">{{value}}<small>/{{max}}</small></span>
+        </div>
+        {{#if segments}}
+        <div class="lfd-odds" data-tooltip-html="{{tooltip}}" data-tooltip-class="{{@root.tipClass}}" {{#if @root.tipDirection}}data-tooltip-direction="{{@root.tipDirection}}"{{/if}}>
+          <div class="lfd-odds-head"><span>{{localize "LFD.Integrity.NextCheck" dice=dice}}</span></div>
+          <div class="lfd-odds-bar">
+            {{#each segments}}<span class="lfd-band lfd-band-{{kind}} {{#if check}}is-check{{/if}}" style="flex-basis:{{width}}%"></span>{{/each}}
+          </div>
+          <span class="lfd-odds-loss {{#if lossOnCheck}}is-check{{/if}}">{{loss}}</span>
+        </div>
+        {{else if headline}}
+        <div class="lfd-odds lfd-odds-final" {{#if tooltip}}data-tooltip-html="{{tooltip}}" data-tooltip-class="{{@root.tipClass}}" {{#if @root.tipDirection}}data-tooltip-direction="{{@root.tipDirection}}"{{/if}}{{/if}}>
+          <span class="lfd-k-warning">{{headline}}</span>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    {{/each}}
+  </div>
+  {{/unless}}
+</section>

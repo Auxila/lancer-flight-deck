@@ -92,6 +92,7 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#ensureResizeGrip();
     if (!this.#listening) this.#attachListeners();
     this.manager.applyAppearance();
+    this.#mountTheme();
     this.fitHeight();
   }
 
@@ -99,6 +100,18 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   _onClose(options) {
     super._onClose(options);
     this.damage.destroy();
+    this.#mountedTheme?.unmount();
+    this.#mountedTheme = null;
+  }
+
+  /** The theme on screen gets its live behaviour (BaseTheme.mount); the one it replaced lets go. */
+  #mountedTheme = null;
+
+  #mountTheme() {
+    const theme = this.manager.shownTheme;
+    if (this.#mountedTheme && this.#mountedTheme !== theme) this.#mountedTheme.unmount();
+    this.#mountedTheme = theme;
+    theme.mount(this.element);
   }
 
   /* -------------------------------------------- */

@@ -13,7 +13,8 @@
         "GMS": "Union standard issue: red on gunmetal",
         "IPSN": "A ship's bridge: riveted plate, signal flags, a telegraph",
         "SSC": "An atelier chronometer: lacquer, gold leaf, sub-dials",
-        "HORUS": "A leaked readout: 1-bit, monospace, watched"
+        "HORUS": "A leaked readout: 1-bit, monospace, watched",
+        "HA": "Imperial brutalism: concrete, banners, a stair of heat"
       }
     },
     "Settings": {
@@ -915,6 +916,14 @@
       "AutoDetail": "{frame}: {badge}",
       "AutoNone": "No mech linked: {badge}",
       "Footer": "Hover: preview · Click: choose · Esc: close"
+    },
+    "HA": {
+      "House": "Harrison Armory",
+      "Boot": {
+        "Caption": "Superior by design",
+        "Title": "Ascendant",
+        "Stamp": "For the Purview"
+      }
     },
     "HORUS": {
       "Pattern": "pattern group: {frame}",

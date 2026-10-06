@@ -7,6 +7,7 @@ import { GMSTheme } from "../src/themes/GMSTheme.js";
 import { IPSNTheme } from "../src/themes/IPSNTheme.js";
 import { SSCTheme } from "../src/themes/SSCTheme.js";
 import { HORUSTheme } from "../src/themes/HORUSTheme.js";
+import { HATheme } from "../src/themes/HATheme.js";
 import { TEMPLATE_ROOT } from "../src/constants.js";
 import { buildHeat } from "../src/ui/components/HeatReactorGauge.js";
 
@@ -20,6 +21,7 @@ test("frames pick their maker's theme; makers without one (and LCPs) fall back t
   assert.equal(resolveTheme("IPSN"), IPSNTheme);
   assert.equal(resolveTheme("SSC"), SSCTheme);
   assert.equal(resolveTheme("HORUS"), HORUSTheme);
+  assert.equal(resolveTheme("HA"), HATheme);
   for (const code of ["BDF", "MPAL", "IRIDIA", "", null, undefined]) assert.equal(resolveTheme(code), GMSTheme, String(code));
 });
 
@@ -65,6 +67,12 @@ test("HORUS handles are eight hex digits (7F3A:C91E), the same for a mech every 
   assert.equal(HORUSTheme.registry({ uuid: "Actor.abc123" }), h);
 });
 
+test("HA battlegroups are named the Armory way (3rd Ras Shamra, Planetwatch), the same for a mech every session", () => {
+  const b = HATheme.registry({ uuid: "Actor.abc123" });
+  assert.match(b, /^[1-9](st|nd|rd|th) .+, (Planetwatch|Force Projection)$/);
+  assert.equal(HATheme.registry({ uuid: "Actor.abc123" }), b);
+});
+
 /**
  * A theme's own templates are a different layout of the same instrument: every action, editable field,
  * data hook and class the code looks for in the base part has to be there too.
@@ -94,7 +102,7 @@ test("theme templates keep every hook of the base part they replace", () => {
       checked++;
     }
   }
-  assert.ok(checked >= 11, "IPS-N and SSC bring four templates each, HORUS three");
+  assert.ok(checked >= 13, "IPS-N and SSC bring four templates each, HORUS three, HA two");
 });
 
 test("the Overcharge view says where the next cost sits on the ladder (dial themes point at it)", () => {
