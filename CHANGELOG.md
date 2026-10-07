@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **Activate** and **End activation** on the NPC Deck's open row, beside Sheet: big, lit buttons that take the NPC's turn and finish it. The one that doesn't apply stays put, dashed and dim, its hover saying why; Activate warns when it would end someone else's turn. End activation pulses gently while the NPC acts (still under Reduce motion).
+- Smoke test, 39 steps: the pair takes a turn and finishes it, and End activation does nothing before then.
+
 ## 0.8.2
 
 **The NPC Deck, laid out for running a turn**

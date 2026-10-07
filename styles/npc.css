@@ -1373,3 +1373,79 @@
 #lancer-flight-deck-npc .lfd-npc-ctl.is-help {
   cursor: help;
 }
+
+/* --------------------------------------------------------------------------
+   The open row's turn: ACTIVATE takes it, END ACTIVATION finishes it. Big and lit when they apply;
+   off, they stay in place (dashed, dim) and their hover text says why.
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck-npc .lfd-npc-cmds {
+  align-items: stretch;
+}
+
+#lancer-flight-deck-npc .lfd-npc-turn-cmds {
+  flex: 1 1 170px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-cmds .lfd-npc-turn-btn {
+  --t: var(--lfd-ok);
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 6px;
+  font: 800 9px/1.1 var(--lfd-font-display);
+  letter-spacing: 0.12em;
+  text-align: left;
+  color: color-mix(in srgb, var(--lfd-ink-dim) 70%, transparent);
+  background: transparent;
+  border: 1px dashed color-mix(in srgb, var(--lfd-line) 80%, transparent);
+  cursor: not-allowed;
+}
+
+#lancer-flight-deck-npc .lfd-npc-turn-btn.is-end {
+  --t: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-turn-btn i {
+  flex: none;
+  font-size: 10px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-cmds .lfd-npc-turn-btn:not(.is-live):hover {
+  border-color: color-mix(in srgb, var(--lfd-line) 80%, transparent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-cmds .lfd-npc-turn-btn.is-live {
+  color: var(--lfd-bg);
+  text-shadow: none;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--t) 80%, #fff), var(--t) 45%);
+  border: 1px solid var(--t);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--t) 45%, transparent), inset 0 -2px 0 color-mix(in srgb, var(--t) 60%, #000);
+  cursor: pointer;
+}
+
+#lancer-flight-deck-npc .lfd-npc-turn-btn.is-end.is-live {
+  color: var(--lfd-accent-ink);
+  animation: lfd-npc-turn-pulse 1.8s ease-in-out infinite;
+}
+
+#lancer-flight-deck-npc .lfd-npc-cmds .lfd-npc-turn-btn.is-live:hover {
+  border-color: var(--t);
+  filter: brightness(1.15);
+}
+
+#lancer-flight-deck-npc .lfd-npc-turn-btn.is-live:active {
+  transform: translateY(1px);
+}
+
+@keyframes lfd-npc-turn-pulse {
+  0%, 100% { box-shadow: 0 0 6px color-mix(in srgb, var(--t) 35%, transparent), inset 0 -2px 0 color-mix(in srgb, var(--t) 60%, #000); }
+  50% { box-shadow: 0 0 14px color-mix(in srgb, var(--t) 75%, transparent), inset 0 -2px 0 color-mix(in srgb, var(--t) 60%, #000); }
+}
+
+#lancer-flight-deck-npc.lfd-reduce-motion .lfd-npc-turn-btn.is-end.is-live {
+  animation: none;
+}

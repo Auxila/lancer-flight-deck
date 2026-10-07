@@ -851,6 +851,19 @@
       "Selected": "Selected on the map (the batch bar acts on these)",
       "ActivateHint": "Activate: start this NPC's turn",
       "EndTurnHint": "End this NPC's turn",
+      "Turn": {
+        "Activate": "Activate",
+        "End": "End activation",
+        "ready": "Take this NPC's turn now (spends one of its activations)",
+        "interrupts": "Take this NPC's turn now: {name}'s turn ends",
+        "acting": "Acting now: End activation finishes its turn",
+        "spent": "No activations left this round",
+        "destroyed": "Destroyed: it can't act",
+        "notInCombat": "Not in this combat: add it from the combat tracker",
+        "end": "End this NPC's activation",
+        "more": "End this activation: it has {n} more this round",
+        "notActing": "Not acting: Activate takes its turn"
+      },
       "Section": {
         "acting": "Acting",
         "ready": "To act · {n}",
@@ -875,7 +888,7 @@
       "EndTurn": "End turn",
       "Recharge": "Recharge",
       "Sheet": "Sheet",
-      "Footer": "Click a row: open it · Click a name: select it on the map · ▶: start its turn · Hover a feature: full text · Click a feature: use it · Right-click a feature: post it to chat · Right-click Hidden: Invisible · Right-click a portrait: start its turn · Wheel over the portraits: scroll them",
+      "Footer": "Click a row: open it · Click a name: select it on the map · ▶ or Activate (open row): take its turn · End activation: finish it · Hover a feature: full text · Click a feature: use it · Right-click a feature: post it to chat · Right-click Hidden: Invisible · Right-click a portrait: start its turn · Wheel over the portraits: scroll them",
       "Attack": "Attack",
       "Accuracy": "Accuracy",
       "Difficulty": "Difficulty",

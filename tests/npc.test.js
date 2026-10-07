@@ -84,3 +84,19 @@ test("an attack's numbers fit on its button", async () => {
   assert.equal(featureLine(tech, npc), "+2 tech · Rng 10");
   assert.equal(featureLine({ system: { type: "Trait", tags: [] } }, npc), null);
 });
+
+test("the open row's turn buttons: Activate takes its turn, End activation finishes it, and each says why when off", async () => {
+  const { turnCommands } = await import("../src/npc/NpcRoster.js");
+  const row = over => ({ inCombat: true, combatantId: "c1", isTurn: false, canAct: true, destroyed: false, activationsLeft: 1, ...over });
+  const why = cmds => [cmds.activate.on, cmds.activate.why, cmds.end.on, cmds.end.why];
+  assert.equal(turnCommands(row(), { started: false }), null, "no started combat: no buttons");
+  assert.deepEqual(why(turnCommands(row(), { started: true })), [true, "ready", false, "notActing"]);
+  const cut = turnCommands(row(), { started: true, acting: { id: "p1", name: "Kitbash" } });
+  assert.deepEqual([cut.activate.why, cut.activate.name], ["interrupts", "Kitbash"], "says whose turn it would end");
+  assert.deepEqual(why(turnCommands(row({ isTurn: true, activationsLeft: 0 }), { started: true, acting: { id: "c1", name: "x" } })), [false, "acting", true, "end"]);
+  const elite = turnCommands(row({ isTurn: true, activationsLeft: 1 }), { started: true, acting: { id: "c1", name: "x" } });
+  assert.deepEqual([elite.end.why, elite.end.more], ["more", 1], "an Elite hears it has another activation");
+  assert.deepEqual(why(turnCommands(row({ canAct: false, activationsLeft: 0 }), { started: true })), [false, "spent", false, "notActing"]);
+  assert.deepEqual(why(turnCommands(row({ canAct: false, destroyed: true }), { started: true })), [false, "destroyed", false, "notActing"]);
+  assert.deepEqual(why(turnCommands(row({ inCombat: false, canAct: false, combatantId: null }), { started: true })), [false, "notInCombat", false, "notInCombat"]);
+});

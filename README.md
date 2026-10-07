@@ -308,7 +308,11 @@ round (out of combat, those still standing); the **?** beside it lists every cli
     in its annunciator colour with a lamp bar along its top; a click toggles one, and hovering
     says what it does. As on the panel, the Hidden tile stands for Invisible too: a right-click
     toggles **Invisible**, and the tile reads Hidden, Invisible or Hid + Invis;
-  - Recharge, and the sheet.
+  - Recharge, the sheet, and, in a started combat, **Activate** and **End activation**: big buttons
+    that take this NPC's turn and finish it (LANCER's popcorn initiative, as from its tracker). The one
+    that doesn't apply stays in place, dashed and dim, and its hover text says why (no activations
+    left, not in this combat, acting now). Activating while someone else is acting ends their turn,
+    as in LANCER's tracker, and the hover says whose.
 - **Features:** hover for the full text with its numbers at the NPC's tier (attack,
   accuracy, range, damage). Click to use it through LANCER's own flows (attack, tech attack,
   or its card, with Limited, Recharge and heat handled by the system); right-click posts its

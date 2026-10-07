@@ -7,7 +7,7 @@ import { HoverCards } from "../ui/HoverCards.js";
 import { LookHere } from "./LookHere.js";
 import { conditionCard } from "../core/ConditionInfo.js";
 import { keyHints } from "../ui/keyHints.js";
-import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, rosterSections, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
+import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, rosterSections, turnCommands, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
 import { conditionLook } from "../ui/components/MasterCautionGrid.js";
 import { CHECKS } from "../ui/components/HullReadout.js";
 
@@ -304,6 +304,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
           return { id, label, ...conditionLook(id, label), img: cfg.img, on, tip: conditionCard(id, { title: label, hint }) };
         }).filter(Boolean);
         // The chips name what's on; the icon tiles below toggle it
+        row.turn = NpcDeck.#turnView(row, combat);
       }
       return row;
     });
@@ -828,12 +829,31 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /** LANCER's popcorn initiative: start this NPC's turn. */
+  /**
+   * The open row's Activate / End activation pair: labels, hover text, and why one is off. The buttons
+   * stay on screen when off (aria-disabled, so their hover text still explains) and clicks on them do nothing.
+   */
+  static #turnView(row, combat) {
+    const acting = combat?.started && combat.combatant ? { id: combat.combatant.id, name: combat.combatant.name } : null;
+    const cmds = turnCommands(row, { started: !!combat?.started, acting });
+    if (!cmds) return null;
+    const i18n = game.i18n;
+    const tip = (why, data) => i18n.format(`LFD.Npc.Turn.${why}`, data ?? {});
+    return {
+      combatantId: row.combatantId,
+      activate: { on: cmds.activate.on, tip: tip(cmds.activate.why, { name: cmds.activate.name }) },
+      end: { on: cmds.end.on, tip: tip(cmds.end.why, { n: cmds.end.more }) },
+    };
+  }
+
   static async #onActivate(event, target) {
+    if (target.getAttribute("aria-disabled") === "true") return;
     const id = target.dataset.combatant;
     if (id) await deckCombat()?.activateCombatant?.(id);
   }
 
   static async #onEndTurn(event, target) {
+    if (target.getAttribute("aria-disabled") === "true") return;
     const id = target.dataset.combatant;
     if (id) await deckCombat()?.deactivateCombatant?.(id);
   }

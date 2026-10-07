@@ -508,6 +508,33 @@ await step(g, "NPC Deck: ▶ on a row starts that NPC's turn, and End turn moves
   return { ok: before === "ready" && acting === "acting" && endTurn && after === "done", detail: { npc: npc.name, before, acting, endTurn, after } };
 }, turn);
 
+await step(g, "NPC Deck: the open row's ACTIVATE takes the turn and END ACTIVATION finishes it; each is off when it doesn't apply", async turn => {
+  if (turn.skip) return { skip: turn.skip };
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const combat = game.combats.get(turn.combat);
+  const inFight = new Set(combat.combatants.map(c => c.tokenId));
+  const npc = canvas.tokens.placeables.find(t => t.actor?.type === "npc" && t.visible && !t.document.hidden && !inFight.has(t.id) && !t.actor.system?.destroyed && (t.actor.system?.structure?.value ?? 1) > 0);
+  if (!npc) return { skip: "no second NPC token standing on the scene" };
+  await combat.createEmbeddedDocuments("Combatant", [{ tokenId: npc.id, sceneId: canvas.scene.id, actorId: npc.document.actorId }]);
+  npc.control({ releaseOthers: true }); // selecting an NPC opens its row
+  await wait(1500);
+  const btn = which => document.querySelector(`#lancer-flight-deck-npc .lfd-npc-row.is-open[data-token="${npc.id}"] .lfd-npc-turn-btn.is-${which}`);
+  const state = () => ({ activate: btn("activate")?.getAttribute("aria-disabled") === "false", end: btn("end")?.getAttribute("aria-disabled") === "false" });
+  const ready = state();
+  btn("end")?.click(); // off: does nothing
+  await wait(800);
+  const stillReady = combat.combatant?.tokenId !== npc.id;
+  btn("activate")?.click();
+  await wait(1800);
+  const acting = { ...state(), turn: combat.combatant?.tokenId === npc.id };
+  btn("end")?.click();
+  await wait(1800);
+  const done = { ...state(), turn: combat.combatant?.tokenId === npc.id };
+  canvas.tokens.releaseAll();
+  const ok = ready.activate && !ready.end && stillReady && acting.turn && !acting.activate && acting.end && !done.turn && !done.activate && !done.end;
+  return { ok, detail: { npc: npc.name, ready, stillReady, acting, done } };
+}, turn);
+
 await g.evaluate(async ([uuid, turn]) => {
   if (turn.skip) return;
   const actor = await fromUuid(uuid);

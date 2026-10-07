@@ -151,6 +151,7 @@ export function readRow(token, { combat, expanded, dups = null }) {
     // Pips only for NPCs with more than one activation (Elites): for the rest, ▶ and the section say it
     activations: act && num(act.max) > 1 ? Array.from({ length: num(act.max) }, (_, i) => ({ on: i < num(act.value) })) : null,
     canAct: !!combatant && num(act?.value) > 0 && !destroyed,
+    activationsLeft: num(act?.value),
     // In a started combat, out of activations and not acting now: done for the round
     acted: !!combatant && !!combat?.started && num(act?.value) <= 0 && combat?.combatant?.id !== combatant.id,
     isTurn: !!combatant && combat?.combatant?.id === combatant.id,
@@ -161,6 +162,29 @@ export function readRow(token, { combat, expanded, dups = null }) {
     controlled: !!placeable?.controlled,
     expanded: expanded === token.id,
   };
+}
+
+/**
+ * The open row's turn buttons, Activate (take its turn, as LANCER's tracker does) and End activation, each
+ * with whether it's live and why. Null without a started combat. LANCER lets the GM activate an NPC while
+ * someone else is acting (that turn then ends), so Activate says whose turn it would cut.
+ * @param {object} row  a readRow result
+ * @param {{started: boolean, acting?: {id: string, name: string}|null}} combat
+ * @returns {null|{activate: {on: boolean, why: string, name?: string}, end: {on: boolean, why: string, more?: number}}}
+ */
+export function turnCommands(row, { started, acting = null }) {
+  if (!started) return null;
+  let activate;
+  if (!row.inCombat) activate = { on: false, why: "notInCombat" };
+  else if (row.isTurn) activate = { on: false, why: "acting" };
+  else if (row.destroyed) activate = { on: false, why: "destroyed" };
+  else if (!row.canAct) activate = { on: false, why: "spent" };
+  else if (acting && acting.id !== row.combatantId) activate = { on: true, why: "interrupts", name: acting.name };
+  else activate = { on: true, why: "ready" };
+  const end = row.isTurn
+    ? row.activationsLeft > 0 ? { on: true, why: "more", more: row.activationsLeft } : { on: true, why: "end" }
+    : { on: false, why: row.inCombat ? "notActing" : "notInCombat" };
+  return { activate, end };
 }
 
 /* -------------------------------------------- */

@@ -211,6 +211,18 @@
           <button type="button" data-action="recharge"><i class="fa-solid fa-dice-d6"></i>{{localize "LFD.Npc.Recharge"}}</button>
           {{/if}}
           <button type="button" data-action="sheet"><i class="fa-solid fa-id-card"></i>{{localize "LFD.Npc.Sheet"}}</button>
+          {{#if turn}}
+          <div class="lfd-npc-turn-cmds">
+            <button type="button" class="lfd-npc-turn-btn is-activate {{#if turn.activate.on}}is-live{{/if}}" data-action="activate" data-combatant="{{turn.combatantId}}"
+                    aria-disabled="{{#if turn.activate.on}}false{{else}}true{{/if}}" data-tooltip="{{turn.activate.tip}}">
+              <i class="fa-solid fa-play" aria-hidden="true"></i><span>{{localize "LFD.Npc.Turn.Activate"}}</span>
+            </button>
+            <button type="button" class="lfd-npc-turn-btn is-end {{#if turn.end.on}}is-live{{/if}}" data-action="endTurn" data-combatant="{{turn.combatantId}}"
+                    aria-disabled="{{#if turn.end.on}}false{{else}}true{{/if}}" data-tooltip="{{turn.end.tip}}">
+              <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i><span>{{localize "LFD.Npc.Turn.End"}}</span>
+            </button>
+          </div>
+          {{/if}}
         </div>
       </div>
       {{/if}}
