@@ -7,7 +7,7 @@ One page for the person deciding whether Flight Deck goes into the world: what i
 ## What it is
 
 - **For players, opt-in:** a cockpit panel for their own mech. It shows heat, the Overcharge ladder and structure/stress odds, plus condition tiles and HUD menus of every action their gear gives them. Nobody gets it unless they turn it on.
-- **For the GM:** the NPC Deck, a board of every NPC in the fight with initiative, conditions and features.
+- **For the GM:** the NPC Deck, a board of every NPC in the fight to run the round from: initiative and turns, HP, conditions and features.
 - **For everyone:** condition visuals drawn on tokens, such as Lock On brackets, Slowed webs and Immobile chains.
 
 Every roll, attack, card, heat cost and Limited use goes through **LANCER's own flows**, exactly as from the character sheet. So LANCER's hooks still fire, and modules like Lancer Weapon FX react to it as usual.
@@ -16,9 +16,13 @@ Every roll, attack, card, heat cost and Limited use goes through **LANCER's own 
 
 | Change | When | Written by | Controlled by |
 |---|---|---|---|
-| Conditions on actors | A player clicks a condition tile on their own mech or tokens they own | That player | — |
+| Conditions on actors | A player clicks a condition tile on their own mech or tokens they own; the GM clicks one on the NPC Deck (an NPC's row, or the batch bar for several selected NPCs) | That player / GM | — |
 | Lock On on an enemy | A player Locks On a target they don't own | The **active GM's** client, on request | World: *Players can Lock On tokens they don't own* |
-| HP, heat, Burn, Overshield | The panel's editors (owner), the NPC Deck's steppers (GM) | Owner / GM | — |
+| HP, heat, Burn, Overshield | The panel's editors (owner), the NPC Deck's steppers (GM, one NPC or the batch bar) | Owner / GM | — |
+| Whose turn it is, and activations (LANCER's popcorn initiative) | The NPC Deck's ▶, **Activate** and **End activation** (End turn), or a right-click on an initiative portrait. These are LANCER's own activate / end calls, as its combat tracker makes them. As in the tracker, activating an NPC while someone else acts ends that turn; the button's hover says whose | GM | — |
+| Combatants in the encounter | The NPC Deck's **Add to combat** (an NPC's row, or the batch bar for several selected) adds NPC tokens to the encounter the deck runs, with this round's activations. Hidden tokens join hidden | GM | — |
+| The round | The NPC Deck's **Next round**: in the bar that appears once nobody is acting and nobody standing has an activation left, or from the strip along the bottom, which asks first (naming who's still to act) if anyone is. **Prev** goes back a round, after asking. Both are LANCER's own next / previous round, which give everyone their activations back. **Undo** gives back the turn in progress (LANCER's previous turn) or the activation that just ended | GM | — |
+| The encounter itself | The strip's **End**: Foundry's own End Encounter, which asks first, then deletes the encounter | GM | — |
 | LANCER's action tracker | An action from a HUD menu goes through; right-click on an action light; a mech's token dragged or arrow-keyed on the map (its movement; an undo gives it back) | Owner (the client of whoever moved the token) | World: *HUD menus spend actions* (in combat / always / never) |
 | Foundry's movement history of a mech's token | The MOVE menu's Reset clears it, with the movement count | Owner | — |
 | Reactor meltdown countdown (`system.meltdown_timer`) | Started from the Meltdown tile or Self-Destruct; ticks down at the end of that character's turn in combat | Owner starts it; the **active GM's** client ticks it | World: *Meltdown countdowns tick at turn end* |
@@ -42,6 +46,7 @@ Also, after a hit, LANCER's own damage prompt can open by itself. That's the per
 
   **One exception:** with the world setting *Jammed effect* on "Flight Deck", it removes Lancer QoL's darkening Jammed filter from tokens where both would stack.
 - **It never replaces sheets or rules.** Sheets open as you've configured them, including Lancer Alternative Sheets.
+- **It never removes anyone from a combat, and it never ends an encounter or changes the round without the GM confirming.** The NPC Deck adds NPCs and takes and ends turns. Next round goes straight through only once everyone has acted. Skipping ahead, going back a round and ending the encounter each ask first.
 - **It never calls outside services or loads outside assets.** All sound is synthesized in the browser.
 
 Visual-only, per player: while a player's panel is open, it hides Token Action HUD's bar, which would otherwise sit behind the panel. Each player can turn that off.

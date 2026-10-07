@@ -287,6 +287,15 @@ round (out of combat, those still standing); the **?** beside it lists every cli
 - **The round's end:** once nobody is acting and nobody standing has an activation left, a bar
   under the header says the round is complete, with **Next round**: LANCER's own, which gives
   everyone their activations back. (The defeated don't hold it up.)
+- **The round's controls,** pinned along the bottom while a combat runs (the outer corner stays
+  clear for the resize grip):
+  - **Prev:** back a round. LANCER's previous round gives everyone their activations back, so
+    that round starts over; it asks first, and rests in round 1.
+  - **Undo:** while someone is acting, takes back their activation (LANCER's previous turn: they
+    get it back and nobody acts). Right after a turn ends, gives that unit the activation back,
+    so it returns to To act without starting a turn. Once per turn; its hover says whose.
+  - **Next round:** any time. With anyone still to act it asks first and names them.
+  - **End:** ends the encounter through Foundry's own End Encounter, which asks first.
 - **Move and resize it like the Flight Deck:** drag the header to float it anywhere, drop it
   at a screen edge to dock it again (or use the pin), and drag the corner grip to scale it
   (70–160%, double-click to reset, arrow keys when focused). Layout is saved per GM.

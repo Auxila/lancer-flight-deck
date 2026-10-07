@@ -189,6 +189,32 @@ export function turnCommands(row, { started, acting = null }) {
 }
 
 /**
+ * What Undo would take back in a started combat, or null:
+ * - "acting": someone is acting. LANCER's previous turn gives them the activation back and nobody acts.
+ * - "ended": nobody is acting and the turn that just ended was this round's. Its unit gets the activation
+ *   back and returns to To act, without starting a turn.
+ * Foundry keeps the turn before on every client (combat.previous); after a reload it's gone and Undo rests.
+ * @param {Combat|null} combat
+ * @returns {null|{kind: "acting"|"ended", id: string, name: string}}
+ */
+export function undoTarget(combat) {
+  if (!combat?.started) return null;
+  const acting = combat.combatant;
+  if (acting) return { kind: "acting", id: acting.id, name: acting.name };
+  const prev = combat.previous;
+  if (!prev?.combatantId || prev.round !== combat.round || prev.turn === null || prev.turn === undefined) return null;
+  const c = combat.combatants?.get?.(prev.combatantId);
+  if (!c || num(c.activations?.value) >= (num(c.activations?.max) || 1)) return null;
+  return { kind: "ended", id: c.id, name: c.name };
+}
+
+/** Who still has a turn this round (whoever is acting included); the defeated don't count. */
+export function stillToAct(combat) {
+  if (!combat?.started) return [];
+  return [...(combat.combatants ?? [])].filter(c => !c.isDefeated && (num(c.activations?.value) > 0 || combat.combatant?.id === c.id));
+}
+
+/**
  * The round is over and LANCER's popcorn initiative waits on the GM: a started combat with nobody acting
  * and nobody left to act. The defeated don't hold it up.
  * @param {Combat|null} combat

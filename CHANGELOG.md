@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+**The round's controls, along the bottom of the NPC Deck** (while a combat runs)
+- **Prev** · **Undo** · **Next round** · **End**, pinned to the bottom edge, clear of the resize grip; End in red, last.
+- **Undo** takes back the turn in progress (LANCER's previous turn: the activation comes back and nobody acts), or right after a turn ends, gives that unit its activation back so it returns to To act. Once per turn; the hover names whose.
+- **Next round** any time: with anyone still to act it asks first and names them. **Prev** asks first (everyone's activations come back and that round starts over). **End** is Foundry's own End Encounter, with its question. Off buttons stay put, dashed and dim, saying why.
+- GM brief: the table covers the strip, and "what it never does" now says the round and the encounter change only after the GM confirms.
+- Smoke test, 43 steps: Undo both ways (and only once), Next and Prev ask, End asks and No keeps the encounter.
+
 ## 0.8.3
 
 **The NPC Deck runs the whole round**
@@ -9,6 +18,7 @@
 - A click on a row's **HP bar** (or its condition badges) opens and closes it, like its name line.
 - Clicking an NPC token that's already selected opens its row again (after the turn had moved the deck to another).
 - The batch bar names twins by their numbers ("Test Hostile 1, Test Hostile 2").
+- **GM brief:** its table of everything Flight Deck can change now covers the NPC Deck's turns and activations, Add to combat and Next round, and the GM's condition tiles; and it says what the deck never does to a combat.
 - Smoke test, 42 steps: the turn pair, the HP click, Add to combat (row and batch), the click on a selected NPC, and Next round.
 
 ## 0.8.2

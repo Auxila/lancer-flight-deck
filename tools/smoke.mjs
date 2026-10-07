@@ -622,6 +622,62 @@ await step(g, "NPC Deck: once everyone has acted, Next round starts the next rou
   return { ok: shown && next && refilled && !bar(), detail: { shown, from: round, to: combat.round, refilled, barGone: !bar() } };
 }, turn);
 
+await step(g, "NPC Deck: the bottom strip: Undo takes back a turn (once), Next and Prev ask first, End is Foundry's own", async turn => {
+  if (turn.skip) return { skip: turn.skip };
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const combat = game.combats.get(turn.combat);
+  const bar = () => document.querySelector("#lancer-flight-deck-npc .lfd-npc-ctrlbar");
+  const on = cls => bar()?.querySelector(`.is-${cls}`)?.getAttribute("aria-disabled") !== "true";
+  const press = cls => bar()?.querySelector(`.is-${cls}`)?.click();
+  const answer = async yes => {
+    for (let i = 0; i < 30 && !document.querySelector(".application.dialog"); i++) await wait(100);
+    const d = [...document.querySelectorAll(".application.dialog")].at(-1);
+    const text = d?.innerText ?? "";
+    d?.querySelector(`button[data-action="${yes ? "yes" : "no"}"]`)?.click();
+    await wait(1200);
+    return text;
+  };
+  if (!bar()) return { ok: false, detail: "no strip in a started combat" };
+  const npc = combat.combatants.find(c => c.actor?.type === "npc" && !c.isDefeated);
+  if (!npc) return { skip: "no NPC combatant standing" };
+  if (combat.combatant) await combat.nextTurn();
+  await npc.update({ "system.activations.value": 1 });
+  // While acting: LANCER's previous turn
+  await combat.activateCombatant(npc.id);
+  await wait(1200);
+  const undoActing = on("undo");
+  press("undo");
+  await wait(1200);
+  const tookBack = !combat.combatant && npc.activations.value === 1;
+  // Just ended: the activation comes back, once
+  await combat.activateCombatant(npc.id);
+  await wait(600);
+  await combat.deactivateCombatant(npc.id);
+  await wait(1200);
+  const undoEnded = on("undo");
+  press("undo");
+  await wait(1200);
+  const gaveBack = !combat.combatant && npc.activations.value === 1 && !on("undo");
+  // Next round with someone to act: asks; No keeps the round
+  const round = combat.round;
+  press("next");
+  const asked = await answer(false);
+  const kept = combat.round === round;
+  // Prev: asks; Yes goes back
+  let back = "skipped: round 1";
+  if (round > 1) {
+    press("prev");
+    await answer(true);
+    back = combat.round === round - 1;
+  }
+  // End: Foundry's own question; No keeps the encounter
+  press("end");
+  const endAsked = await answer(false);
+  const still = !!game.combats.get(turn.combat);
+  const ok = undoActing && tookBack && undoEnded && gaveBack && /still to act/.test(asked) && kept && back !== false && !!endAsked && still;
+  return { ok, detail: { npc: npc.name, undoActing, tookBack, undoEnded, gaveBack, nextAsked: !!asked, kept, back, endAsked: !!endAsked, still } };
+}, turn);
+
 await g.evaluate(async ([uuid, turn]) => {
   if (turn.skip) return;
   const actor = await fromUuid(uuid);

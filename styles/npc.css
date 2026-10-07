@@ -1557,3 +1557,98 @@
 #lancer-flight-deck-npc.lfd-reduce-motion .lfd-npc-roundend button {
   animation: none;
 }
+
+/* --------------------------------------------------------------------------
+   The round's controls, pinned along the bottom while a combat runs:
+   Prev (round) · Undo (turn) · Next round · End (encounter, red, last)
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck-npc .lfd-npc-ctrlbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 7;
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: 3px;
+  /* The resize grip sits over the bottom corner on the outer side: keep that corner clear */
+  padding: 4px 18px 4px 4px;
+  background: color-mix(in srgb, var(--lfd-bg) 88%, var(--lfd-plate));
+  border-top: 1px solid var(--lfd-line);
+  box-shadow: 0 -6px 10px rgb(0 0 0 / 0.35);
+}
+
+#lancer-flight-deck-npc.lfd-dock-right .lfd-npc-ctrlbar {
+  padding: 4px 4px 4px 18px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-ctrlbar button {
+  --t: var(--lfd-ink-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 24px;
+  padding: 0 8px;
+  font: 800 8px/1 var(--lfd-font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--lfd-ink);
+  background: var(--lfd-plate-2);
+  border: 1px solid var(--lfd-line);
+}
+
+#lancer-flight-deck-npc .lfd-npc-ctrlbar button i {
+  font-size: 9px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-ctrlbar button:hover {
+  border-color: var(--lfd-accent);
+  filter: brightness(1.15);
+}
+
+#lancer-flight-deck-npc .lfd-npc-ctrlbar button:active {
+  transform: translateY(1px);
+}
+
+#lancer-flight-deck-npc .lfd-npc-ctrlbar button.is-next {
+  color: var(--lfd-ok);
+  background: color-mix(in srgb, var(--lfd-ok) 10%, var(--lfd-plate-2));
+  border-color: color-mix(in srgb, var(--lfd-ok) 55%, transparent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-ctrlbar button.is-next:hover {
+  border-color: var(--lfd-ok);
+}
+
+/* Destructive, and last: red */
+#lancer-flight-deck-npc .lfd-npc-ctrlbar button.is-end {
+  color: var(--lfd-warning);
+  background: color-mix(in srgb, var(--lfd-warning) 8%, var(--lfd-plate-2));
+  border-color: color-mix(in srgb, var(--lfd-warning) 55%, transparent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-ctrlbar button.is-end:hover {
+  color: #fff;
+  background: var(--lfd-warning);
+  border-color: var(--lfd-warning);
+  filter: none;
+}
+
+/* Off: dashed and dim, the hover saying why */
+#lancer-flight-deck-npc .lfd-npc-ctrlbar button[aria-disabled="true"] {
+  color: var(--lfd-ink-dim);
+  background: transparent;
+  border-style: dashed;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#lancer-flight-deck-npc .lfd-npc-ctrlbar button[aria-disabled="true"]:hover {
+  border-color: var(--lfd-line);
+  filter: none;
+}
+
+#lancer-flight-deck-npc .lfd-npc-ctrlbar button[aria-disabled="true"]:active {
+  transform: none;
+}

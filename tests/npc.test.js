@@ -114,3 +114,31 @@ test("the round is complete once nobody is acting and nobody standing has an act
   assert.equal(roundComplete(combat([])), false, "nobody in it");
   assert.equal(roundComplete(combat([c(0, true)])), false, "only the defeated");
 });
+
+test("Undo takes back the turn in progress, or gives back the activation that just ended (once)", async () => {
+  const { undoTarget } = await import("../src/npc/NpcRoster.js");
+  const unit = (id, value, max = 1) => ({ id, name: id.toUpperCase(), activations: { value, max } });
+  const combat = (list, over = {}) => {
+    const byId = new Map(list.map(c => [c.id, c]));
+    return { started: true, round: 2, combatant: undefined, previous: null, combatants: { get: id => byId.get(id), [Symbol.iterator]: () => byId.values() }, ...over };
+  };
+  assert.equal(undoTarget(null), null);
+  assert.equal(undoTarget(combat([unit("a", 0)], { started: false })), null, "not started");
+  const a = unit("a", 0);
+  assert.deepEqual(undoTarget(combat([a], { combatant: a })), { kind: "acting", id: "a", name: "A" }, "someone acting: LANCER's previous turn");
+  const ended = combat([unit("a", 0)], { previous: { round: 2, turn: 0, combatantId: "a" } });
+  assert.deepEqual(undoTarget(ended), { kind: "ended", id: "a", name: "A" }, "the turn that just ended");
+  assert.equal(undoTarget(combat([unit("a", 1)], { previous: { round: 2, turn: 0, combatantId: "a" } })), null, "already given back: once only");
+  assert.equal(undoTarget(combat([unit("a", 0)], { previous: { round: 1, turn: 0, combatantId: "a" } })), null, "last round's turn");
+  assert.equal(undoTarget(combat([unit("a", 0)], { previous: { round: 2, turn: null, combatantId: undefined } })), null, "nothing ended");
+  assert.deepEqual(undoTarget(combat([unit("e", 1, 2)], { previous: { round: 2, turn: 0, combatantId: "e" } }))?.kind, "ended", "an Elite with one of two left");
+});
+
+test("still to act: anyone with an activation left, or acting; never the defeated", async () => {
+  const { stillToAct } = await import("../src/npc/NpcRoster.js");
+  const c = (id, value, isDefeated = false) => ({ id, activations: { value }, isDefeated });
+  const acting = c("b", 0);
+  const list = [c("a", 1), acting, c("x", 0), c("d", 1, true)];
+  assert.deepEqual(stillToAct({ started: true, combatant: acting, combatants: list }).map(u => u.id), ["a", "b"]);
+  assert.deepEqual(stillToAct({ started: false, combatants: list }), []);
+});

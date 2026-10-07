@@ -7,11 +7,11 @@ import { HoverCards } from "../ui/HoverCards.js";
 import { LookHere } from "./LookHere.js";
 import { conditionCard } from "../core/ConditionInfo.js";
 import { keyHints } from "../ui/keyHints.js";
-import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, rosterSections, roundComplete, turnCommands, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
+import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, rosterSections, roundComplete, stillToAct, turnCommands, undoTarget, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
 import { conditionLook } from "../ui/components/MasterCautionGrid.js";
 import { CHECKS } from "../ui/components/HullReadout.js";
 
-const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 /** Token fields a move writes. An update touching only these needs no redraw. */
 const MOVEMENT_KEYS = new Set(["_id", "x", "y", "elevation", "rotation", "sort", "_movementHistory", "_regions"]);
@@ -68,6 +68,9 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       addToCombat: NpcDeck.#onAddToCombat,
       batchAddToCombat: NpcDeck.#onBatchAddToCombat,
       nextRound: NpcDeck.#onNextRound,
+      prevRound: NpcDeck.#onPrevRound,
+      undoTurn: NpcDeck.#onUndoTurn,
+      endEncounter: NpcDeck.#onEndEncounter,
       recharge: NpcDeck.#onRecharge,
       collapse: NpcDeck.#onCollapse,
       initSelect: { handler: NpcDeck.#onInitSelect, buttons: [0, 2] },
@@ -358,6 +361,8 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       roundEnd: roundComplete(combat)
         ? { done: i18n.format("LFD.Npc.RoundEnd.Done", { n: combat.round }), tip: i18n.format("LFD.Npc.RoundEnd.Tip", { n: combat.round + 1 }) }
         : null,
+      // The round's controls along the bottom, while a combat runs
+      controls: combat?.started ? NpcDeck.#controlsView(combat) : null,
       tipClass: `lfd-hud-tip lfd-themed ${this.#theme().cssClass}`,
       help: `<div class="lfd-tip"><header><strong>${foundry.utils.escapeHTML(i18n.localize("LFD.Npc.HelpTitle"))}</strong></header>${hints
         .map(h => `<p>${h.key ? `<b>${foundry.utils.escapeHTML(h.key)}:</b> ` : ""}${foundry.utils.escapeHTML(h.action)}</p>`)
@@ -909,9 +914,86 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /** Everyone has acted: LANCER's next round (it gives every combatant their activations back). */
+  /** The bottom strip: Previous round, Undo, Next round, End, each with its hover (and why when off). */
+  static #controlsView(combat) {
+    const i18n = game.i18n;
+    const undo = undoTarget(combat);
+    const left = stillToAct(combat);
+    const next = combat.round + 1;
+    return {
+      prev: combat.round > 1
+        ? { on: true, tip: i18n.format("LFD.Npc.Ctrl.PrevTip", { n: combat.round - 1 }) }
+        : { on: false, tip: i18n.localize("LFD.Npc.Ctrl.PrevFirst") },
+      undo: undo
+        ? { on: true, tip: i18n.format(undo.kind === "acting" ? "LFD.Npc.Ctrl.UndoActing" : "LFD.Npc.Ctrl.UndoEnded", { name: undo.name }) }
+        : { on: false, tip: i18n.localize("LFD.Npc.Ctrl.UndoNone") },
+      next: {
+        on: true,
+        tip: left.length ? i18n.format("LFD.Npc.Ctrl.NextEarly", { n: next, count: left.length }) : i18n.format("LFD.Npc.RoundEnd.Tip", { n: next }),
+      },
+      end: { on: true, tip: i18n.localize("LFD.Npc.Ctrl.EndTip") },
+    };
+  }
+
+  /** A short roll call for a confirmation: "Kitbash, Virtue, Squad 3 and 2 more". */
+  static #names(list) {
+    const shown = list.slice(0, 3).map(c => c.name);
+    const rest = list.length - shown.length;
+    const names = shown.join(", ");
+    return rest > 0 ? game.i18n.format("LFD.Npc.Ctrl.NamesMore", { names, n: rest }) : names;
+  }
+
+  static async #confirm(title, text) {
+    return DialogV2.confirm({
+      window: { title },
+      content: `<p>${foundry.utils.escapeHTML(text)}</p>`,
+      modal: true,
+      rejectClose: false,
+    });
+  }
+
+  /**
+   * LANCER's next round. At the round's end straight away; with anyone still to act, after asking (and
+   * naming them), as the tracker would let the GM skip ahead.
+   */
   static async #onNextRound() {
     const combat = deckCombat();
-    if (roundComplete(combat)) await combat.nextRound();
+    if (!combat?.started) return;
+    const i18n = game.i18n;
+    const left = stillToAct(combat);
+    if (left.length && !roundComplete(combat)) {
+      const ok = await NpcDeck.#confirm(
+        i18n.localize("LFD.Npc.Ctrl.NextTitle"),
+        i18n.format("LFD.Npc.Ctrl.NextConfirm", { names: NpcDeck.#names(left), n: combat.round + 1 }),
+      );
+      if (!ok) return;
+    }
+    await combat.nextRound();
+  }
+
+  /** LANCER's previous round, after asking: everyone's activations come back and that round starts over. */
+  static async #onPrevRound(event, target) {
+    if (target.getAttribute("aria-disabled") === "true") return;
+    const combat = deckCombat();
+    if (!combat?.started || combat.round <= 1) return;
+    const i18n = game.i18n;
+    const ok = await NpcDeck.#confirm(i18n.localize("LFD.Npc.Ctrl.PrevTitle"), i18n.format("LFD.Npc.Ctrl.PrevConfirm", { n: combat.round - 1 }));
+    if (ok) await combat.previousRound();
+  }
+
+  /** Take back the turn in progress (LANCER's previous turn), or give back the activation that just ended. */
+  static async #onUndoTurn(event, target) {
+    if (target.getAttribute("aria-disabled") === "true") return;
+    const combat = deckCombat();
+    const undo = undoTarget(combat);
+    if (!undo) return;
+    if (undo.kind === "acting") await combat.previousTurn();
+    else await combat.combatants.get(undo.id)?.modifyCurrentActivations(1);
+  }
+
+  /** Foundry's own end of the encounter: it asks first. */
+  static async #onEndEncounter() {
+    await deckCombat()?.endCombat();
   }
 
   static async #onActivate(event, target) {
