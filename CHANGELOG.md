@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.8.2
 
 **The NPC Deck, laid out for running a turn**
 - The roster runs in the order a GM chooses who goes next: **Acting**, **To act**, **Done this round**, then **Destroyed** folded into one line (click to show). Out of combat, one list with the destroyed still folded.
