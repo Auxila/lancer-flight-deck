@@ -52,6 +52,13 @@
         "On": "Always reduce",
         "Off": "Full motion"
       },
+      "BattleDamage": {
+        "Name": "Battle damage",
+        "Hint": "How your panel shows the mech's damage. Animated: hits land and stress effects move. Still: the same damage with nothing moving and no kick on a structure hit, lighter on slow machines (Reduce motion also gives this). Off: a clean panel; the integrity readout still shows structure and stress, and sounds follow the audio settings.",
+        "Animated": "Animated",
+        "Still": "Still",
+        "Off": "Off"
+      },
       "Boot": {
         "Name": "Cold boot sequence",
         "Hint": "A quick, skippable boot sequence (about three seconds) whenever the panel opens or expands, when combat starts, and after a Shut Down ends."
@@ -220,7 +227,8 @@
         "grit": "Grit",
         "other": "gear, talents and effects"
       },
-      "MoveLeft": "{n} of {speed} spaces of its standard move left this turn.",
+      "MoveLeft": "{n} of {allowance} spaces of its standard move left this turn.",
+      "MoveLeftBoost": "{n} of {allowance} spaces left this turn, Boost included.",
       "Now": "On it now"
     },
     "Move": {

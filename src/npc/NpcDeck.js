@@ -7,7 +7,7 @@ import { HoverCards } from "../ui/HoverCards.js";
 import { LookHere } from "./LookHere.js";
 import { conditionCard } from "../core/ConditionInfo.js";
 import { keyHints } from "../ui/keyHints.js";
-import { QUICK_CONDITIONS, featureTip, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
+import { QUICK_CONDITIONS, deckCombat, featureTip, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
 import { conditionLook } from "../ui/components/MasterCautionGrid.js";
 import { CHECKS } from "../ui/components/HullReadout.js";
 
@@ -352,7 +352,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
             }
             NpcDeck.#thumbs.set(src, still);
           }
-          const fallback = game.combat?.combatants.get(e.id)?.actor?.img;
+          const fallback = deckCombat()?.combatants.get(e.id)?.actor?.img;
           e.img = still ?? (fallback && !isVideoArt(fallback) ? fallback : "icons/svg/mystery-man.svg");
           e.generic = !still && isGenericArt(e.img);
           e.video = false;
@@ -538,14 +538,15 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     const secondary = event.button === 2 || event.type === "contextmenu";
     if (secondary) {
       event.preventDefault();
-      const combatant = game.combat?.combatants.get(unit?.dataset.combatant);
+      const combat = deckCombat();
+      const combatant = combat?.combatants.get(unit?.dataset.combatant);
       if (!combatant) return;
-      if (game.combat.combatant?.id === combatant.id) return;
+      if (combat.combatant?.id === combatant.id) return;
       if ((combatant.activations?.value ?? 0) <= 0) {
         ui.notifications.info(game.i18n.format("LFD.Npc.Init.NoActivations", { name: combatant.name }));
         return;
       }
-      return game.combat.activateCombatant?.(combatant.id);
+      return combat.activateCombatant?.(combatant.id);
     }
     const token = canvas.tokens?.get(unit?.dataset.initToken);
     if (!token) return;
@@ -796,12 +797,12 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
   /** LANCER's popcorn initiative: start this NPC's turn. */
   static async #onActivate(event, target) {
     const id = target.dataset.combatant;
-    if (id) await game.combat?.activateCombatant?.(id);
+    if (id) await deckCombat()?.activateCombatant?.(id);
   }
 
   static async #onEndTurn(event, target) {
     const id = target.dataset.combatant;
-    if (id) await game.combat?.deactivateCombatant?.(id);
+    if (id) await deckCombat()?.deactivateCombatant?.(id);
   }
 
   static async #onRecharge(event, target) {

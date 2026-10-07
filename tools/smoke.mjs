@@ -378,6 +378,205 @@ await step(g, "cleanup: scanning the world for Flight Deck data works", async ()
 });
 
 const mechUuid = await p.evaluate(() => game.modules.get("lancer-flight-deck").api.manager.actor?.uuid);
+
+/* ---------------- 0.8.1: a turn of our own (movement, Boost, whose turn it is) ---------------- */
+
+// A short encounter of the mech's own, its turn running: movement is recorded and spent in a started combat,
+// and players can't move while the game is paused. Everything is put back afterwards.
+const turn = await g.evaluate(async uuid => {
+  const actor = await fromUuid(uuid);
+  const token = actor?.getActiveTokens(false, true)[0];
+  if (!token) return { skip: "the mech has no token on this scene" };
+  const before = {
+    active: game.combats.find(c => c.active && (!c.scene || c.scene === canvas.scene))?.id ?? null,
+    paused: game.paused,
+    x: token.x,
+    y: token.y,
+    tracker: foundry.utils.deepClone(actor.system.action_tracker),
+  };
+  const combat = await Combat.create({ scene: canvas.scene.id, active: true });
+  await combat.createEmbeddedDocuments("Combatant", [{ tokenId: token.id, sceneId: canvas.scene.id, actorId: token.actorId }]);
+  await combat.startCombat();
+  await combat.activateCombatant(combat.combatants.contents[0].id);
+  if (game.paused) game.togglePause(false, { broadcast: true });
+  await new Promise(r => setTimeout(r, 1500));
+  return { combat: combat.id, ...before };
+}, mechUuid);
+
+await step(p, "the activation light follows the mech's own turn, whichever encounter the tracker shows", async turn => {
+  if (turn.skip) return { skip: turn.skip };
+  const other = game.combats.find(c => c.id !== turn.combat);
+  if (other) ui.combat.viewed = other;
+  await game.modules.get("lancer-flight-deck").api.manager.refresh({ force: true });
+  await new Promise(r => setTimeout(r, 800));
+  const lit = !!document.querySelector("#lancer-flight-deck .lfd-activation");
+  ui.combat.viewed = game.combats.get(turn.combat);
+  return { ok: lit, detail: { trackerShows: other ? "another encounter" : "this one", lit } };
+}, turn);
+
+await step(g, "NPC Deck runs the scene's active encounter, even when the tracker shows another", async turn => {
+  if (turn.skip) return { skip: turn.skip };
+  const combat = game.combats.get(turn.combat);
+  const other = game.combats.find(c => c.id !== turn.combat && c.started);
+  if (other) ui.combat.viewed = other;
+  await game.settings.set("lancer-flight-deck", "npcDeck", true);
+  await game.modules.get("lancer-flight-deck").api.npcDeck()?.render();
+  await new Promise(r => setTimeout(r, 1200));
+  const ids = [...document.querySelectorAll("#lancer-flight-deck-npc [data-combatant]")].map(e => e.dataset.combatant);
+  const ours = ids.some(id => combat.combatants.has(id));
+  const theirs = ids.some(id => !combat.combatants.has(id));
+  ui.combat.viewed = combat;
+  return { ok: ours && !theirs, detail: { units: ids.length, otherEncounter: !!other } };
+}, turn);
+
+await step(p, "dragging the mech spends movement, undo gives it back, Reset restores it and clears the ruler", async turn => {
+  if (turn.skip) return { skip: turn.skip };
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const mgr = game.modules.get("lancer-flight-deck").api.manager;
+  const actor = mgr.actor;
+  const token = actor.getActiveTokens(false, true)[0];
+  const speed = Number(actor.system.speed) || 0;
+  await actor.update({ "system.action_tracker.move": speed });
+  await wait(500);
+  const o = canvas.grid.getOffset(token.object.center);
+  const dest = canvas.grid.getTopLeftPoint({ i: o.i, j: o.j + 2 });
+  await token.move([{ x: dest.x, y: dest.y }], { method: "dragging" });
+  await wait(1800);
+  const afterDrag = actor.system.action_tracker.move;
+  const recorded = token.movementHistory.length;
+  await token.revertRecordedMovement();
+  await wait(1800);
+  const afterUndo = actor.system.action_tracker.move;
+  await token.move([{ x: dest.x, y: dest.y }], { method: "dragging" });
+  await wait(1800);
+  document.querySelector('#lancer-flight-deck [data-action="menu"][data-menu="move"]')?.click();
+  await wait(900);
+  document.querySelector('#lancer-flight-deck-hud [data-entry="util:resetMove"]')?.click();
+  await wait(1800);
+  mgr.hud.close();
+  const afterReset = actor.system.action_tracker.move;
+  const history = token.movementHistory.length;
+  const ok = afterDrag < speed && recorded > 0 && afterUndo === speed && afterReset === speed && history === 0;
+  return { ok, detail: { speed, afterDrag, afterUndo, afterReset, historyAfterReset: history } };
+}, turn);
+
+await step(p, "Boost adds Speed, and the MOVE light reads what's left over the turn's allowance", async turn => {
+  if (turn.skip) return { skip: turn.skip };
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const mgr = game.modules.get("lancer-flight-deck").api.manager;
+  const actor = mgr.actor;
+  const speed = Number(actor.system.speed) || 0;
+  const light = () => document.querySelector("#lancer-flight-deck .lfd-light-move .lfd-light-detail")?.textContent.trim();
+  document.querySelector('#lancer-flight-deck [data-action="menu"][data-menu="quick"]')?.click();
+  await wait(900);
+  document.querySelector('#lancer-flight-deck-hud [data-entry="basic:boost"]')?.click();
+  await wait(2500);
+  mgr.hud.close();
+  const boosted = { move: actor.system.action_tracker.move, light: light() };
+  await mgr.toggleMenu("move");
+  await wait(900);
+  document.querySelector('#lancer-flight-deck-hud [data-entry="util:resetMove"]')?.click();
+  await wait(1800);
+  mgr.hud.close();
+  const reset = light();
+  const ok = boosted.move === 2 * speed && boosted.light === `${2 * speed}/${2 * speed}` && reset === `${speed}/${speed}`;
+  return { ok, detail: { speed, boosted, reset } };
+}, turn);
+
+await g.evaluate(async ([uuid, turn]) => {
+  if (turn.skip) return;
+  const actor = await fromUuid(uuid);
+  const token = actor.getActiveTokens(false, true)[0];
+  await game.combats.get(turn.combat)?.delete();
+  if (turn.active) await game.combats.get(turn.active)?.activate();
+  if (token) await token.update({ x: turn.x, y: turn.y }, { animate: false });
+  await actor.update({ "system.action_tracker": turn.tracker, "flags.lancer-flight-deck.-=moveAllowance": null });
+  if (turn.paused) game.togglePause(true, { broadcast: true });
+}, [mechUuid, turn]);
+await p.waitForTimeout(1500);
+
+/* ---------------- 0.8.1: the rest of this round's features ---------------- */
+
+await step(p, "Roll damage after a hit also opens on a miss with a Reliable weapon, and not without", async () => {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const M = "lancer-flight-deck";
+  const actor = game.modules.get(M).api.manager.actor;
+  const isReliable = i => (i.system.active_profile?.all_tags ?? []).some(t => t.is_reliable);
+  const reliable = actor.items.find(i => i.type === "mech_weapon" && isReliable(i));
+  const plain = actor.items.find(i => i.type === "mech_weapon" && !isReliable(i));
+  const target = canvas.tokens.placeables.find(t => t.actor && t.actor.uuid !== actor.uuid && t.visible);
+  if (!reliable || !plain || !target) return { skip: "needs a Reliable and a plain weapon on the mech, and another token" };
+  const was = game.settings.get(M, "autoDamage");
+  await game.settings.set(M, "autoDamage", true);
+  // An attack card of the player's own, as LANCER posts it: a miss on one target
+  const miss = async item => {
+    await ChatMessage.create({
+      content: '<div class="lancer-damage-flow"></div>',
+      whisper: [game.user.id],
+      flags: { lancer: { attackData: { attackerUuid: actor.uuid, attackerItemUuid: item.uuid, invade: false, targets: [{ uuid: target.document.uuid, hit: false, crit: false, total: "1" }] } } },
+    });
+    let shown = null;
+    for (let i = 0; i < 20 && !shown; i++) {
+      await wait(150);
+      shown = [...document.querySelectorAll("#hudzone .component")].find(e => / DAMAGE -- /.test(e.textContent));
+    }
+    document.querySelector('#hudzone [data-button="cancel"], #hudzone .dialog-button.cancel')?.click();
+    await wait(1200);
+    return !!shown;
+  };
+  const opened = await miss(reliable);
+  const plainOpened = await miss(plain);
+  for (const t of [...game.user.targets]) t.setTarget(false, { releaseOthers: false });
+  await game.settings.set(M, "autoDamage", was);
+  return { ok: opened && !plainOpened, detail: { reliable: reliable.name, opened, plain: plain.name, plainOpened } };
+});
+
+await step(p, "keyboard: a HUD menu opened from its shortcut takes focus; Escape puts it back on the button", async () => {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const mgr = game.modules.get("lancer-flight-deck").api.manager;
+  document.activeElement?.blur?.();
+  await mgr.toggleMenu("quick", { focus: true });
+  await wait(600);
+  const inMenu = !!document.activeElement?.closest?.("#lancer-flight-deck-hud [data-entry]");
+  document.activeElement?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  await wait(900);
+  const back = !!document.activeElement?.matches?.('#lancer-flight-deck [data-action="menu"][data-menu="quick"]');
+  mgr.hud.close();
+  return { ok: inMenu && back, detail: { inMenu, back } };
+});
+
+await step(p, "stat cards: every stat in the strip explains itself", async () => {
+  const stats = [...document.querySelectorAll("#lancer-flight-deck .lfd-stat")];
+  const cards = stats.map(el => el.dataset.tooltipHtml ?? "");
+  const withMakeUp = cards.filter(c => c.includes("lfd-tip-calc")).length;
+  const described = stats.length === 6 && cards.every(c => c.includes("lfd-tip-stat")) && stats.every(el => el.getAttribute("aria-label") && el.tabIndex === 0);
+  game.tooltip.activate(stats[0]);
+  await new Promise(r => setTimeout(r, 300));
+  const shown = !!document.querySelector("#tooltip .lfd-tip-stat");
+  game.tooltip.deactivate();
+  return { ok: described && shown, detail: { stats: stats.length, withMakeUp, shown } };
+});
+
+await step(g, "NPC Deck: a right-click on the Hidden tile toggles Invisible", async () => {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const npc = canvas.tokens.placeables.find(t => t.actor?.type === "npc" && t.visible && document.querySelector(`#lancer-flight-deck-npc .lfd-npc-row[data-token="${t.id}"]`));
+  if (!npc) return { skip: "no NPC row in the deck" };
+  const had = npc.actor.statuses.has("invisible");
+  npc.control({ releaseOthers: true });
+  await wait(1200);
+  const tile = () => document.querySelector('#lancer-flight-deck-npc [data-action="condition"][data-cond="hidden"]');
+  const right = () => tile()?.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, button: 2 }));
+  right();
+  await wait(1200);
+  const flipped = npc.actor.statuses.has("invisible") !== had;
+  const legend = tile()?.textContent.trim();
+  right();
+  await wait(1200);
+  const back = npc.actor.statuses.has("invisible") === had;
+  npc.release();
+  return { ok: flipped && back, detail: { npc: npc.name, legend } };
+});
+
 const saved = await g.evaluate(async uuid => {
   const a = await fromUuid(uuid);
   return { s: a.system.structure.value, st: a.system.stress.value };
@@ -392,6 +591,27 @@ await step(p, "the player's panel takes damage when the GM deals structure damag
   const n = document.querySelectorAll("#lancer-flight-deck .lfd-dmg-mark").length;
   const style = document.querySelector("#lancer-flight-deck .lfd-damage")?.dataset.style;
   return { ok: n > 0, detail: { marks: n, style } };
+});
+await step(p, "battle damage: still holds it, off takes it down, animated brings it back without replaying", async () => {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const M = "lancer-flight-deck";
+  const root = () => document.getElementById("lancer-flight-deck");
+  const marks = () => root().querySelectorAll(".lfd-dmg-mark").length;
+  const was = { mode: game.settings.get(M, "battleDamage"), reduce: game.settings.get(M, "reduceMotion") };
+  await game.settings.set(M, "reduceMotion", "off");
+  await game.settings.set(M, "battleDamage", "still");
+  await wait(800);
+  const still = { held: root().classList.contains("lfd-dmg-still"), marks: marks() };
+  await game.settings.set(M, "battleDamage", "off");
+  await wait(800);
+  const off = { hidden: root().querySelector(".lfd-damage")?.hidden === true, cracked: root().classList.contains("lfd-cracked"), marks: marks() };
+  await game.settings.set(M, "battleDamage", "animated");
+  await wait(800);
+  const on = { marks: marks(), replaying: root().querySelectorAll(".lfd-damage .is-forming").length, held: root().classList.contains("lfd-dmg-still") };
+  await game.settings.set(M, "battleDamage", was.mode);
+  await game.settings.set(M, "reduceMotion", was.reduce);
+  const ok = still.held && still.marks > 0 && off.hidden && !off.cracked && off.marks === 0 && on.marks === still.marks && on.replaying === 0 && !on.held;
+  return { ok, detail: { still, off, on } };
 });
 await g.evaluate(async ([uuid, s]) => (await fromUuid(uuid)).update({ "system.structure.value": s.s, "system.stress.value": s.st }), [mechUuid, saved]);
 await p.waitForTimeout(1500);

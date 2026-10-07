@@ -84,3 +84,12 @@ test("a move costs the sum of its steps in spaces, difficult terrain included; d
   assert.equal(movementSpaces(null, 1), 0);
   assert.equal(movementSpaces({ waypoints: [step(1)] }, 0), 0, "no grid, no spaces");
 });
+
+test("the MOVE light reads left over the turn's allowance: Speed, or more after a Boost this turn", async () => {
+  const { moveAllowance } = await import("../src/core/MovementTracker.js");
+  assert.equal(moveAllowance({ speed: 5, move: 3, key: "c1:2" }), 5, "no Boost: Speed");
+  assert.equal(moveAllowance({ speed: 5, move: 6, boost: { key: "c1:2", value: 10 }, key: "c1:2" }), 10, "after a Boost: 6/10");
+  assert.equal(moveAllowance({ speed: 5, move: 4, boost: { key: "c1:1", value: 10 }, key: "c1:2" }), 5, "last round's Boost doesn't count");
+  assert.equal(moveAllowance({ speed: 5, move: 7, key: "free" }), 7, "a hand-edited count never reads more than its allowance");
+  assert.equal(moveAllowance({ speed: 5, move: 2, boost: { key: "free", value: "x" }, key: "free" }), 5, "a broken flag is ignored");
+});

@@ -425,16 +425,17 @@
 #lancer-flight-deck .lfd-damage-fx { z-index: 3; }
 
 /* Reduced motion: damage is shown, never animated */
-#lancer-flight-deck.lfd-reduce-motion .lfd-damage *,
-#lancer-flight-deck.lfd-reduce-motion .lfd-damage::before {
+/* Battle damage held still (the Battle damage setting, or Reduce motion): the same damage, nothing moving */
+#lancer-flight-deck.lfd-dmg-still .lfd-damage *,
+#lancer-flight-deck.lfd-dmg-still .lfd-damage::before {
   animation: none !important;
 }
 
-#lancer-flight-deck.lfd-reduce-motion.lfd-stressed .lfd-damage[data-style="glass"]::before {
+#lancer-flight-deck.lfd-dmg-still.lfd-stressed .lfd-damage[data-style="glass"]::before {
   opacity: 0.4;
 }
 
-#lancer-flight-deck.lfd-reduce-motion .lfd-warn-leds i {
+#lancer-flight-deck.lfd-dmg-still .lfd-warn-leds i {
   opacity: 0.8;
 }
 

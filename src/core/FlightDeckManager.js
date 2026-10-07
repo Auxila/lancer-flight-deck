@@ -1,9 +1,10 @@
-import { ALERT_MS, MODULE_ID, SCALE_MAX, SCALE_MIN, SETTINGS, STATUS } from "../constants.js";
-import { getSetting, reduceMotion, registerSettings, setSetting } from "../settings.js";
+import { ALERT_MS, MODULE_ID, MOVE_FLAG, SCALE_MAX, SCALE_MIN, SETTINGS, STATUS } from "../constants.js";
+import { battleDamage, getSetting, reduceMotion, registerSettings, setSetting } from "../settings.js";
+import { boostMovement } from "./MovementTracker.js";
 import { mechThemeId, resolveTheme } from "../themes/registry.js";
 import { ThemeMenu } from "../ui/ThemeMenu.js";
 import { FlightDeckPanel, PART_IDS } from "../ui/FlightDeckPanel.js";
-import { inActiveCombat, recordReaction, runEntry, trackerChange } from "../actions/runner.js";
+import { inActiveCombat, isActiveCombatant, recordReaction, runEntry, trackerChange } from "../actions/runner.js";
 import { mountedWeapons } from "../actions/catalog.js";
 import { HudMenu } from "../ui/HudMenu.js";
 import { buildActions } from "../ui/components/ActionBus.js";
@@ -408,6 +409,8 @@ export class FlightDeckManager {
    */
   #explainCheckRouting(actor, kind) {
     const automation = game.settings.get(game.system.id, "automationOptions");
+    // One LANCER setting gates both checks: its updateActor handler (triggerStrussFlow) starts the Overheat
+    // and the Structure flow only while automationOptions.structure is on
     if (automation && automation.structure === false) {
       ui.notifications.info(game.i18n.format("LFD.Check.AutomationOff", { kind }));
       return;
@@ -488,8 +491,7 @@ export class FlightDeckManager {
   async #grantMove(actor) {
     const mode = game.settings.get(MODULE_ID, SETTINGS.SPEND_ACTIONS);
     if (mode === "never" || (mode === "combat" && !this.inCombat(actor))) return;
-    const left = Number(actor.system?.action_tracker?.move) || 0;
-    await actor.update({ "system.action_tracker.move": left + (Number(actor.system?.speed) || 0) });
+    await boostMovement(actor);
   }
 
   /**
@@ -505,7 +507,11 @@ export class FlightDeckManager {
     if (has === undefined) return;
     const kind = id === "quick" && !has ? "full" : id; // refreshing quick brings back both halves
     const next = trackerChange(actor.system?.action_tracker ?? {}, kind, has, a.speed);
-    if (next) await actor.update({ "system.action_tracker": next });
+    if (!next) return;
+    // MOVE back to full is a fresh standard move: a Boost's allowance goes with it
+    const update = { "system.action_tracker": next };
+    if (id === "move" && !has) update[`flags.${MODULE_ID}.-=${MOVE_FLAG}`] = null;
+    await actor.update(update);
   }
 
   /** A click on an annunciator tile: apply its condition (Lock On: to targets; else: selection). */
@@ -670,8 +676,6 @@ export class FlightDeckManager {
 
     const caution = buildCaution(t, this.#pending, this.#tileTargets(), tileActiveOn);
     const editable = !!this.actor?.isOwner;
-    const combat = game.combat;
-    const activeActor = combat?.started ? combat.combatant?.actor : null;
     Object.assign(base.header, {
       mechName: t.name,
       frameName: t.frame?.name ?? game.i18n.localize("LFD.Header.NoFrame"),
@@ -683,7 +687,7 @@ export class FlightDeckManager {
       alertCaution: caution.alertCaution,
       warningDelay: caution.warningDelay,
       cautionDelay: caution.cautionDelay,
-      activation: !!activeActor && activeActor.uuid === t.uuid,
+      activation: isActiveCombatant(this.actor),
       mini: {
         heat: t.heat.max > 0 ? `${t.heat.value}/${t.heat.max}` : `${t.heat.value}`,
         structure: `${t.structure.value}/${t.structure.max}`,
@@ -749,7 +753,9 @@ export class FlightDeckManager {
     el.style.zoom = String(zoom);
     if (floating) this.#placeFloating(el, zoom);
     else el.style.left = el.style.top = "";
-    this.panel.damage.update(t, { reduceMotion: !!reduce });
+    const damage = battleDamage();
+    el.classList.toggle("lfd-dmg-still", damage === "still");
+    this.panel.damage.update(t, { reduceMotion: damage !== "animated", enabled: damage !== "off" });
     el.style.setProperty("--lfd-opacity", String(getSetting(SETTINGS.OPACITY)));
     el.setAttribute("aria-label", game.i18n.localize("LFD.Title"));
     this.syncTokenActionHud();
@@ -784,7 +790,8 @@ export class FlightDeckManager {
       this.synth.play("thud");
       this.synth.play("crack");
       panel?.pulse('[data-track="structure"]', "is-hit", 900);
-      panel?.pulse(null, "is-shaken", 500);
+      // The panel's kick is part of the battle damage: not when it's held still or off
+      if (battleDamage() === "animated") panel?.pulse(null, "is-shaken", 500);
     }
     if (has("stressHit")) {
       this.synth.play("geiger");

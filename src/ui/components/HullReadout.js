@@ -75,8 +75,10 @@ function statCard(t, stat, value) {
   const parts = [`<header><strong>${esc(i18n.localize(`${base}.Name`))}</strong><span>${esc(value)}</span></header>`];
   parts.push(`<p>${i18n.localize(`${base}.Text`)}</p>`);
   // Speed in a turn: what's left of the standard move
-  if (stat.id === "speed" && t.actions && t.actions.move < t.stats.speed) {
-    parts.push(`<p class="lfd-tip-note">${esc(i18n.format("LFD.StatInfo.MoveLeft", { n: t.actions.move, speed: t.stats.speed }))}</p>`);
+  const allowance = t.actions?.allowance ?? t.stats.speed;
+  if (stat.id === "speed" && t.actions && (t.actions.move < allowance || allowance > t.stats.speed)) {
+    const key = allowance > t.stats.speed ? "LFD.StatInfo.MoveLeftBoost" : "LFD.StatInfo.MoveLeft";
+    parts.push(`<p class="lfd-tip-note">${esc(i18n.format(key, { n: t.actions.move, allowance }))}</p>`);
   }
   const b = statBreakdown(t, stat);
   if (b) {

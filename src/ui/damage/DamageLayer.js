@@ -54,10 +54,13 @@ export class DamageLayer {
   /**
    * Bring the layer in line with the mech.
    * @param {object|null} t  Telemetry snapshot (null in standby)
-   * @param {{reduceMotion?: boolean}} [options]
+   * @param {{reduceMotion?: boolean, enabled?: boolean}} [options]  reduceMotion: draw it still (the
+   *   Battle damage setting's "still", or Reduce motion); enabled false: the player turned it off
    */
-  update(t, { reduceMotion = false } = {}) {
+  update(t, { reduceMotion = false, enabled = true } = {}) {
     if (!this.element) return;
+    if (!enabled) return this.#disable();
+    this.element.hidden = false;
     const root = this.panel.element;
     const levels = t ? damageLevels(t) : { fractures: 0, stressLost: 0, stressLevel: 0, steam: 0 };
     const seed = t?.uuid ?? null;
@@ -113,6 +116,27 @@ export class DamageLayer {
     this.#style = null;
     this.element?.remove();
     this.element = null;
+  }
+
+  /**
+   * Battle damage turned off: no marks, no stress effects, none of the shared state on the root. Turned
+   * on again, it's first sight of the mech, so the damage draws quietly.
+   */
+  #disable() {
+    this.#style?.destroy();
+    this.#style = null;
+    this.#seed = null;
+    this.#levels = null;
+    this.#geo = { W: 0, H: 0 };
+    const root = this.panel.element;
+    if (root) {
+      root.classList.remove("lfd-stressed", "lfd-cracked", "lfd-stress-1", "lfd-stress-2", "lfd-stress-3");
+      for (const key of Object.keys(DAMAGE_STYLES)) root.classList.remove(`lfd-dmg-${key}`);
+      root.style.removeProperty("--lfd-dmg-structure");
+      root.style.removeProperty("--lfd-dmg-stress");
+    }
+    this.element.hidden = true;
+    delete this.element.dataset.style;
   }
 
   /** The style follows the theme on screen (a picker preview included). @returns {boolean} swapped */

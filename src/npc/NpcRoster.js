@@ -45,12 +45,30 @@ export const isNpc = actor => actor?.type === "npc";
 export const viewedScene = () => canvas?.scene ?? game.scenes?.viewed ?? null;
 
 /**
+ * The combat the deck runs, among those started on the scene in view: the scene's active encounter (the
+ * one Foundry's tracker opens on, and the one a newly created encounter becomes), else the one this
+ * client's tracker shows, else the latest started. A scene can hold more than one encounter.
+ * @param {Combat[]} combats
+ * @param {Combat|null} viewed  the tracker's encounter (game.combat)
+ * @param {Scene|null} scene
+ */
+export function pickCombat(combats, viewed, scene) {
+  const here = c => !!c?.started && (!c.scene || c.scene === scene);
+  return combats.find(c => c.active && here(c)) ?? (here(viewed) ? viewed : null) ?? combats.filter(here).at(-1) ?? null;
+}
+
+/** The deck's combat, now (see pickCombat). */
+export function deckCombat() {
+  return pickCombat(game.combats?.contents ?? [], game.combat ?? null, viewedScene());
+}
+
+/**
  * NPC tokens in play: the started combat's NPC combatants in turn order, else every NPC token
  * on the scene (hostiles first, then by name).
  * @returns {{tokens: TokenDocument[], combat: Combat|null}}
  */
 export function rosterTokens() {
-  const combat = game.combat?.started && (!game.combat.scene || game.combat.scene === viewedScene()) ? game.combat : null;
+  const combat = deckCombat();
   if (combat) {
     const seen = new Set();
     const tokens = [];

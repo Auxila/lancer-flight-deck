@@ -15,6 +15,7 @@ export const SETTINGS = Object.freeze({
   DANGER_HUM: "dangerHum",
   BOOT: "bootSequence",
   REDUCE_MOTION: "reduceMotion",
+  BATTLE_DAMAGE: "battleDamage",
   PROMPTED: "prompted",
   OFFER: "offerToPlayers",
   SCALE: "scale",
@@ -36,6 +37,9 @@ export const SETTINGS = Object.freeze({
   NPC_DECK_MODE: "npcDeckMode",
   NPC_DECK_POSITION: "npcDeckPosition",
 });
+
+/** Actor flag: the turn's movement allowance after a Boost ({key, value}: key = the combat round it belongs to). */
+export const MOVE_FLAG = "moveAllowance";
 
 /** Actor flag: the mech's own cockpit theme ("auto" or a theme id), picked by its owner, seen by everyone. */
 export const THEME_FLAG = "theme";

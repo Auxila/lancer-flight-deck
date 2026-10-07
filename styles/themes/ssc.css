@@ -1586,10 +1586,10 @@
 
 /* Reduced motion: no glints, flicker, strobe or heartbeat; the steady dropouts and a still ghost show
    the level */
-#lancer-flight-deck.lfd-reduce-motion :is(.lfd-seam-glint, .lfd-glam-tile.is-flicker, .lfd-glam-strobe) {
+#lancer-flight-deck.lfd-dmg-still :is(.lfd-seam-glint, .lfd-glam-tile.is-flicker, .lfd-glam-strobe) {
   display: none !important;
 }
 
-#lancer-flight-deck.lfd-reduce-motion.lfd-stressed .lfd-glam-heart {
+#lancer-flight-deck.lfd-dmg-still.lfd-stressed .lfd-glam-heart {
   opacity: calc(var(--beat) * 0.35);
 }

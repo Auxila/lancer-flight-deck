@@ -44,7 +44,7 @@ Ten minutes in a copy of your world (or a test world) shows everything a cautiou
 
 | Section | Contents |
 |---|---|
-| Header | Manufacturer badge, mech and frame, pilot callsign, comms link status, your activation |
+| Header | Manufacturer badge, mech and frame, pilot callsign, comms link status, your activation (lit while it's the mech's turn in any started encounter, whichever one your combat tracker shows) |
 | Hull | HP with overshield, armor, burn, Evasion / E-Def / Speed / Sensors / Save / Tech, and HULL / AGI / SYS / ENG check buttons. Hover (or Tab to) any stat for its card: what it does in play, how the number is made up (frame, the skill or Grit the rules add, and anything from gear and talents), the move left this turn on Speed, and any condition on the mech right now that changes it |
 | Reactor heat | One segment per point of heat, the Danger Zone boundary, the Overcharge ladder, and the odds that the next Overcharge pushes you over your Heat Cap |
 | Integrity | Structure and stress pips. Each track shows the next check's dice, the exact chance of every outcome, and the chance of losing the mech |
@@ -136,6 +136,10 @@ are, and every number stays legible.
 - Only real changes animate: opening the panel, reloading, switching mechs or switching theme
   draws the damage as it stands. Collapsed, the tab shows a small mark of each and a stress
   light. Reduced motion shows all the damage without animating any of it.
+- **Battle damage** in Configure Settings (per player): **Animated**, **Still** (the same damage
+  with nothing moving, and no kick on a structure hit; lighter on slow machines) or **Off** (a
+  clean panel; the integrity readout still shows structure and stress, and sounds follow the
+  audio settings). Turned back on, it draws the damage as it stands, without replaying it.
 - To inspect it frame by frame:
   `game.modules.get("lancer-flight-deck").api.damageClock.setScale(0.1)` slows the damage
   timers and steam to a tenth. Slow the CSS to match with DevTools > Animations.
@@ -206,7 +210,8 @@ Frame traits and the core passive post their actions too.
   with the arrow keys, spends the MOVE count by what Foundry measured for the path, in spaces, with
   difficult terrain costing what it costs. Undoing a move (Ctrl+Z) gives it back. Being pushed, pulled
   or put somewhere (displacement, a GM's or a script's move, a paste) costs nothing. Moving further
-  than you had left says so, once, to you. **Boost** adds your Speed to what's left. The **Reset**
+  than you had left says so, once, to you. **Boost** adds your Speed to what's left, and the MOVE
+  light then reads what's left over the turn's allowance (10/10 after a Boost at Speed 5). The **Reset**
   in the MOVE menu puts the count back to your Speed and clears Foundry's record of the turn's
   movement too, so the ruler's distance moved starts over with it. The same world setting decides
   when any of this counts.
@@ -266,7 +271,9 @@ collapses and expands it). Players never see it.
     adds to the selection). **Double-click** looks at it. **Right-click** starts that
     combatant's turn (LANCER's popcorn initiative).
 - **The roster:** the started combat's NPCs in turn order (destroyed ones sink to the
-  bottom), or, with no combat, every NPC token on the scene. Unlinked copies of the same NPC
+  bottom), or, with no combat, every NPC token on the scene. With more than one encounter on
+  the scene, the deck runs the scene's active one (the one Foundry's tracker opens on, and the
+  one a new encounter becomes), else the one your tracker shows. Unlinked copies of the same NPC
   are separate rows with their own health and conditions.
 - **It follows you:** the open row follows the turn, and your selection. Select an NPC on
   the map and its row opens and scrolls into view; select one that isn't in the combat and
@@ -407,7 +414,7 @@ Heat colours never change between themes.
 - **Alt+C** turns the panel on, then collapses and expands it. You can rebind it in Configure Controls.
 - **Panel header:** the speaker button mutes audio, the eye-slash button hides the panel completely, and the chevrons collapse it to a slim tab that still shows heat and structure.
 - **Token Controls:** the **Flight Deck** toggle (gauge icon) turns the panel on and off for every player. It's the one-click way back after hiding it.
-- Client settings, which are per player: show panel, dock side, default theme and whether to show each mech's own, panel size, opacity, reduce motion, cold boot, audio, volume, and Danger Zone afterglow.
+- Client settings, which are per player: show panel, dock side, default theme and whether to show each mech's own, panel size, opacity, reduce motion, battle damage (animated, still or off), cold boot, audio, volume, and Danger Zone afterglow.
 - World settings: offer the panel to each player once when they first log in with a mech (opt-in; nobody is forced), whether players can Lock On tokens they don't own, when HUD menus spend actions, and whether meltdown countdowns tick at turn end (the active GM's client ticks them, when LANCER runs its own end-of-turn automation). **Remove Flight Deck data** (GM) is here too.
 
 The panel follows the last mech token you control. If you aren't controlling one, it falls back to your assigned character (or your pilot's active mech).

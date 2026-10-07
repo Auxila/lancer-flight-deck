@@ -93,6 +93,20 @@ export function registerSettings(manager) {
     onChange: () => manager.applyAppearance(),
   });
 
+  client(SETTINGS.BATTLE_DAMAGE, {
+    name: "LFD.Settings.BattleDamage.Name",
+    hint: "LFD.Settings.BattleDamage.Hint",
+    config: true,
+    type: String,
+    choices: {
+      animated: "LFD.Settings.BattleDamage.Animated",
+      still: "LFD.Settings.BattleDamage.Still",
+      off: "LFD.Settings.BattleDamage.Off",
+    },
+    default: "animated",
+    onChange: () => manager.applyAppearance(),
+  });
+
   client(SETTINGS.BOOT, {
     name: "LFD.Settings.Boot.Name",
     hint: "LFD.Settings.Boot.Hint",
@@ -258,6 +272,16 @@ export function setSetting(key, value) {
  * This player's Reduce motion choice, resolved: On, Off, or under Auto the operating system's
  * preference. Everything Flight Deck animates asks here (the panel, the NPC Deck, its map marker).
  */
+/**
+ * How this player's panel shows battle damage: "animated", "still" (the same damage, nothing moving;
+ * also what Reduce motion gives) or "off" (a clean panel).
+ */
+export function battleDamage() {
+  const mode = getSetting(SETTINGS.BATTLE_DAMAGE);
+  if (mode === "off") return "off";
+  return mode === "still" || reduceMotion() ? "still" : "animated";
+}
+
 export function reduceMotion() {
   const mode = getSetting(SETTINGS.REDUCE_MOTION);
   return mode === "on" || (mode === "auto" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);

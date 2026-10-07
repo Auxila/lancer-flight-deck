@@ -1,5 +1,5 @@
-import { MODULE_ID, SETTINGS } from "../constants.js";
-import { inActiveCombat } from "../actions/runner.js";
+import { MODULE_ID, MOVE_FLAG, SETTINGS } from "../constants.js";
+import { inActiveCombat, isCombatantOf } from "../actions/runner.js";
 
 /** Movement methods that are the mech moving itself: a drag on the map, or the arrow keys. */
 const OWN_MOVES = new Set(["dragging", "keyboard"]);
@@ -95,11 +95,43 @@ async function applyMove(actor, delta, doc) {
 }
 
 /**
- * The Move menu's reset: LANCER's movement back to Speed, and Foundry's record of the turn's movement
- * cleared too, so the ruler's distance moved starts over with it.
+ * Which turn a mech's movement belongs to: the round of the started combat it's in (the one where it's
+ * acting, if any), or "free" out of combat. A Boost's allowance only counts for that turn.
+ */
+export function moveTurnKey(actor) {
+  const combats = game.combats?.filter(c => c.started && c.combatants.some(cb => isCombatantOf(cb, actor))) ?? [];
+  const combat = combats.find(c => isCombatantOf(c.combatant, actor)) ?? combats[0];
+  return combat ? `${combat.id}:${combat.round}` : "free";
+}
+
+/**
+ * The turn's movement allowance, for the MOVE light's "left / allowance": Speed, or what Boosts made it this
+ * turn; never less than what's left (a hand-edited count reads 7/7, not 7/5).
+ * @param {{speed: number, move: number, boost?: {key: string, value: number}|null, key: string}} state
+ */
+export function moveAllowance({ speed, move, boost = null, key }) {
+  const granted = boost && boost.key === key && Number.isFinite(boost.value) ? boost.value : speed;
+  return Math.max(granted, move, 0);
+}
+
+/**
+ * Boost: move your Speed again. Adds Speed to what's left and to the turn's allowance, in one update.
+ */
+export async function boostMovement(actor) {
+  const speed = Number(actor.system?.speed) || 0;
+  const left = Number(actor.system?.action_tracker?.move) || 0;
+  const key = moveTurnKey(actor);
+  const prior = actor.flags?.[MODULE_ID]?.[MOVE_FLAG];
+  const allowance = moveAllowance({ speed, move: left, boost: prior, key }) + speed;
+  await actor.update({ "system.action_tracker.move": left + speed, [`flags.${MODULE_ID}.${MOVE_FLAG}`]: { key, value: allowance } });
+}
+
+/**
+ * The Move menu's reset: LANCER's movement back to Speed (any Boost's allowance gone with it), and
+ * Foundry's record of the turn's movement cleared too, so the ruler's distance moved starts over with it.
  */
 export async function resetMovement(actor) {
-  await actor.update({ "system.action_tracker.move": Number(actor.system?.speed) || 0 });
+  await actor.update({ "system.action_tracker.move": Number(actor.system?.speed) || 0, [`flags.${MODULE_ID}.-=${MOVE_FLAG}`]: null });
   for (const token of actor.getActiveTokens(false, true)) {
     if (token.isOwner && token.movementHistory?.length) await token.clearMovementHistory();
   }

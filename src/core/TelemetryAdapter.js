@@ -1,4 +1,5 @@
-import { DEFAULT_OVERCHARGE_SEQUENCE, STATUS } from "../constants.js";
+import { MOVE_FLAG, MODULE_ID, DEFAULT_OVERCHARGE_SEQUENCE, STATUS } from "../constants.js";
+import { moveAllowance, moveTurnKey } from "./MovementTracker.js";
 import { nextOverchargeCost, nextOverheatCheck, nextStructureCheck, overchargeOdds } from "./Odds.js";
 
 /** Which structure/overheat tables are in play: LANCER Alternative Structure replaces the core ones. */
@@ -184,6 +185,8 @@ export class TelemetryAdapter {
         full: !!tracker.full,
         reaction: !!tracker.reaction,
         speed: num(sys.speed),
+        // Speed, or more after a Boost this turn (MovementTracker.moveAllowance)
+        allowance: moveAllowance({ speed: num(sys.speed), move: num(tracker.move), boost: actor.flags?.[MODULE_ID]?.[MOVE_FLAG] ?? null, key: moveTurnKey(actor) }),
       },
       core: { ready: num(sys.core_energy) > 0, active: !!sys.core_active, available: !!frame },
       meltdown: { timer: meltdownTimer, active: meltdownTimer !== null || flags[STATUS.MELTDOWN] },

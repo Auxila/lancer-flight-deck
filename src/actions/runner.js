@@ -266,7 +266,22 @@ export async function recordReaction(actor, key) {
 /** True if the actor is a combatant in a combat that has started. */
 export function inActiveCombat(actor) {
   if (!actor) return false;
-  return game.combats.some(c => c.started && c.combatants.some(cb => cb.actor?.uuid === actor.uuid || cb.actorId === actor.id));
+  return game.combats.some(c => c.started && c.combatants.some(cb => isCombatantOf(cb, actor)));
+}
+
+/**
+ * Is it this mech's turn in a combat that has started? Any such combat, not just the one this client's
+ * tracker shows: a scene can hold more than one encounter.
+ */
+export function isActiveCombatant(actor) {
+  if (!actor) return false;
+  return game.combats.some(c => c.started && isCombatantOf(c.combatant, actor));
+}
+
+/** A combatant stands for this actor: the same (token) actor, or a linked actor's own id. */
+export function isCombatantOf(combatant, actor) {
+  if (!combatant || !actor) return false;
+  return combatant.actor?.uuid === actor.uuid || (!actor.isToken && combatant.actorId === actor.id);
 }
 
 /**

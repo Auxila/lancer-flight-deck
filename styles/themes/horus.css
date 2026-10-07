@@ -1505,17 +1505,17 @@
 #lancer-flight-deck.lfd-theme-horus [data-application-part="caution"] { --slip: 5.4; }
 #lancer-flight-deck.lfd-theme-horus [data-application-part="actions"] { --slip: 3.3; }
 
-#lancer-flight-deck.lfd-theme-horus.lfd-stressed:not(.lfd-booting, .lfd-boot-reveal, .lfd-reduce-motion, .is-tear, .is-jam) .lfd-plate {
+#lancer-flight-deck.lfd-theme-horus.lfd-stressed:not(.lfd-booting, .lfd-boot-reveal, .lfd-dmg-still, .is-tear, .is-jam) .lfd-plate {
   animation: lfd-cor-slip 17s steps(1) infinite;
   animation-delay: calc(var(--slip, 0) * -2.9s);
 }
 
-#lancer-flight-deck.lfd-theme-horus.lfd-stress-2:not(.lfd-booting, .lfd-boot-reveal, .lfd-reduce-motion, .is-tear, .is-jam) .lfd-plate {
+#lancer-flight-deck.lfd-theme-horus.lfd-stress-2:not(.lfd-booting, .lfd-boot-reveal, .lfd-dmg-still, .is-tear, .is-jam) .lfd-plate {
   animation-duration: 12s;
   animation-delay: calc(var(--slip, 0) * -2s);
 }
 
-#lancer-flight-deck.lfd-theme-horus.lfd-stress-3:not(.lfd-booting, .lfd-boot-reveal, .lfd-reduce-motion, .is-tear, .is-jam) .lfd-plate {
+#lancer-flight-deck.lfd-theme-horus.lfd-stress-3:not(.lfd-booting, .lfd-boot-reveal, .lfd-dmg-still, .is-tear, .is-jam) .lfd-plate {
   animation-duration: 8s;
   animation-delay: calc(var(--slip, 0) * -1.4s);
 }
@@ -1642,19 +1642,19 @@
 
 /* Reduced motion: no roll, melt, whispers, slips, inversion or hijacks, and the great eye stays shut; the
    watchers are open and still, and the blocks stand */
-#lancer-flight-deck.lfd-reduce-motion :is(.lfd-cor-roll, .lfd-cor-bigeye, .lfd-cor-melt, .lfd-cor-whispers) {
+#lancer-flight-deck.lfd-dmg-still :is(.lfd-cor-roll, .lfd-cor-bigeye, .lfd-cor-melt, .lfd-cor-whispers) {
   display: none !important;
 }
 
-#lancer-flight-deck.lfd-reduce-motion .lfd-cor-watcher {
+#lancer-flight-deck.lfd-dmg-still .lfd-cor-watcher {
   scale: 1 1;
 }
 
-#lancer-flight-deck.lfd-theme-horus.lfd-reduce-motion :is(.lfd-datalink-status, .lfd-frame-name, .lfd-horus-handle span, .lfd-section-title > span:first-child)::after {
+#lancer-flight-deck.lfd-theme-horus.lfd-dmg-still :is(.lfd-datalink-status, .lfd-frame-name, .lfd-horus-handle span, .lfd-section-title > span:first-child)::after {
   content: none !important;
 }
 
-#lancer-flight-deck.lfd-theme-horus.lfd-reduce-motion:is(.is-tear, .is-jam) .lfd-plate {
+#lancer-flight-deck.lfd-theme-horus.lfd-dmg-still:is(.is-tear, .is-jam) .lfd-plate {
   animation: none;
 }
 

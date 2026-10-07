@@ -26,6 +26,7 @@ Every roll, attack, card, heat cost and Limited use goes through **LANCER's own 
 | Deployable tokens (mines, drones, turrets) | **Deploy / Recall** from a HUD menu | Only users Foundry lets create and delete tokens (Assistant GM and up by default) | Foundry: User Permissions |
 | Token Magic filters on token art (ids `lfd-…`) | A token gains Exposed, Shredded, Jammed or Impaired | Exactly one client: the **active GM's**, or with no GM online, the token's first active owner | World: *Condition effects on token art* |
 | A note on actors: reactions used this round | A reaction is taken from a HUD menu | Owner | — |
+| A note on actors: the turn's movement allowance after a Boost | Boost from a HUD menu (it lapses with the round; Reset or a refreshed MOVE light clears it) | Owner | World: *HUD menus spend actions* |
 | A note on actors: the mech's cockpit theme | Picked from the panel's maker badge; everyone who has that mech in their panel sees it | Owner | Per player: *Show each mech's own theme* |
 
 Also, after a hit, LANCER's own damage prompt can open by itself. That's the per-player setting *Roll damage after a hit*. Nothing is rolled until the player clicks Roll in LANCER's prompt.

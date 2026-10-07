@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.1
+
+Ready for the table trial.
+
+- **Battle damage setting** (per player): Animated, Still or Off. Still keeps the damage with nothing moving and no kick on a structure hit (Reduce motion gives the same), and HORUS's stress-horror eyes stop following while the cockpit's own eyes still do. Off is a clean panel; turned back on, the damage draws as it stands without replaying.
+- **The MOVE light after a Boost** reads what's left over the turn's real allowance (10/10 at Speed 5), not over Speed (10/5). Boost records the allowance for its own combat round, so it lapses on its own; Reset and a right-click refresh of the light clear it. The Speed card says "Boost included".
+- **Whose turn it is, with more than one encounter:** the panel's activation light is lit while it's the mech's turn in any started encounter, whichever one the player's combat tracker shows. The NPC Deck runs the scene's active encounter (the one Foundry's tracker opens on, and the one a new encounter becomes), else the one the tracker shows, else the latest started; its Activate, End turn and initiative right-click act on that same encounter.
+- **Checked:** the Structure / Overheat notice reads LANCER's `automationOptions.structure`, which gates both checks (LANCER's `triggerStrussFlow` starts both only while it's on); no change.
+- **Smoke test, 37 steps:** nine more, for the features since 0.8.0: whose turn it is with two encounters (panel and NPC Deck), drag movement with undo and Reset (the ruler's history cleared), Boost and the allowance, Reliable misses opening the damage roll (and plain misses not), the NPC Deck's Invisible right-click, keyboard focus in HUD menus, stat cards, and the battle damage setting.
+
 ## 0.8.0
 
 Manufacturer themes: IPS-N, SSC, HORUS and HA each get their own cockpit, layout and battle damage; GMS stays the baseline (and the fallback for LCP makers).

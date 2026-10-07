@@ -1633,8 +1633,8 @@
 }
 
 /* Reduced motion: the damage stands, nothing turns or drips */
-#lancer-flight-deck.lfd-reduce-motion .lfd-hull-beacon,
-#lancer-flight-deck.lfd-reduce-motion .lfd-hull-drip i {
+#lancer-flight-deck.lfd-dmg-still .lfd-hull-beacon,
+#lancer-flight-deck.lfd-dmg-still .lfd-hull-drip i {
   display: none !important;
 }
 

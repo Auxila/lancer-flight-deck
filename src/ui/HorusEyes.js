@@ -10,6 +10,8 @@ const FULL_AT = 160;
  * low, and the great eye at the last point (src/ui/damage/styles/CorruptionDamage.js).
  */
 const EYES = ".lfd-horus-structure .lfd-pip.is-intact, .lfd-cor-watcher, .lfd-cor-bigeye";
+/** With the battle damage held still, only the cockpit's own eyes follow; the stress horror's stay put. */
+const STILL_EYES = ".lfd-horus-structure .lfd-pip.is-intact";
 
 /**
  * HORUS's eyes follow the pointer. A passive pointermove listener records where the pointer is; one
@@ -70,7 +72,7 @@ export class HorusEyes {
     // Reduced motion can switch on without a render: the eyes stay front until it's off again
     if (root.classList.contains("lfd-reduce-motion")) return this.#rest({ force: true });
     let looking = false;
-    for (const eye of root.querySelectorAll(EYES)) {
+    for (const eye of root.querySelectorAll(root.classList.contains("lfd-dmg-still") ? STILL_EYES : EYES)) {
       const r = eye.getBoundingClientRect();
       if (!r.width) continue; // collapsed, scrolled away, or not open yet
       const dx = this.#x - (r.left + r.width / 2);

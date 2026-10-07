@@ -26,7 +26,7 @@ export function buildActions(t, { systems, open, owner }) {
   return {
     lights: [
       light("invade", "LFD.Action.Invade", quickLeft > 0, { invade: true }),
-      light("move", "LFD.Action.Move", a.move > 0, { detail: `${a.move}/${a.speed}` }),
+      light("move", "LFD.Action.Move", a.move > 0, { detail: `${a.move}/${a.allowance ?? a.speed}` }),
       light("quick", "LFD.Action.Quick", quickLeft > 0, { pips: [{ on: quickLeft > 0 }, { on: quickLeft > 1 }] }),
       light("full", "LFD.Action.Full", a.full),
       light("reaction", "LFD.Action.Reaction", a.reaction, {

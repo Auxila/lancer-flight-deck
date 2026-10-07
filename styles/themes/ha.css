@@ -1144,7 +1144,11 @@
 }
 
 /* Reduced motion: the soak glows, nothing rises */
-#lancer-flight-deck.lfd-reduce-motion .lfd-ha-wisps {
+#lancer-flight-deck.lfd-theme-ha.lfd-dmg-still.lfd-stress-3 .lfd-plate.lfd-body::before {
+  animation: none;
+}
+
+#lancer-flight-deck.lfd-dmg-still .lfd-ha-wisps {
   display: none !important;
 }
 
