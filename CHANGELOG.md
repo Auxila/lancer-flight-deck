@@ -6,7 +6,8 @@
 - The roster runs in the order a GM chooses who goes next: **Acting**, **To act**, **Done this round**, then **Destroyed** folded into one line (click to show). Out of combat, one list with the destroyed still folded.
 - **▶ on every NPC that can still act** starts its turn from the list; the acting NPC's row has **End turn**. Choosing the next NPC is one click.
 - HP gets the full width; heat shows once there is some (the open row always has it), and activation pips only for NPCs with more than one.
-- The open row leads with the NPC's features, attacks showing their numbers on the button (`+1 · Thr 1 · 5 Kin`); defenses go on one line; the condition tiles become one row of icons (named in the row's badges and their hover cards).
+- The open row leads with the NPC's features, attacks showing their numbers on the button (`+1 · Thr 1 · 5 Kin`); defenses go on one line; the condition tiles are bigger and bolder: two rows of named tiles, a lit one glowing in its annunciator colour under a lamp bar.
+- A destroyed NPC's open row greys only its header, so its controls (and lit conditions) stay readable.
 - The initiative strip is one row: done units shrink, a big fight scrolls sideways (mouse wheel too, the edge fading while there's more), labels keep what tells them apart ("Gladi… A"), and tokens that share a name carry the same number on the strip and the roster.
 - Counts say what they count: the header is NPCs still to act this round (standing, out of combat), the strip's summary is all sides. Selected NPCs are marked in the roster. The always-on help footer moved behind a **?** in the header.
 - Smoke test, 38 steps: ▶ and End turn move an NPC through the sections.

@@ -219,7 +219,8 @@
   opacity: 0.55;
 }
 
-#lancer-flight-deck-npc .lfd-npc-row.is-destroyed {
+#lancer-flight-deck-npc .lfd-npc-row.is-destroyed:not(.is-open),
+#lancer-flight-deck-npc .lfd-npc-row.is-destroyed.is-open :is(.lfd-npc-top, .lfd-npc-bars) {
   opacity: 0.45;
   filter: grayscale(1);
 }
@@ -582,11 +583,12 @@
   margin: 0;
 }
 
-/* Condition tiles: the panel's annunciator in miniature. Off reads unlit; on lights in its kind's colour. */
+/* Condition tiles: the panel's annunciator in miniature, two rows of five, each named. Off reads unlit but
+   legible; on lights in its kind's colour, with a lamp bar along the top so it reads across the table. */
 #lancer-flight-deck-npc .lfd-npc-conds {
   display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 2px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 3px;
 }
 
 #lancer-flight-deck-npc .lfd-npc-ctile {
@@ -594,47 +596,44 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: relative;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
-  min-height: 24px;
-  padding: 3px 0;
-  font: 700 7px/1.1 var(--lfd-font-display);
-  letter-spacing: 0;
+  min-height: 44px;
+  padding: 5px 1px 4px;
+  font: 700 7.5px/1.1 var(--lfd-font-display);
+  letter-spacing: -0.02em;
   text-transform: uppercase;
   text-align: center;
-  color: color-mix(in srgb, var(--k) 36%, var(--lfd-unlit));
+  color: color-mix(in srgb, var(--k) 30%, var(--lfd-ink-dim));
   background: var(--lfd-well);
   border: 1px solid var(--lfd-edge);
   transition: border-color 100ms ease, filter 100ms ease;
 }
 
 #lancer-flight-deck-npc .lfd-npc-ctile img {
-  width: 16px;
-  height: 16px;
+  width: 22px;
+  height: 22px;
   border: none;
-  opacity: 0.45;
-  filter: grayscale(0.7);
+  opacity: 0.6;
+  filter: grayscale(0.6);
 }
 
-/* The legend stays for screen readers; on screen the icon and its card say it */
 #lancer-flight-deck-npc .lfd-npc-ctile span {
-  position: absolute;
-  width: 1px;
-  height: 1px;
+  max-width: 100%;
   overflow: hidden;
-  clip-path: inset(50%);
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 #lancer-flight-deck-npc .lfd-npc-ctile:hover {
-  color: color-mix(in srgb, var(--k) 66%, var(--lfd-unlit));
+  color: color-mix(in srgb, var(--k) 70%, var(--lfd-ink));
   border-color: color-mix(in srgb, var(--k) 70%, var(--lfd-edge));
   filter: brightness(1.15);
 }
 
 #lancer-flight-deck-npc .lfd-npc-ctile:hover img {
-  opacity: 0.8;
+  opacity: 0.9;
+  filter: none;
 }
 
 #lancer-flight-deck-npc .lfd-npc-ctile:active {
@@ -642,11 +641,14 @@
 }
 
 #lancer-flight-deck-npc .lfd-npc-ctile.is-on {
-  color: var(--k);
-  text-shadow: 0 0 6px color-mix(in srgb, var(--k) 70%, transparent);
-  background: color-mix(in srgb, var(--k) 18%, var(--lfd-well));
+  color: color-mix(in srgb, var(--k) 55%, #fff);
+  text-shadow: 0 0 5px color-mix(in srgb, var(--k) 80%, transparent);
+  background: color-mix(in srgb, var(--k) 26%, var(--lfd-well));
   border-color: var(--k);
-  box-shadow: inset 0 0 10px color-mix(in srgb, var(--k) 25%, transparent);
+  box-shadow:
+    inset 0 3px 0 var(--k),
+    inset 0 0 12px color-mix(in srgb, var(--k) 35%, transparent),
+    0 0 6px color-mix(in srgb, var(--k) 35%, transparent);
 }
 
 #lancer-flight-deck-npc .lfd-npc-ctile.is-on img {

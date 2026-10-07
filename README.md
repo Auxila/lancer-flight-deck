@@ -303,10 +303,11 @@ round (out of combat, those still standing); the **?** beside it lists every cli
   - its defenses on one line, and **HULL / AGI / SYS / ENG** keys in the panel's colours that
     roll the check through LANCER, as from the sheet;
   - HP / heat steppers, with its heat;
-  - a row of condition icons (Lock On, Jammed, Impaired, Slowed, Immobile, Stunned, Exposed,
-    Shredded, Prone, Hidden), lit like the panel's annunciator when on; a click toggles one,
-    and hovering says what it does. As on the panel, the Hidden icon stands for Invisible too:
-    a right-click toggles **Invisible**. What's on is also named in the row's badges;
+  - two rows of named condition tiles (Lock On, Jammed, Impaired, Slowed, Immobile, Stunned,
+    Exposed, Shredded, Prone, Hidden), big enough to read and hit at a glance. On, a tile lights
+    in its annunciator colour with a lamp bar along its top; a click toggles one, and hovering
+    says what it does. As on the panel, the Hidden tile stands for Invisible too: a right-click
+    toggles **Invisible**, and the tile reads Hidden, Invisible or Hid + Invis;
   - Recharge, and the sheet.
 - **Features:** hover for the full text with its numbers at the NPC's tier (attack,
   accuracy, range, damage). Click to use it through LANCER's own flows (attack, tech attack,
