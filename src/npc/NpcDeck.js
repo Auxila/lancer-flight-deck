@@ -1,4 +1,4 @@
-import { MODULE_ID, SCALE_MAX, SCALE_MIN, SETTINGS, TEMPLATE_ROOT } from "../constants.js";
+import { MODULE_ID, SCALE_MAX, SCALE_MIN, SETTINGS, STATUS, TEMPLATE_ROOT } from "../constants.js";
 import { setStatus } from "../core/ConditionControl.js";
 import { getSetting, reduceMotion, setSetting } from "../settings.js";
 import { resolveTheme } from "../themes/registry.js";
@@ -55,10 +55,10 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       sheet: NpcDeck.#onSheet,
       adjust: NpcDeck.#onAdjust,
       feature: { handler: NpcDeck.#onFeature, buttons: [0, 2] },
-      condition: NpcDeck.#onCondition,
+      condition: { handler: NpcDeck.#onCondition, buttons: [0, 2] },
       rollCheck: NpcDeck.#onRollCheck,
       batchAdjust: NpcDeck.#onBatchAdjust,
-      batchCondition: NpcDeck.#onBatchCondition,
+      batchCondition: { handler: NpcDeck.#onBatchCondition, buttons: [0, 2] },
       batchRelease: NpcDeck.#onBatchRelease,
       activate: NpcDeck.#onActivate,
       endTurn: NpcDeck.#onEndTurn,
@@ -290,6 +290,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
         row.features = readFeatures(actor);
         row.anyUncharged = row.features.some(g => g.items.some(f => f.state === "uncharged"));
         row.quick = QUICK_CONDITIONS.map(id => {
+          if (id === STATUS.HIDDEN) return NpcDeck.#hiddenTile([actor]);
           const cfg = CONFIG.statusEffects.find(s => s.id === id);
           if (!cfg) return null;
           const label = game.i18n.localize(cfg.name ?? id);
@@ -297,8 +298,8 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
           const hint = game.i18n.localize(on ? "LFD.Npc.CondRemove" : "LFD.Npc.CondApply");
           return { id, label, ...conditionLook(id, label), img: cfg.img, on, tip: conditionCard(id, { title: label, hint }) };
         }).filter(Boolean);
-        // The open row's tiles light its quick conditions; its chips keep only the rest
-        row.conditions = row.conditions.filter(c => !QUICK_CONDITIONS.includes(c.id));
+        // The open row's tiles light its quick conditions (the Hidden tile stands for Invisible too); its chips keep only the rest
+        row.conditions = row.conditions.filter(c => !QUICK_CONDITIONS.includes(c.id) && c.id !== STATUS.INVISIBLE);
         row.hasChips = row.conditions.length > 0 || row.burn > 0 || row.overshield > 0;
         row.inCombat = !!combat && !!row.combatantId;
       }
@@ -664,6 +665,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       names: picked.map(t => t.name).join(", "),
       heat: picked.some(t => Number(t.actor.system?.heat?.max) > 0),
       quick: QUICK_CONDITIONS.map(id => {
+        if (id === STATUS.HIDDEN) return NpcDeck.#hiddenTile(picked.map(t => t.actor), { batch: true });
         const cfg = CONFIG.statusEffects.find(s => s.id === id);
         if (!cfg) return null;
         const label = i18n.localize(cfg.name ?? id);
@@ -673,6 +675,46 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
         return { id, label, ...conditionLook(id, label), img: cfg.img, state, tip: conditionCard(id, { title: label, detail: `${have}/${n}`, hint }) };
       }).filter(Boolean),
     };
+  }
+
+  /**
+   * The Hidden tile, as on the panel's annunciator: it stands for Hidden, Invisible or both. Click toggles
+   * Hidden, right-click Invisible. Lit (or, for several NPCs, all / some) when either is on; its legend,
+   * icon and card say which.
+   * @param {Actor[]} actors      the open row's NPC, or every selected one
+   * @param {{batch?: boolean}} [options]
+   */
+  static #hiddenTile(actors, { batch = false } = {}) {
+    const i18n = game.i18n;
+    const cfgOf = id => CONFIG.statusEffects.find(s => s.id === id);
+    const hiddenCfg = cfgOf(STATUS.HIDDEN);
+    if (!hiddenCfg) return null;
+    const invisibleCfg = cfgOf(STATUS.INVISIBLE);
+    const nameOf = (cfg, id) => i18n.localize(cfg?.name ?? id);
+    const n = actors.length;
+    const count = id => actors.filter(a => a.statuses?.has(id)).length;
+    const hidden = count(STATUS.HIDDEN);
+    const invisible = invisibleCfg ? count(STATUS.INVISIBLE) : 0;
+    const either = actors.filter(a => a.statuses?.has(STATUS.HIDDEN) || a.statuses?.has(STATUS.INVISIBLE)).length;
+    const onlyInvisible = !hidden && invisible > 0;
+    const label = [hidden && nameOf(hiddenCfg, STATUS.HIDDEN), invisible && nameOf(invisibleCfg, STATUS.INVISIBLE)].filter(Boolean).join(" + ") || nameOf(hiddenCfg, STATUS.HIDDEN);
+    const legend = hidden && invisible ? "LFD.Tile.HiddenInvisible" : onlyInvisible ? "LFD.Tile.Invisible" : "LFD.Tile.Hidden";
+    const tile = {
+      id: STATUS.HIDDEN,
+      label,
+      kind: conditionLook(STATUS.HIDDEN, label).kind,
+      short: i18n.localize(legend),
+      img: (onlyInvisible && invisibleCfg?.img) || hiddenCfg.img,
+      tip: conditionCard(onlyInvisible ? STATUS.INVISIBLE : STATUS.HIDDEN, {
+        title: label,
+        detail: batch ? i18n.format("LFD.Npc.Batch.HiddenDetail", { n, hidden, invisible }) : null,
+        hint: i18n.format(batch ? "LFD.Npc.Batch.HiddenHint" : "LFD.Npc.CondHiddenHint", { n }),
+        also: hidden && invisible ? [STATUS.INVISIBLE] : [],
+      }),
+    };
+    if (batch) tile.state = either === 0 ? "none" : either === n ? "all" : "some";
+    else tile.on = either > 0;
+    return tile;
   }
 
   /** The selected NPCs' actors, each once (two tokens of one linked actor are one NPC). */
@@ -689,7 +731,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** All of them have it: remove it from all. Otherwise: give it to the ones without it. */
   static async #onBatchCondition(event, target) {
-    const id = target.dataset.cond;
+    const id = NpcDeck.#conditionFor(event, target);
     const actors = NpcDeck.#batchActors();
     if (!id || !actors.length) return;
     const all = actors.every(a => a.statuses?.has(id));
@@ -722,9 +764,20 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static async #onCondition(event, target) {
     const actor = NpcDeck.#tokenDoc(target)?.actor;
-    const id = target.dataset.cond;
+    const id = NpcDeck.#conditionFor(event, target);
     if (!actor || !id) return;
     await setStatus([actor], id, !actor.statuses?.has(id));
+  }
+
+  /**
+   * The condition a tile click is for: the tile's own, or on a right-click on the Hidden tile, Invisible
+   * (as on the panel). A right-click anywhere else does nothing, without the browser's menu.
+   */
+  static #conditionFor(event, target) {
+    const id = target.dataset.cond;
+    if (!(event.button === 2 || event.type === "contextmenu")) return id;
+    event.preventDefault();
+    return id === STATUS.HIDDEN ? STATUS.INVISIBLE : null;
   }
 
   /** HULL / AGI / SYS / ENG: LANCER's own check for this NPC, exactly as from its sheet. */

@@ -290,7 +290,8 @@ collapses and expands it). Players never see it.
   - HP / heat steppers;
   - a grid of labelled condition tiles (Lock On, Jammed, Impaired, Slowed, Immobile, Stunned,
     Exposed, Shredded, Prone, Hidden). They light like the panel's annunciator when on, and a
-    click toggles one;
+    click toggles one. As on the panel, the Hidden tile stands for Invisible too: a right-click
+    toggles **Invisible**, and the tile reads Hidden, Invisible or Hid + Invis;
   - its features as buttons (Weapons, Tech, Systems, Reactions, Traits, with Recharge and
     Limited state);
   - **Activate** / **End turn** (LANCER's popcorn initiative), Recharge, and the sheet.
@@ -306,7 +307,7 @@ collapses and expands it). Players never see it.
 Select two or more NPC tokens on the map (drag a box, or shift-click tokens or initiative portraits) and a **batch bar** appears at the top of the deck:
 
 - HP and heat steps apply to every selected NPC, each one exactly as if you'd stepped its own row. When several NPCs drop to 0 HP (or go over their heat cap) at once, their structure (or overheat) checks open one after another, since LANCER only keeps one such prompt open; a notice says whose check is next.
-- Condition tiles show whether none, some (half-lit) or all of the selection have it. A click gives it to the ones without it; when all have it, a click removes it from all. The hover card says how many have it.
+- Condition tiles show whether none, some (half-lit) or all of the selection have it. A click gives it to the ones without it; when all have it, a click removes it from all. The hover card says how many have it. On the Hidden tile a right-click does the same with **Invisible**, and the card counts both.
 - The × clears the selection.
 
 ### Several targets

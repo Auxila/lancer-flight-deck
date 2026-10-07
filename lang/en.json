@@ -909,11 +909,14 @@
       },
       "CondApply": "Click to apply",
       "CondRemove": "Click to remove",
+      "CondHiddenHint": "Click: toggle Hidden · Right-click: toggle Invisible",
       "Batch": {
         "Title": "{n} selected",
         "Release": "Deselect all",
         "Apply": "Click: apply to all {n} selected ({have} of {n} already have it)",
-        "Remove": "Click: remove from all {n} selected"
+        "Remove": "Click: remove from all {n} selected",
+        "HiddenHint": "Click: Hidden for all {n} selected · Right-click: Invisible for all {n}",
+        "HiddenDetail": "Hidden {hidden}/{n} · Invisible {invisible}/{n}"
       },
       "CheckQueued": "{name}'s {kind} check is next: it opens once the one that's up is rolled or cancelled.",
       "CheckStructure": "structure",
