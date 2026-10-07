@@ -854,15 +854,22 @@
       "Turn": {
         "Activate": "Activate",
         "End": "End activation",
+        "Add": "Add to combat",
+        "add": "Add this NPC to the combat: it joins To act with its activations for this round",
         "ready": "Take this NPC's turn now (spends one of its activations)",
         "interrupts": "Take this NPC's turn now: {name}'s turn ends",
         "acting": "Acting now: End activation finishes its turn",
         "spent": "No activations left this round",
         "destroyed": "Destroyed: it can't act",
-        "notInCombat": "Not in this combat: add it from the combat tracker",
         "end": "End this NPC's activation",
         "more": "End this activation: it has {n} more this round",
         "notActing": "Not acting: Activate takes its turn"
+      },
+      "RoundEnd": {
+        "Done": "Round {n} complete",
+        "Hint": "Everyone has acted",
+        "Next": "Next round",
+        "Tip": "Start round {n}: LANCER gives everyone their activations back"
       },
       "Section": {
         "acting": "Acting",
@@ -888,7 +895,7 @@
       "EndTurn": "End turn",
       "Recharge": "Recharge",
       "Sheet": "Sheet",
-      "Footer": "Click a row: open it · Click a name: select it on the map · ▶ or Activate (open row): take its turn · End activation: finish it · Hover a feature: full text · Click a feature: use it · Right-click a feature: post it to chat · Right-click Hidden: Invisible · Right-click a portrait: start its turn · Wheel over the portraits: scroll them",
+      "Footer": "Click a row or its HP: open it · Click a name: select it on the map · ▶ or Activate (open row): take its turn · End activation: finish it · Add to combat: an NPC outside the fight joins it · Next round: once everyone has acted · Hover a feature: full text · Click a feature: use it · Right-click a feature: post it to chat · Right-click Hidden: Invisible · Right-click a portrait: start its turn · Wheel over the portraits: scroll them",
       "Attack": "Attack",
       "Accuracy": "Accuracy",
       "Difficulty": "Difficulty",
@@ -949,7 +956,9 @@
         "Apply": "Click: apply to all {n} selected ({have} of {n} already have it)",
         "Remove": "Click: remove from all {n} selected",
         "HiddenHint": "Click: Hidden for all {n} selected · Right-click: Invisible for all {n}",
-        "HiddenDetail": "Hidden {hidden}/{n} · Invisible {invisible}/{n}"
+        "HiddenDetail": "Hidden {hidden}/{n} · Invisible {invisible}/{n}",
+        "Add": "Add {n} to combat",
+        "AddTip": "Add to the combat, with their activations for this round: {names}"
       },
       "CheckQueued": "{name}'s {kind} check is next: it opens once the one that's up is rolled or cancelled.",
       "CheckStructure": "structure",

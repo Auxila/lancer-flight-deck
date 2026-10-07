@@ -25,6 +25,12 @@
   </header>
 
   {{#unless collapsed}}
+  {{#if roundEnd}}
+  <div class="lfd-npc-roundend" role="status">
+    <span class="lfd-npc-roundend-text"><b>{{roundEnd.done}}</b><small>{{localize "LFD.Npc.RoundEnd.Hint"}}</small></span>
+    <button type="button" data-action="nextRound" data-tooltip="{{roundEnd.tip}}"><i class="fa-solid fa-forward" aria-hidden="true"></i>{{localize "LFD.Npc.RoundEnd.Next"}}</button>
+  </div>
+  {{/if}}
   {{#if initiative}}
   <section class="lfd-init" aria-label="{{localize 'LFD.Npc.Init.Title'}}">
     <div class="lfd-init-head">
@@ -66,6 +72,9 @@
       <span class="lfd-npc-batch-title" data-tooltip="{{batch.names}}"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> {{localize "LFD.Npc.Batch.Title" n=batch.count}}</span>
       <button type="button" class="lfd-npc-batch-release" data-action="batchRelease" data-tooltip="LFD.Npc.Batch.Release" aria-label="{{localize 'LFD.Npc.Batch.Release'}}"><i class="fa-solid fa-xmark"></i></button>
     </div>
+    {{#if batch.add}}
+    <button type="button" class="lfd-npc-batch-add" data-action="batchAddToCombat" data-tooltip="{{batch.add.tip}}"><i class="fa-solid fa-plus" aria-hidden="true"></i>{{batch.add.label}}</button>
+    {{/if}}
     <div class="lfd-npc-adjust">
       <span class="lfd-npc-adjust-label">HP</span>
       <button type="button" data-action="batchAdjust" data-resource="hp" data-delta="-5">−5</button>
@@ -132,7 +141,7 @@
         <i class="fa-solid fa-chevron-down lfd-npc-chev" aria-hidden="true"></i>
       </div>
 
-      <div class="lfd-npc-bars">
+      <div class="lfd-npc-bars" data-action="toggleRow">
         <div class="lfd-npc-bar is-hp lvl-{{hp.level}}" aria-label="HP {{hp.value}}/{{hp.max}}">
           <span style="width: {{hp.pct}}%"></span><b>{{hp.value}}<small>/{{hp.max}}</small></b>
         </div>
@@ -146,7 +155,7 @@
       </div>
 
       {{#if hasChips}}
-      <div class="lfd-npc-chips" data-tooltip-class="{{@root.tipClass}}">
+      <div class="lfd-npc-chips" data-action="toggleRow" data-tooltip-class="{{@root.tipClass}}">
         {{#each conditions}}<span class="lfd-npc-cond k-{{kind}} {{#if lockon}}is-lockon{{/if}}" {{#if tip}}data-tooltip-html="{{tip}}"{{else}}data-tooltip="{{label}}"{{/if}}>{{#if img}}<img src="{{img}}" alt="">{{/if}}{{short}}</span>{{/each}}
         {{#if burn}}<span class="lfd-npc-chip is-burn" data-tooltip="LFD.Npc.Burn">{{localize "LFD.Npc.BurnShort" n=burn}}</span>{{/if}}
         {{#if overshield}}<span class="lfd-npc-chip is-os" data-tooltip="LFD.Npc.Overshield">{{localize "LFD.Npc.OverShort" n=overshield}}</span>{{/if}}
@@ -211,7 +220,13 @@
           <button type="button" data-action="recharge"><i class="fa-solid fa-dice-d6"></i>{{localize "LFD.Npc.Recharge"}}</button>
           {{/if}}
           <button type="button" data-action="sheet"><i class="fa-solid fa-id-card"></i>{{localize "LFD.Npc.Sheet"}}</button>
-          {{#if turn}}
+          {{#if turn.add}}
+          <div class="lfd-npc-turn-cmds is-add">
+            <button type="button" class="lfd-npc-turn-btn is-add is-live" data-action="addToCombat" data-tooltip="{{turn.add.tip}}">
+              <i class="fa-solid fa-plus" aria-hidden="true"></i><span>{{localize "LFD.Npc.Turn.Add"}}</span>
+            </button>
+          </div>
+          {{else if turn}}
           <div class="lfd-npc-turn-cmds">
             <button type="button" class="lfd-npc-turn-btn is-activate {{#if turn.activate.on}}is-live{{/if}}" data-action="activate" data-combatant="{{turn.combatantId}}"
                     aria-disabled="{{#if turn.activate.on}}false{{else}}true{{/if}}" data-tooltip="{{turn.activate.tip}}">

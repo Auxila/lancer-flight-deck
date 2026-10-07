@@ -98,5 +98,19 @@ test("the open row's turn buttons: Activate takes its turn, End activation finis
   assert.deepEqual([elite.end.why, elite.end.more], ["more", 1], "an Elite hears it has another activation");
   assert.deepEqual(why(turnCommands(row({ canAct: false, activationsLeft: 0 }), { started: true })), [false, "spent", false, "notActing"]);
   assert.deepEqual(why(turnCommands(row({ canAct: false, destroyed: true }), { started: true })), [false, "destroyed", false, "notActing"]);
-  assert.deepEqual(why(turnCommands(row({ inCombat: false, canAct: false, combatantId: null }), { started: true })), [false, "notInCombat", false, "notInCombat"]);
+  assert.deepEqual(turnCommands(row({ inCombat: false, canAct: false, combatantId: null }), { started: true }), { add: true }, "outside the combat: Add to combat instead");
+});
+
+test("the round is complete once nobody is acting and nobody standing has an activation left", async () => {
+  const { roundComplete } = await import("../src/npc/NpcRoster.js");
+  const c = (left, isDefeated = false) => ({ activations: { value: left }, isDefeated });
+  const combat = (combatants, over = {}) => ({ started: true, combatant: undefined, combatants, ...over });
+  assert.equal(roundComplete(null), false);
+  assert.equal(roundComplete(combat([c(0), c(0)])), true);
+  assert.equal(roundComplete(combat([c(0), c(1)])), false, "someone still to act");
+  assert.equal(roundComplete(combat([c(0), c(1, true)])), true, "the defeated don't hold it up");
+  assert.equal(roundComplete(combat([c(0)], { combatant: c(0) })), false, "someone is acting (their last activation)");
+  assert.equal(roundComplete(combat([c(0)], { started: false })), false, "not started");
+  assert.equal(roundComplete(combat([])), false, "nobody in it");
+  assert.equal(roundComplete(combat([c(0, true)])), false, "only the defeated");
 });

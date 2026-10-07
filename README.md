@@ -280,8 +280,13 @@ round (out of combat, those still standing); the **?** beside it lists every cli
   one a new encounter becomes), else the one your tracker shows. Unlinked copies of the same NPC
   are separate rows with their own health and conditions.
 - **It follows you:** the open row follows the turn, and your selection. Select an NPC on
-  the map and its row opens and scrolls into view; select one that isn't in the combat and
-  it appears at the top, marked "Not in combat". The deck stays open throughout.
+  the map and its row opens and scrolls into view (clicking one that's already selected opens
+  its row again, after the turn moved the deck elsewhere); select one that isn't in the combat
+  and it appears at the top, marked "Not in combat", with **Add to combat** in its row. The
+  deck stays open throughout.
+- **The round's end:** once nobody is acting and nobody standing has an activation left, a bar
+  under the header says the round is complete, with **Next round**: LANCER's own, which gives
+  everyone their activations back. (The defeated don't hold it up.)
 - **Move and resize it like the Flight Deck:** drag the header to float it anywhere, drop it
   at a screen edge to dock it again (or use the pin), and drag the corner grip to scale it
   (70–160%, double-click to reset, arrow keys when focused). Layout is saved per GM.
@@ -311,14 +316,16 @@ round (out of combat, those still standing); the **?** beside it lists every cli
   - Recharge, the sheet, and, in a started combat, **Activate** and **End activation**: big buttons
     that take this NPC's turn and finish it (LANCER's popcorn initiative, as from its tracker). The one
     that doesn't apply stays in place, dashed and dim, and its hover text says why (no activations
-    left, not in this combat, acting now). Activating while someone else is acting ends their turn,
+    left, acting now, destroyed). For an NPC outside the combat, **Add to combat** takes their
+    place: it joins To act with its activations for this round. Activating while someone else is acting ends their turn,
     as in LANCER's tracker, and the hover says whose.
 - **Features:** hover for the full text with its numbers at the NPC's tier (attack,
   accuracy, range, damage). Click to use it through LANCER's own flows (attack, tech attack,
   or its card, with Limited, Recharge and heat handled by the system); right-click posts its
   text without using it.
-- **Rows:** click a name to select the token and look at it (Shift adds to the selection),
-  double-click for the sheet; hovering a row lights its token on the map.
+- **Rows:** click a row's name line or its HP bar to open or close it; click the name itself to
+  select the token and look at it (Shift adds to the selection), double-click for the sheet;
+  hovering a row lights its token on the map.
 
 ### Several NPCs at once
 
@@ -326,6 +333,7 @@ Select two or more NPC tokens on the map (drag a box, or shift-click tokens or i
 
 - HP and heat steps apply to every selected NPC, each one exactly as if you'd stepped its own row. When several NPCs drop to 0 HP (or go over their heat cap) at once, their structure (or overheat) checks open one after another, since LANCER only keeps one such prompt open; a notice says whose check is next.
 - Condition tiles show whether none, some (half-lit) or all of the selection have it. A click gives it to the ones without it; when all have it, a click removes it from all. The hover card says how many have it. On the Hidden tile a right-click does the same with **Invisible**, and the card counts both.
+- In a combat, when some of the selection isn't in it, **Add N to combat** adds those in one go (its hover names them, twins by their numbers).
 - The × clears the selection.
 
 ### Several targets

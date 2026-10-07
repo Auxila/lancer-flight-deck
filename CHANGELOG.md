@@ -1,9 +1,15 @@
 # Changelog
 
-## Unreleased
+## 0.8.3
 
-- **Activate** and **End activation** on the NPC Deck's open row, beside Sheet: big, lit buttons that take the NPC's turn and finish it. The one that doesn't apply stays put, dashed and dim, its hover saying why; Activate warns when it would end someone else's turn. End activation pulses gently while the NPC acts (still under Reduce motion).
-- Smoke test, 39 steps: the pair takes a turn and finishes it, and End activation does nothing before then.
+**The NPC Deck runs the whole round**
+- **Activate** and **End activation** on the open row, beside Sheet: big, lit buttons that take the NPC's turn and finish it. The one that doesn't apply stays put, dashed and dim, its hover saying why; Activate warns when it would end someone else's turn. End activation pulses gently while the NPC acts (still under Reduce motion).
+- **Add to combat:** an NPC outside the fight gets it in its row, in place of Activate / End activation; with several selected, the batch bar's **Add N to combat** adds the ones not in it. They join To act with this round's activations.
+- **Next round:** once nobody is acting and nobody standing has an activation left, a bar under the header says the round is complete and offers LANCER's Next round.
+- A click on a row's **HP bar** (or its condition badges) opens and closes it, like its name line.
+- Clicking an NPC token that's already selected opens its row again (after the turn had moved the deck to another).
+- The batch bar names twins by their numbers ("Test Hostile 1, Test Hostile 2").
+- Smoke test, 42 steps: the turn pair, the HP click, Add to combat (row and batch), the click on a selected NPC, and Next round.
 
 ## 0.8.2
 

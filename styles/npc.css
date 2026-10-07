@@ -1449,3 +1449,111 @@
 #lancer-flight-deck-npc.lfd-reduce-motion .lfd-npc-turn-btn.is-end.is-live {
   animation: none;
 }
+
+/* --------------------------------------------------------------------------
+   Running the round from the deck: its HP opens a row, Add to combat, Next round
+   -------------------------------------------------------------------------- */
+
+/* The HP bar (and the chips under it) open the row like its name line does */
+#lancer-flight-deck-npc .lfd-npc-row :is(.lfd-npc-bars, .lfd-npc-chips)[data-action="toggleRow"] {
+  cursor: pointer;
+}
+
+/* Add to combat: one big button where Activate / End activation would be */
+#lancer-flight-deck-npc .lfd-npc-turn-cmds.is-add {
+  grid-template-columns: 1fr;
+}
+
+#lancer-flight-deck-npc .lfd-npc-turn-btn.is-add {
+  --t: var(--lfd-ok);
+}
+
+/* Several selected, some outside the combat: add them in one go */
+#lancer-flight-deck-npc .lfd-npc-batch-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 26px;
+  margin: 0 0 5px;
+  font: 800 9px/1.1 var(--lfd-font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lfd-bg);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lfd-ok) 80%, #fff), var(--lfd-ok) 45%);
+  border: 1px solid var(--lfd-ok);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--lfd-ok) 40%, transparent), inset 0 -2px 0 color-mix(in srgb, var(--lfd-ok) 60%, #000);
+}
+
+#lancer-flight-deck-npc .lfd-npc-batch-add:hover {
+  filter: brightness(1.15);
+}
+
+#lancer-flight-deck-npc .lfd-npc-batch-add:active {
+  transform: translateY(1px);
+}
+
+/* Everyone has acted: the round's end, with LANCER's Next round */
+#lancer-flight-deck-npc .lfd-npc-roundend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 7px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--lfd-accent) 22%, transparent), transparent 70%),
+    color-mix(in srgb, var(--lfd-bg) 85%, var(--lfd-plate));
+  border-bottom: 1px solid var(--lfd-line);
+  box-shadow: inset 3px 0 0 var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-roundend-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#lancer-flight-deck-npc .lfd-npc-roundend-text b {
+  font: 800 9.5px/1.1 var(--lfd-font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck-npc .lfd-npc-roundend-text small {
+  font: 600 8px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.08em;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck-npc .lfd-npc-roundend button {
+  --t: var(--lfd-accent);
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 12px;
+  font: 800 9.5px/1.1 var(--lfd-font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lfd-accent-ink);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--t) 80%, #fff), var(--t) 45%);
+  border: 1px solid var(--t);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--t) 45%, transparent), inset 0 -2px 0 color-mix(in srgb, var(--t) 60%, #000);
+  animation: lfd-npc-turn-pulse 1.8s ease-in-out infinite;
+}
+
+#lancer-flight-deck-npc .lfd-npc-roundend button:hover {
+  filter: brightness(1.15);
+}
+
+#lancer-flight-deck-npc .lfd-npc-roundend button:active {
+  transform: translateY(1px);
+}
+
+#lancer-flight-deck-npc.lfd-reduce-motion .lfd-npc-roundend button {
+  animation: none;
+}

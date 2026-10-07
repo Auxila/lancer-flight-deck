@@ -7,7 +7,7 @@ import { HoverCards } from "../ui/HoverCards.js";
 import { LookHere } from "./LookHere.js";
 import { conditionCard } from "../core/ConditionInfo.js";
 import { keyHints } from "../ui/keyHints.js";
-import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, rosterSections, turnCommands, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
+import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, rosterSections, roundComplete, turnCommands, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
 import { conditionLook } from "../ui/components/MasterCautionGrid.js";
 import { CHECKS } from "../ui/components/HullReadout.js";
 
@@ -37,6 +37,9 @@ const HIT_MS = { hp: 900, structure: 1400 };
  *
  * Movable and resizable like the Flight Deck (DeckFrame). GM only.
  */
+/** Marks a canvas stage the deck already listens to for token clicks. */
+const TOKEN_CLICKS = Symbol("lfd-npc-token-clicks");
+
 export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
   static #instance = null;
 
@@ -62,6 +65,9 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       batchRelease: NpcDeck.#onBatchRelease,
       activate: NpcDeck.#onActivate,
       endTurn: NpcDeck.#onEndTurn,
+      addToCombat: NpcDeck.#onAddToCombat,
+      batchAddToCombat: NpcDeck.#onBatchAddToCombat,
+      nextRound: NpcDeck.#onNextRound,
       recharge: NpcDeck.#onRecharge,
       collapse: NpcDeck.#onCollapse,
       initSelect: { handler: NpcDeck.#onInitSelect, buttons: [0, 2] },
@@ -228,6 +234,9 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const hook of ["createToken", "deleteToken", "createCombat", "updateCombat", "deleteCombat", "createCombatant", "updateCombatant", "deleteCombatant", "targetToken"]) {
       Hooks.on(hook, () => this.queue());
     }
+    // A click on an NPC token that's already selected opens its row too
+    Hooks.on("canvasReady", () => this.#watchTokenClicks());
+    this.#watchTokenClicks();
     // Reduce motion changed: the deck and its map marker follow at once
     Hooks.on("clientSettingChanged", key => {
       if (key !== `${MODULE_ID}.${SETTINGS.REDUCE_MOTION}`) return;
@@ -256,6 +265,27 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
   /* -------------------------------------------- */
   /*  Rendering                                   */
   /* -------------------------------------------- */
+
+  /**
+   * Selecting an NPC opens its row (controlToken), but that hook only fires on a change: once the turn had
+   * opened another row, a click on the NPC already selected did nothing. Foundry stops a token's click at
+   * the token, so this listens on the way down (PIXI's capture phase), once per canvas stage.
+   */
+  #watchTokenClicks() {
+    const stage = canvas?.stage;
+    if (!stage || stage[TOKEN_CLICKS]) return;
+    stage[TOKEN_CLICKS] = true;
+    const Token = foundry.canvas.placeables.Token;
+    stage.addEventListener("pointerdown", event => {
+      if (event.button !== 0 || event.shiftKey || game.activeTool === "target" || !this.rendered) return;
+      let obj = event.target;
+      while (obj && !(obj instanceof Token)) obj = obj.parent;
+      if (!obj?.controlled || !isNpc(obj.actor) || this.#expanded === obj.id) return;
+      this.#expanded = obj.id;
+      this.#reveal = obj.id;
+      this.queue();
+    }, { capture: true });
+  }
 
   /** Destroyed NPCs fold into one line until the GM opens it. */
   #showFallen = false;
@@ -324,6 +354,10 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     const hints = keyHints(i18n.localize("LFD.Npc.Footer"));
     return {
       batch: NpcDeck.#batchView(),
+      // Everyone has acted: the deck offers LANCER's next round
+      roundEnd: roundComplete(combat)
+        ? { done: i18n.format("LFD.Npc.RoundEnd.Done", { n: combat.round }), tip: i18n.format("LFD.Npc.RoundEnd.Tip", { n: combat.round + 1 }) }
+        : null,
       tipClass: `lfd-hud-tip lfd-themed ${this.#theme().cssClass}`,
       help: `<div class="lfd-tip"><header><strong>${foundry.utils.escapeHTML(i18n.localize("LFD.Npc.HelpTitle"))}</strong></header>${hints
         .map(h => `<p>${h.key ? `<b>${foundry.utils.escapeHTML(h.key)}:</b> ` : ""}${foundry.utils.escapeHTML(h.action)}</p>`)
@@ -681,9 +715,18 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!picked.length) return null;
     const i18n = game.i18n;
     const n = picked.length;
+    // Twins by their numbers, as on their rows ("Test Hostile 1, Test Hostile 2")
+    const dups = duplicateNumbers(viewedScene()?.tokens.contents ?? []);
+    const names = list => list.map(t => (dups.has(t.id) ? `${t.name} ${dups.get(t.id)}` : t.name)).join(", ");
+    // In a started combat: the selected NPCs that aren't in it yet, to add in one go
+    const combat = deckCombat();
+    const outside = combat ? picked.filter(t => !combat.getCombatantsByToken(t.document).length) : [];
     return {
       count: n,
-      names: picked.map(t => t.name).join(", "),
+      names: names(picked),
+      add: outside.length
+        ? { label: i18n.format("LFD.Npc.Batch.Add", { n: outside.length }), tip: i18n.format("LFD.Npc.Batch.AddTip", { names: names(outside) }) }
+        : null,
       heat: picked.some(t => Number(t.actor.system?.heat?.max) > 0),
       quick: QUICK_CONDITIONS.map(id => {
         if (id === STATUS.HIDDEN) return NpcDeck.#hiddenTile(picked.map(t => t.actor), { batch: true });
@@ -838,12 +881,37 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     const cmds = turnCommands(row, { started: !!combat?.started, acting });
     if (!cmds) return null;
     const i18n = game.i18n;
+    if (cmds.add) return { add: { tip: i18n.localize("LFD.Npc.Turn.add") } };
     const tip = (why, data) => i18n.format(`LFD.Npc.Turn.${why}`, data ?? {});
     return {
       combatantId: row.combatantId,
       activate: { on: cmds.activate.on, tip: tip(cmds.activate.why, { name: cmds.activate.name }) },
       end: { on: cmds.end.on, tip: tip(cmds.end.why, { n: cmds.end.more }) },
     };
+  }
+
+  /** Add NPC tokens to the deck's combat (those not in it yet). In a started combat LANCER gives them this round's activations. */
+  static async #addToCombat(docs) {
+    const combat = deckCombat();
+    if (!combat) return;
+    const data = docs
+      .filter(d => d && !combat.getCombatantsByToken(d).length)
+      .map(d => ({ tokenId: d.id, sceneId: d.parent.id, actorId: d.actorId, hidden: d.hidden }));
+    if (data.length) await combat.createEmbeddedDocuments("Combatant", data);
+  }
+
+  static async #onAddToCombat(event, target) {
+    await NpcDeck.#addToCombat([NpcDeck.#tokenDoc(target)]);
+  }
+
+  static async #onBatchAddToCombat() {
+    await NpcDeck.#addToCombat(NpcDeck.#batchTokens().map(t => t.document));
+  }
+
+  /** Everyone has acted: LANCER's next round (it gives every combatant their activations back). */
+  static async #onNextRound() {
+    const combat = deckCombat();
+    if (roundComplete(combat)) await combat.nextRound();
   }
 
   static async #onActivate(event, target) {

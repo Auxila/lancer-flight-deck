@@ -535,6 +535,93 @@ await step(g, "NPC Deck: the open row's ACTIVATE takes the turn and END ACTIVATI
   return { ok, detail: { npc: npc.name, ready, stillReady, acting, done } };
 }, turn);
 
+await step(g, "NPC Deck: a click on a row's HP opens it, and another closes it", async () => {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  canvas.tokens.releaseAll();
+  await wait(800);
+  const deck = () => document.getElementById("lancer-flight-deck-npc");
+  const closed = deck()?.querySelector(".lfd-npc-row:not(.is-open) .lfd-npc-bars");
+  const id = closed?.closest("[data-token]")?.dataset.token;
+  if (!id) return { skip: "no closed row" };
+  const row = () => deck().querySelector(`.lfd-npc-row[data-token="${id}"]`);
+  closed.click();
+  await wait(700);
+  const opened = row()?.classList.contains("is-open");
+  row()?.querySelector(".lfd-npc-bars")?.click();
+  await wait(700);
+  const shut = !row()?.classList.contains("is-open");
+  return { ok: opened && shut, detail: { opened, shut } };
+});
+
+await step(g, "NPC Deck: Add to combat from a row and from the batch bar; a click on an NPC already selected opens its row", async turn => {
+  if (turn.skip) return { skip: turn.skip };
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const combat = game.combats.get(turn.combat);
+  const deck = () => document.getElementById("lancer-flight-deck-npc");
+  const outside = () => canvas.tokens.placeables.filter(t => t.actor?.type === "npc" && t.visible && !t.document.hidden && !combat.getCombatantsByToken(t.document).length);
+  const one = outside()[0];
+  if (!one) return { skip: "every NPC on the scene is already in the combat" };
+  one.control({ releaseOthers: true });
+  await wait(1500);
+  const openRow = () => deck().querySelector(".lfd-npc-row.is-open");
+  const offered = openRow()?.dataset.token === one.id && !!openRow()?.querySelector('[data-action="addToCombat"]');
+  openRow()?.querySelector('[data-action="addToCombat"]')?.click();
+  await wait(1500);
+  const added = combat.getCombatantsByToken(one.document).length === 1 && !!openRow()?.querySelector(".lfd-npc-turn-btn.is-activate");
+  // Several selected, some outside: one button adds them
+  const two = outside().slice(0, 2);
+  let batch = "skipped: fewer than two NPCs left outside";
+  if (two.length === 2) {
+    canvas.tokens.releaseAll();
+    for (const t of [one, ...two]) t.control({ releaseOthers: false });
+    await wait(1500);
+    const button = deck().querySelector('[data-action="batchAddToCombat"]');
+    const label = button?.textContent.trim();
+    button?.click();
+    await wait(1500);
+    const inNow = two.every(t => combat.getCombatantsByToken(t.document).length === 1);
+    batch = { label, inNow, gone: !deck().querySelector('[data-action="batchAddToCombat"]') };
+  }
+  // The turn opens another row; a click on the NPC still selected opens its row again
+  canvas.tokens.releaseAll();
+  one.control({ releaseOthers: true });
+  await wait(1000);
+  const otherRow = [...deck().querySelectorAll(".lfd-npc-row:not(.is-open) .lfd-npc-bars")].find(e => e.closest("[data-token]").dataset.token !== one.id);
+  otherRow?.click();
+  await wait(800);
+  const movedAway = openRow()?.dataset.token !== one.id;
+  await canvas.animatePan({ x: one.center.x, y: one.center.y, duration: 0 });
+  await wait(400);
+  const view = canvas.app.view;
+  const box = view.getBoundingClientRect();
+  const at = canvas.stage.worldTransform.apply(new PIXI.Point(one.center.x, one.center.y));
+  const ptr = type => view.dispatchEvent(new PointerEvent(type, { clientX: box.x + at.x, clientY: box.y + at.y, button: 0, buttons: type === "pointerdown" ? 1 : 0, pointerId: 1, pointerType: "mouse", isPrimary: true, bubbles: true }));
+  ptr("pointerdown");
+  ptr("pointerup");
+  await wait(1200);
+  const reopened = openRow()?.dataset.token === one.id && one.controlled;
+  canvas.tokens.releaseAll();
+  const batchOk = typeof batch === "string" || (batch.label === "Add 2 to combat" && batch.inNow && batch.gone);
+  return { ok: offered && added && batchOk && movedAway && reopened, detail: { npc: one.name, offered, added, batch, movedAway, reopened } };
+}, turn);
+
+await step(g, "NPC Deck: once everyone has acted, Next round starts the next round", async turn => {
+  if (turn.skip) return { skip: turn.skip };
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const combat = game.combats.get(turn.combat);
+  if (combat.combatant) await combat.nextTurn();
+  await combat.updateEmbeddedDocuments("Combatant", combat.combatants.map(c => ({ _id: c.id, "system.activations.value": 0 })));
+  await wait(1500);
+  const bar = () => document.querySelector("#lancer-flight-deck-npc .lfd-npc-roundend");
+  const shown = !!bar();
+  const round = combat.round;
+  bar()?.querySelector('[data-action="nextRound"]')?.click();
+  await wait(1500);
+  const next = combat.round === round + 1;
+  const refilled = combat.combatants.contents.every(c => (c.activations?.value ?? 0) >= 1 || c.isDefeated);
+  return { ok: shown && next && refilled && !bar(), detail: { shown, from: round, to: combat.round, refilled, barGone: !bar() } };
+}, turn);
+
 await g.evaluate(async ([uuid, turn]) => {
   if (turn.skip) return;
   const actor = await fromUuid(uuid);
