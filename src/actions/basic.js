@@ -22,7 +22,7 @@
 export const BASIC_ACTIONS = [
   // Quick
   { id: "skirmish", menu: "quick", section: "basic", icon: "cci cci-weapon", spend: "quick", run: "weapons" },
-  { id: "boost", menu: "quick", section: "basic", icon: "fa-solid fa-forward-fast", spend: "quick", run: "chat" },
+  { id: "boost", menu: "quick", section: "basic", icon: "fa-solid fa-forward-fast", spend: "quick", run: "chat", grantsMove: true },
   { id: "grapple", menu: "quick", section: "basic", icon: "fa-solid fa-hand-fist", spend: "quick", run: "basicAttack" },
   { id: "ram", menu: "quick", section: "basic", icon: "fa-solid fa-person-falling-burst", spend: "quick", run: "basicAttack" },
   { id: "hide", menu: "quick", section: "basic", icon: "cci cci-status-hidden", spend: "quick", run: "selfStatus", status: "hidden", active: true },
@@ -52,7 +52,7 @@ export const BASIC_ACTIONS = [
   { id: "overwatch", menu: "reaction", section: "basic", icon: "cci cci-reticule", spend: "reaction", run: "weapons" },
 
   // Movement
-  { id: "boostMove", menu: "move", section: "basic", icon: "fa-solid fa-forward-fast", spend: "quick", run: "chat", text: "boost" },
+  { id: "boostMove", menu: "move", section: "basic", icon: "fa-solid fa-forward-fast", spend: "quick", run: "chat", text: "boost", grantsMove: true },
   { id: "disengageMove", menu: "move", section: "basic", icon: "fa-solid fa-person-running", spend: "full", run: "chat", text: "disengage" },
 
   // Invade

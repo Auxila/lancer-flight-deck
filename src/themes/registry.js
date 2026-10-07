@@ -3,6 +3,7 @@ import { IPSNTheme } from "./IPSNTheme.js";
 import { SSCTheme } from "./SSCTheme.js";
 import { HORUSTheme } from "./HORUSTheme.js";
 import { HATheme } from "./HATheme.js";
+import { MODULE_ID, THEME_FLAG } from "../constants.js";
 
 /**
  * Registered themes, by id: GMS (the fallback, which must always exist), then the Big Four: IPS-N, SSC,
@@ -29,6 +30,18 @@ export function themeChoices() {
   const choices = { auto: "LFD.Settings.Theme.Auto" };
   for (const theme of THEMES.values()) choices[theme.id] = theme.label;
   return choices;
+}
+
+/**
+ * A mech's own theme, picked by its owner and kept on the actor, so every player who views the mech sees
+ * the same cockpit: "auto" (match its frame) or a registered theme id. Null when nobody has picked one,
+ * or the pick is a theme that's no longer registered. Read raw (an unlinked token's delta is merged in).
+ * @param {Actor|null} actor
+ * @returns {string|null}
+ */
+export function mechThemeId(actor) {
+  const id = actor?.flags?.[MODULE_ID]?.[THEME_FLAG];
+  return id === "auto" || THEMES.has(id) ? id : null;
 }
 
 /**

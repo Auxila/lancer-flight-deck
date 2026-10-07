@@ -6,7 +6,8 @@ import { ART_FX_PREFIX } from "../fx/presets.js";
  *
  *  - Token Magic FX filters on token art (ids starting "lfd-": Exposed fire, Shredded smoke, Jammed and
  *    Impaired electricity). They're saved on the token, so they would outlive the module.
- *  - Its own flags on actors: the record of which reactions were used this round.
+ *  - Its own flags on actors: the record of which reactions were used this round, and a mech's cockpit
+ *    theme (picked from the badge).
  *
  * Everything else Flight Deck does is ordinary game state made through LANCER (conditions, HP, heat,
  * the action tracker, a meltdown countdown, deployable tokens), and stays. The world setting

@@ -99,6 +99,8 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _onClose(options) {
     super._onClose(options);
+    // A boot still playing stops here, not on its timers against a panel that's gone
+    this.endBoot({ immediate: true });
     this.damage.destroy();
     this.#mountedTheme?.unmount();
     this.#mountedTheme = null;
@@ -573,11 +575,12 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       event.preventDefault();
       const menu = target.dataset.menu;
       this.manager.toggleSlot(menu === "reaction" && event.shiftKey ? "protocol" : menu);
-    } else this.manager.toggleMenu(target.dataset.menu);
+    } else this.manager.toggleMenu(target.dataset.menu, { focus: event.detail === 0 });
   }
 
-  static #onToggleSystems() {
-    this.manager.toggleSystems();
+  /** A click with detail 0 came from the keyboard (Enter or Space): focus follows into the menu. */
+  static #onToggleSystems(event) {
+    this.manager.toggleSystems({ focus: event.detail === 0 });
   }
 
   static async #onOvercharge() {

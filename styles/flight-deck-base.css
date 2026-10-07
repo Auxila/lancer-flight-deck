@@ -547,6 +547,21 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   font-weight: 700;
 }
 
+/* Each stat has a hover card (what it is, how its number is made up, what's changing it now) */
+#lancer-flight-deck .lfd-stat {
+  cursor: help;
+  transition: background-color 120ms ease;
+}
+
+#lancer-flight-deck .lfd-stat:hover {
+  background: color-mix(in srgb, var(--lfd-accent) 14%, var(--lfd-well-2));
+}
+
+#lancer-flight-deck .lfd-stat:focus-visible {
+  outline: 1px solid var(--lfd-accent);
+  outline-offset: 1px;
+}
+
 /* HASE check keys under the stat strip (panel and NPC Deck): one colour per check, the label carries it too */
 :is(#lancer-flight-deck, #lancer-flight-deck-npc) .lfd-checks {
   display: grid;
@@ -1710,11 +1725,6 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   100% { opacity: 0.35; }
 }
 
-@keyframes lfd-tile-flash {
-  0% { background: color-mix(in srgb, var(--k) 45%, var(--lfd-well)); }
-  100% { background: color-mix(in srgb, var(--k) 12%, var(--lfd-well)); }
-}
-
 @keyframes lfd-static {
   0% { background-position: 0 0, 0 0; }
   25% { background-position: 0 1px, 3px 0; }
@@ -1749,10 +1759,6 @@ body.lfd-hide-tah :is(#token-action-hud-app, #token-action-hud, #token-action-hu
   32% { transform: translate(-3px, 1px) rotate(-0.2deg); }
   50% { transform: translate(2px, 0) rotate(0.1deg); }
   70% { transform: translate(-1px, 0) rotate(0); }
-}
-
-@keyframes lfd-type {
-  to { clip-path: inset(0 0 0 0); }
 }
 
 @keyframes lfd-fade-in {

@@ -2,13 +2,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { getThemes, resolveTheme, themeChoices } from "../src/themes/registry.js";
+import { getThemes, mechThemeId, resolveTheme, themeChoices } from "../src/themes/registry.js";
 import { GMSTheme } from "../src/themes/GMSTheme.js";
 import { IPSNTheme } from "../src/themes/IPSNTheme.js";
 import { SSCTheme } from "../src/themes/SSCTheme.js";
 import { HORUSTheme } from "../src/themes/HORUSTheme.js";
 import { HATheme } from "../src/themes/HATheme.js";
-import { TEMPLATE_ROOT } from "../src/constants.js";
+import { MODULE_ID, TEMPLATE_ROOT, THEME_FLAG } from "../src/constants.js";
 import { buildHeat } from "../src/ui/components/HeatReactorGauge.js";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
@@ -30,6 +30,18 @@ test("a player's override wins over the frame, and an unknown one is ignored", (
   assert.equal(resolveTheme("IPS-N", "gms"), GMSTheme);
   assert.equal(resolveTheme("IPS-N", "auto"), IPSNTheme);
   assert.equal(resolveTheme("IPS-N", "no-such-theme"), IPSNTheme);
+});
+
+test("a mech carries its own theme: Match frame or a registered theme; anything else means none", () => {
+  const mech = theme => ({ flags: theme === undefined ? {} : { [MODULE_ID]: { [THEME_FLAG]: theme } } });
+  assert.equal(mechThemeId(mech("ha")), "ha");
+  assert.equal(mechThemeId(mech("auto")), "auto");
+  for (const bad of [undefined, null, "", "no-such-theme", 3]) assert.equal(mechThemeId(mech(bad)), null, String(bad));
+  assert.equal(mechThemeId(null), null, "no mech linked");
+  assert.equal(mechThemeId({}), null, "an actor without flags");
+  // The mech's pick then dresses the cockpit like any override, frame or not
+  assert.equal(resolveTheme("HORUS", mechThemeId(mech("ha"))), HATheme);
+  assert.equal(resolveTheme("HORUS", mechThemeId(mech("auto"))), HORUSTheme);
 });
 
 test("the setting offers Match frame plus every registered theme", () => {

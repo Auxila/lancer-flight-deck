@@ -29,9 +29,13 @@
         "Right": "Right"
       },
       "Theme": {
-        "Name": "Cockpit theme",
-        "Hint": "Match your frame's manufacturer, or pick one. Manufacturers without a theme yet use GMS.",
+        "Name": "Default cockpit theme",
+        "Hint": "For mechs whose owner hasn't picked a theme (and for every mech, if Show each mech's own theme is off): match the frame's manufacturer, or pick one. Manufacturers without a theme yet use GMS.",
         "Auto": "Match frame manufacturer"
+      },
+      "MechThemes": {
+        "Name": "Show each mech's own theme",
+        "Hint": "A mech's owner picks its cockpit theme from the badge, and everyone who views that mech sees it. Turn this off to see every mech in your default cockpit theme instead (the badge then changes your default)."
       },
       "Opacity": {
         "Name": "Panel opacity",
@@ -115,7 +119,7 @@
       },
       "AutoDamage": {
         "Name": "Roll damage after a hit",
-        "Hint": "When an attack you make hits or crits at least one target, LANCER's damage roll opens by itself, as if you'd pressed ROLL DAMAGE on the attack card. Works for attacks from anywhere: the HUD, the sheet, macros. The button stays on the card for re-rolls."
+        "Hint": "When an attack you make hits or crits at least one target, or misses with a Reliable weapon (whose Reliable damage still lands), LANCER's damage roll opens by itself, as if you'd pressed ROLL DAMAGE on the attack card. Works for attacks from anywhere: the HUD, the sheet, macros. The button stays on the card for re-rolls."
       },
       "MeltdownTick": {
         "Name": "Meltdown countdowns tick at turn end",
@@ -181,6 +185,47 @@
       "Tech": "Tech",
       "Hull": "HULL",
       "Engineering": "ENGINEERING"
+    },
+    "StatInfo": {
+      "evasion": {
+        "Name": "Evasion",
+        "Text": "What an attack against it must reach to hit. Covers every attack except tech attacks, which roll against <strong>E-Defense</strong>."
+      },
+      "edef": {
+        "Name": "E-Defense",
+        "Text": "What a tech attack against it, an Invade included, must reach to hit."
+      },
+      "speed": {
+        "Name": "Speed",
+        "Text": "Spaces it can cover with its standard move each turn. A <strong>Boost</strong> moves it its Speed again."
+      },
+      "sensors": {
+        "Name": "Sensors",
+        "Text": "How far its sensors reach. Tech actions (Invade, Lock On, Scan and the rest) and Search can only target what's within this range."
+      },
+      "save": {
+        "Name": "Save Target",
+        "Text": "What a character must reach on a save it forces with its weapons, systems or talents."
+      },
+      "tech": {
+        "Name": "Tech Attack",
+        "Text": "Added to its tech attack rolls, Invades included, against the target's <strong>E-Defense</strong>."
+      },
+      "Frame": "Frame {n}",
+      "FrameOnly": "All from the frame: no skill, talent or gear adds to it.",
+      "From": {
+        "agi": "Agility",
+        "agiHalf": "half Agility",
+        "sys": "Systems",
+        "grit": "Grit",
+        "other": "gear, talents and effects"
+      },
+      "MoveLeft": "{n} of {speed} spaces of its standard move left this turn.",
+      "Now": "On it now"
+    },
+    "Move": {
+      "Over": "{name} moved {n} more spaces than it had left this turn.",
+      "OverOne": "{name} moved 1 more space than it had left this turn."
     },
     "Heat": {
       "Title": "Reactor heat",
@@ -375,11 +420,6 @@
       "Core": "Flight Deck: the Core Power flow failed. See the console (F12).",
       "Action": "Flight Deck: that action failed. See the console (F12)."
     },
-    "Move": {
-      "Hint": "Drag to move. Drop at a screen edge to dock.",
-      "Dock": "Dock the panel",
-      "DockHere": "Dock here"
-    },
     "Resize": {
       "Label": "Panel size",
       "Hint": "Drag to resize · double-click to reset · arrow keys adjust"
@@ -445,7 +485,6 @@
       }
     },
     "Systems": {
-      "Title": "Systems available",
       "Button": "Systems available",
       "ButtonHint": "Your mech's systems: hover for the rules, click to post to chat",
       "CountLabel": "{ready} of {total} ready",
@@ -568,7 +607,7 @@
       "MoveMode": "Movement mode",
       "ResetMove": "Reset movement",
       "ResetMoveShort": "Reset",
-      "ResetMoveHint": "Set remaining movement back to your Speed.",
+      "ResetMoveHint": "Set remaining movement back to your Speed, and clear the distance the ruler counts as moved this turn.",
       "Tracker": "Action tracker",
       "CorePower": "Core power",
       "CorePassive": "Core passive",
@@ -915,7 +954,9 @@
       "Auto": "Match frame",
       "AutoDetail": "{frame}: {badge}",
       "AutoNone": "No mech linked: {badge}",
-      "Footer": "Hover: preview · Click: choose · Esc: close"
+      "Footer": "Hover: preview · Click: choose · Esc: close",
+      "ScopeMech": "{name}: everyone sees it",
+      "ScopeDefault": "Your default"
     },
     "HA": {
       "House": "Harrison Armory",

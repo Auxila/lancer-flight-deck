@@ -1055,11 +1055,11 @@
   border-style: dashed;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  #lancer-flight-deck-npc .lfd-init-unit.is-acting::before,
-  #lancer-flight-deck-npc .lfd-npc-row {
-    animation: none !important;
-  }
+/* Reduce motion (the player's setting; under Auto, the system's): no pulsing, flashing or kicking. The
+   acting glow stays lit and damage still shows in the bars and pips */
+#lancer-flight-deck-npc.lfd-reduce-motion .lfd-init-unit.is-acting::before,
+#lancer-flight-deck-npc.lfd-reduce-motion .lfd-npc-row {
+  animation: none !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -1078,6 +1078,10 @@
   color: #ff2a2a;
   filter: drop-shadow(0 0 6px rgb(255 42 42 / 0.8));
   animation: lfd-look-arrow 0.9s ease-in-out infinite;
+}
+
+.lfd-look-arrow.lfd-reduce-motion {
+  animation: none;
 }
 
 .lfd-look-arrow[hidden] {

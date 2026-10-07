@@ -72,12 +72,23 @@ ${stack}`);
   return { browser, page };
 }
 
+/**
+ * Run one check in a page. It returns { ok, detail }, or { skip: "why" } when this world has nothing for it
+ * to test (no NPC token, no systems...): a skip is reported apart, never as a pass, but a Flight Deck error
+ * thrown while finding that out still fails it.
+ */
 async function step(page, name, fn, arg) {
   const before = errors.length;
   try {
     const out = await page.evaluate(fn, arg);
-    const ok = out?.ok !== false && errors.length === before;
-    results.push({ ok, line: `${ok ? "ok  " : "FAIL"} ${name}${out?.detail !== undefined ? ` -> ${JSON.stringify(out.detail)}` : ""}` });
+    const clean = errors.length === before;
+    if (out?.skip && clean) {
+      results.push({ ok: true, skipped: true, line: `skip ${name} -> ${out.skip}` });
+      return await page.waitForTimeout(400);
+    }
+    const ok = out?.ok !== false && !out?.skip && clean;
+    const detail = out?.detail ?? out?.skip;
+    results.push({ ok, line: `${ok ? "ok  " : "FAIL"} ${name}${detail !== undefined ? ` -> ${JSON.stringify(detail)}` : ""}` });
   } catch (err) {
     results.push({ ok: false, line: `FAIL ${name}: ${err.message.split("\n")[0]}` });
   }
@@ -162,7 +173,7 @@ await step(p, "LANCER workaround: Grapple's attack prompt carries its own title"
 
 await step(p, "LANCER workaround: a basic invade is marked as a tech attack (vs E-Defense)", async () => {
   const target = canvas.tokens.placeables.find(t => t.actor?.type === "npc" && t.visible);
-  if (!target) return { detail: "no NPC token on the scene to target" };
+  if (!target) return { skip: "no NPC token on the scene to target" };
   const before = [...game.user.targets];
   target.setTarget(true, { releaseOthers: true });
   let marked = null;
@@ -209,7 +220,7 @@ await step(p, "a system posts its full card to chat", async () => {
   const hud = game.modules.get("lancer-flight-deck").api.manager.hud;
   await hud.open("systems");
   const entry = document.querySelector('#lancer-flight-deck-hud [data-entry^="system:"]');
-  if (!entry) { hud.close(); return { ok: true, detail: "no systems on this mech" }; }
+  if (!entry) { hud.close(); return { skip: "no systems on this mech" }; }
   const before = game.messages.size;
   entry.click();
   await new Promise(r => setTimeout(r, 1500));
@@ -279,6 +290,32 @@ await step(p, "theme picker: the badge opens it, hover previews a layout, Escape
   return { ok, detail: { options, previewed, ipsnLayout, closed, restored } };
 });
 
+await step(p, "theme picker: choosing sets the mech's own theme (an actor flag), not the player's default", async () => {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const M = "lancer-flight-deck";
+  const panel = () => document.getElementById("lancer-flight-deck");
+  const themeOf = () => [...panel().classList].find(c => c.startsWith("lfd-theme-"));
+  const actor = game.modules.get(M).api.manager.actor;
+  const flag = actor.flags?.[M]?.theme;
+  const setting = game.settings.get(M, "theme");
+  const mechThemes = game.settings.get(M, "mechThemes");
+  if (!mechThemes) await game.settings.set(M, "mechThemes", true);
+  const pick = themeOf() === "lfd-theme-ha" ? "ssc" : "ha";
+  panel().querySelector(".lfd-badge").click();
+  await wait(500);
+  const scope = document.querySelector("#lancer-flight-deck-themes .lfd-theme-menu-scope")?.textContent.trim();
+  document.querySelector(`#lancer-flight-deck-themes [data-theme="${pick}"]`)?.click();
+  await wait(1500);
+  const chosen = { flag: actor.flags?.[M]?.theme, theme: themeOf(), setting: game.settings.get(M, "theme") };
+  if (flag) await actor.setFlag(M, "theme", flag);
+  else await actor.unsetFlag(M, "theme");
+  if (!mechThemes) await game.settings.set(M, "mechThemes", false);
+  await wait(1000);
+  const ok = !!scope?.includes(actor.name) && chosen.flag === pick && chosen.theme === `lfd-theme-${pick}` && chosen.setting === setting &&
+    (actor.flags?.[M]?.theme ?? undefined) === (flag ?? undefined);
+  return { ok, detail: { scope, pick, chosen, restored: actor.flags?.[M]?.theme ?? null } };
+});
+
 await step(p, "hide button, then the toolbar toggle brings it back", async () => {
   document.querySelector('#lancer-flight-deck [data-action="hidePanel"]')?.click();
   await new Promise(r => setTimeout(r, 900));
@@ -292,7 +329,7 @@ await step(p, "hide button, then the toolbar toggle brings it back", async () =>
 });
 
 await step(p, "Token Action HUD steps aside while the panel is open", async () => {
-  if (!game.modules.get("token-action-hud-core")?.active) return { detail: "Token Action HUD not active" };
+  if (!game.modules.get("token-action-hud-core")?.active) return { skip: "Token Action HUD not active" };
   const hiddenOpen = document.body.classList.contains("lfd-hide-tah");
   await game.settings.set("lancer-flight-deck", "collapsed", true);
   await new Promise(r => setTimeout(r, 500));
@@ -317,7 +354,8 @@ await step(g, "NPC Deck lists the scene's NPCs", async () => {
   const deck = document.getElementById("lancer-flight-deck-npc");
   const rows = deck?.querySelectorAll(".lfd-npc-row").length ?? 0;
   const npcs = canvas.scene?.tokens.filter(t => t.actor?.type === "npc").length ?? 0;
-  return { ok: !!deck && (rows > 0 || npcs === 0), detail: { rows, portraits: deck?.querySelectorAll(".lfd-init-unit").length ?? 0 } };
+  if (deck && !npcs) return { skip: "no NPC tokens on the scene (the deck opened)" };
+  return { ok: !!deck && rows > 0, detail: { rows, portraits: deck?.querySelectorAll(".lfd-init-unit").length ?? 0 } };
 });
 
 await step(g, "LANCER contract: NPC Deck's combat and feature calls exist", async () => {
@@ -372,5 +410,7 @@ if (unknown.length) {
 }
 if (foreign) console.log(`\n${foreign} errors from other packages ignored.`);
 const failed = results.filter(r => !r.ok).length;
-console.log(`\n${results.length - failed}/${results.length} passed`);
+const skipped = results.filter(r => r.skipped).length;
+const ran = results.length - skipped;
+console.log(`\n${ran - failed}/${ran} passed${skipped ? `, ${skipped} skipped (nothing to test in this world)` : ""}`);
 process.exit(failed ? 1 : 0);

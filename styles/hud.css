@@ -1101,6 +1101,13 @@
   color: var(--lfd-ink);
 }
 
+/* A stat's make-up: frame + skill + the rest, in the data face */
+#tooltip.lfd-hud-tip .lfd-tip-calc {
+  font: 10px/1.35 var(--lfd-font-data);
+  font-variant-numeric: tabular-nums;
+  color: var(--lfd-ink-dim);
+}
+
 #tooltip.lfd-hud-tip .lfd-tip-note {
   font-size: 10px;
   color: var(--lfd-caution);
@@ -1362,6 +1369,16 @@
 
 #lancer-flight-deck-themes .is-checked .lfd-theme-check {
   opacity: 1;
+}
+
+/* Who the choice is for: this mech (everyone sees it), or your own default */
+#lancer-flight-deck-themes .lfd-theme-menu-scope {
+  margin-left: auto;
+  padding-left: 8px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  color: var(--lfd-ink-dim);
 }
 
 #lancer-flight-deck-themes .lfd-theme-menu-foot {

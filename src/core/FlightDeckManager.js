@@ -1,6 +1,6 @@
 import { ALERT_MS, MODULE_ID, SCALE_MAX, SCALE_MIN, SETTINGS, STATUS } from "../constants.js";
-import { getSetting, registerSettings, setSetting } from "../settings.js";
-import { resolveTheme } from "../themes/registry.js";
+import { getSetting, reduceMotion, registerSettings, setSetting } from "../settings.js";
+import { mechThemeId, resolveTheme } from "../themes/registry.js";
 import { ThemeMenu } from "../ui/ThemeMenu.js";
 import { FlightDeckPanel, PART_IDS } from "../ui/FlightDeckPanel.js";
 import { inActiveCombat, recordReaction, runEntry, trackerChange } from "../actions/runner.js";
@@ -123,7 +123,7 @@ export class FlightDeckManager {
         editable: [],
         onDown: () => {
           if (!this.panel || this.collapsed) return false;
-          this.toggleMenu(menu);
+          this.toggleMenu(menu, { focus: true });
           return true;
         },
         precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL,
@@ -434,13 +434,14 @@ export class FlightDeckManager {
   /* -------------------------------------------- */
 
   /** An action bus light: open (or close) its menu. */
-  async toggleMenu(menu) {
+  /** @param {{focus?: boolean}} [options]  focus: opened from the keyboard (see HudMenu#toggle) */
+  async toggleMenu(menu, options) {
     if (!this.actor) return;
-    await this.hud.toggle(menu);
+    await this.hud.toggle(menu, options);
   }
 
-  async toggleSystems() {
-    await this.toggleMenu("systems");
+  async toggleSystems(options) {
+    await this.toggleMenu("systems", options);
   }
 
   /** Is this mech fighting in a combat that has started? */
@@ -467,6 +468,7 @@ export class FlightDeckManager {
       return false;
     }
     if (ok && spend) await this.#spend(actor, spend);
+    if (ok && entry.def?.grantsMove) await this.#grantMove(actor);
     if (ok && entry.spend === "reaction") await recordReaction(actor, entry.reactionKey ?? entry.key);
     return ok;
   }
@@ -477,6 +479,17 @@ export class FlightDeckManager {
     if (mode === "never" || (mode === "combat" && !this.inCombat(actor))) return;
     const next = trackerChange(actor.system?.action_tracker ?? {}, kind, true, Number(actor.system?.speed) || 0);
     if (next) await actor.update({ "system.action_tracker": next });
+  }
+
+  /**
+   * Boost: move your Speed again. Adds Speed to the movement left (dragging the token spends it), under
+   * the same rule as spending.
+   */
+  async #grantMove(actor) {
+    const mode = game.settings.get(MODULE_ID, SETTINGS.SPEND_ACTIONS);
+    if (mode === "never" || (mode === "combat" && !this.inCombat(actor))) return;
+    const left = Number(actor.system?.action_tracker?.move) || 0;
+    await actor.update({ "system.action_tracker.move": left + (Number(actor.system?.speed) || 0) });
   }
 
   /**
@@ -571,7 +584,7 @@ export class FlightDeckManager {
     }
     const prev = this.telemetry;
     const next = actor ? TelemetryAdapter.read(actor) : null;
-    this.theme = resolveTheme(next?.manufacturer, getSetting(SETTINGS.THEME));
+    this.theme = resolveTheme(next?.manufacturer, this.themeChoice(actor));
 
     // Annunciator: newly lit tiles flash; a fresh baseline never does.
     const lit = litTiles(next);
@@ -687,6 +700,16 @@ export class FlightDeckManager {
     };
   }
 
+  /**
+   * The theme id that dresses this mech's cockpit: the mech's own (picked by its owner, the same for every
+   * player who views it), else this player's default. A player who turns off "Show each mech's own
+   * theme" always gets their default.
+   * @param {Actor|null} [actor]
+   */
+  themeChoice(actor = this.actor) {
+    return (getSetting(SETTINGS.MECH_THEMES) && mechThemeId(actor)) || getSetting(SETTINGS.THEME);
+  }
+
   /** The theme on screen: the picker's preview while it shows one, else the mech's theme. */
   get shownTheme() {
     return this.#previewTheme ?? this.theme;
@@ -710,9 +733,8 @@ export class FlightDeckManager {
     el.classList.add(this.shownTheme.cssClass);
     if (this.collapsed) this.themeMenu.close();
     this.themeMenu.syncTheme();
-    const motion = getSetting(SETTINGS.REDUCE_MOTION);
-    const reduce = motion === "on" || (motion === "auto" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
-    el.classList.toggle("lfd-reduce-motion", !!reduce);
+    const reduce = reduceMotion();
+    el.classList.toggle("lfd-reduce-motion", reduce);
     el.classList.toggle("is-collapsed", this.collapsed);
     el.classList.toggle("is-standby", !t);
     el.classList.toggle("is-shutdown", !!t?.flags[STATUS.SHUT_DOWN]);

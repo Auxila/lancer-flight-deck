@@ -159,6 +159,18 @@ export class TelemetryAdapter {
         save: num(sys.save),
         tech: num(sys.tech_attack),
       },
+      // What the stats are built from (hover cards): the frame's own numbers and the pilot's Grit
+      statBase: frame?.system?.stats
+        ? {
+            evasion: num(frame.system.stats.evasion),
+            edef: num(frame.system.stats.edef),
+            speed: num(frame.system.stats.speed),
+            sensors: num(frame.system.stats.sensor_range),
+            save: num(frame.system.stats.save),
+            tech: num(frame.system.stats.tech_attack),
+          }
+        : null,
+      grit: num(pilot?.system?.grit),
       // HASE check bonuses (a mech's Hull / Agility / Systems / Engineering)
       checks: { hull: num(sys.hull), agi: num(sys.agi), sys: num(sys.sys), eng: num(sys.eng) },
       heat,

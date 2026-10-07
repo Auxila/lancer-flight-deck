@@ -9,6 +9,7 @@ export const SETTINGS = Object.freeze({
   DOCK_SIDE: "dockSide",
   OPACITY: "opacity",
   THEME: "theme",
+  MECH_THEMES: "mechThemes",
   AUDIO: "audioEnabled",
   VOLUME: "volume",
   DANGER_HUM: "dangerHum",
@@ -35,6 +36,9 @@ export const SETTINGS = Object.freeze({
   NPC_DECK_MODE: "npcDeckMode",
   NPC_DECK_POSITION: "npcDeckPosition",
 });
+
+/** Actor flag: the mech's own cockpit theme ("auto" or a theme id), picked by its owner, seen by everyone. */
+export const THEME_FLAG = "theme";
 
 /** v13 user query the GM answers when a player applies a condition to a token they don't own. */
 export const QUERY_APPLY = `${MODULE_ID}.applyCondition`;

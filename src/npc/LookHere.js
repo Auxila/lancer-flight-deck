@@ -6,21 +6,33 @@
  * or broadcast): a solid ring with a soft glow, a dashed ring turning against it, four
  * chevrons bobbing in toward the token, and sonar rings rippling out. Line weights are
  * divided by the canvas zoom so it reads the same zoomed in or out. If the token is off
- * screen, a red arrow on the screen edge points to it instead.
+ * screen, a red arrow on the screen edge points to it instead. Under Reduce motion it holds
+ * still (one frame of it, still following pans and zooms) and the arrow doesn't bob.
  */
 import { damageClock as clock } from "../ui/damage/clock.js";
+import { reduceMotion } from "../settings.js";
 
 const COLOR = 0xff2a2a;
 const PERIOD = 1300; // ms per sonar ripple
 const RIPPLES = 3;
+/** The moment shown under Reduce motion: ripples spread out, chevrons in close. */
+const STILL_T = PERIOD * 0.4;
 
 export class LookHere {
   static #mark = null;
+  static #still = false;
+
+  /** Reduce motion changed while a mark is up. */
+  static setStill(still) {
+    LookHere.#still = still;
+    LookHere.#mark?.arrow?.classList.toggle("lfd-reduce-motion", still);
+  }
 
   /** Mark this token (a Token placeable). Replaces any mark already up. */
   static show(token) {
     LookHere.hide();
     if (!token || !canvas?.ready || token.scene !== canvas.scene) return;
+    LookHere.#still = reduceMotion();
     const container = new PIXI.Container();
     container.name = `lfd-look-here:${token.id}`; // findable from the console
     container.eventMode = "none";
@@ -32,7 +44,8 @@ export class LookHere {
     const arrow = LookHere.#arrowElement(token);
     // The effects clock (normally real time) lets the marker be slowed down for inspection
     const started = clock.now();
-    const tick = () => LookHere.#draw({ token, container, glow, lines, arrow, t: clock.now() - started });
+    // Still, it keeps redrawing: the marker follows the token and the canvas as they move
+    const tick = () => LookHere.#draw({ token, container, glow, lines, arrow, t: LookHere.#still ? STILL_T : clock.now() - started });
     canvas.app.ticker.add(tick);
     LookHere.#mark = { token, container, tick, arrow };
     tick();
@@ -121,7 +134,7 @@ export class LookHere {
   /** A DOM arrow on the screen edge, shown only while the token is off screen. */
   static #arrowElement(token) {
     const el = document.createElement("div");
-    el.className = "lfd-look-arrow";
+    el.className = `lfd-look-arrow${LookHere.#still ? " lfd-reduce-motion" : ""}`;
     el.innerHTML = `<i class="fa-solid fa-location-arrow" aria-hidden="true"></i><span></span>`;
     el.querySelector("span").textContent = token.name ?? "";
     el.hidden = true;

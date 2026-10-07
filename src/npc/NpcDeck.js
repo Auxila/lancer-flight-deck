@@ -1,6 +1,6 @@
 import { MODULE_ID, SCALE_MAX, SCALE_MIN, SETTINGS, TEMPLATE_ROOT } from "../constants.js";
 import { setStatus } from "../core/ConditionControl.js";
-import { getSetting, setSetting } from "../settings.js";
+import { getSetting, reduceMotion, setSetting } from "../settings.js";
 import { resolveTheme } from "../themes/registry.js";
 import { DeckFrame } from "../ui/DeckFrame.js";
 import { HoverCards } from "../ui/HoverCards.js";
@@ -227,6 +227,12 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const hook of ["createToken", "deleteToken", "createCombat", "updateCombat", "deleteCombat", "createCombatant", "updateCombatant", "deleteCombatant", "targetToken"]) {
       Hooks.on(hook, () => this.queue());
     }
+    // Reduce motion changed: the deck and its map marker follow at once
+    Hooks.on("clientSettingChanged", key => {
+      if (key !== `${MODULE_ID}.${SETTINGS.REDUCE_MOTION}`) return;
+      this.element?.classList.toggle("lfd-reduce-motion", reduceMotion());
+      LookHere.setStill(reduceMotion());
+    });
     // A token that only moved (anyone's, every step in combat) changes nothing the deck shows
     Hooks.on("updateToken", (doc, changes) => {
       if (!Object.keys(changes ?? {}).every(key => MOVEMENT_KEYS.has(key))) this.queue();
@@ -402,6 +408,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const cls of [...el.classList]) if (cls.startsWith("lfd-theme-")) el.classList.remove(cls);
     el.classList.add(this.#theme().cssClass);
     el.classList.toggle("is-collapsed", !!getSetting(SETTINGS.NPC_DECK_COLLAPSED));
+    el.classList.toggle("lfd-reduce-motion", reduceMotion());
     this.frame.apply();
     this.cards.restore();
     this.#restoreLook();
@@ -597,7 +604,13 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
   static #checks = Promise.resolve();
   static #waiting = 0;
 
-  /** Run an update; if it starts LANCER's Structure or Overheat check for this actor, wait until that's rolled or cancelled. */
+  /**
+   * Run an update; if it starts LANCER's Structure or Overheat check for this actor, wait until that's
+   * rolled or cancelled. LANCER reports both (postFlow), but not a flow that throws partway. It starts the
+   * check without awaiting it, so that error surfaces as an unhandled rejection: one from LANCER's own code
+   * lets the queue go on, so a broken check never holds every later NPC edit until a reload. There's no
+   * timeout: a GM may sit on a prompt, and the next check opening would cancel it.
+   */
   static async #settle(actor, update) {
     const started = new Set();
     const finished = new Set();
@@ -612,11 +625,21 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
         if ([...started].every(f => finished.has(f))) done?.();
       })]);
     }
+    // Listening from before the update: a check can fail before the update call returns
+    let failed = false;
+    const onError = event => {
+      if (!started.size || !/\/systems\/lancer\//.test(String(event.reason?.stack ?? ""))) return;
+      console.warn(`Flight Deck | ${actor.name}: LANCER's check failed; the next one can go ahead`);
+      failed = true;
+      done?.();
+    };
+    window.addEventListener("unhandledrejection", onError);
     try {
       await update();
       // LANCER starts the check from its own updateActor hook, which has run by now
-      if ([...started].some(f => !finished.has(f))) await new Promise(resolve => (done = resolve));
+      if (!failed && [...started].some(f => !finished.has(f))) await new Promise(resolve => (done = resolve));
     } finally {
+      window.removeEventListener("unhandledrejection", onError);
       for (const [name, id] of hooks) Hooks.off(name, id);
     }
   }

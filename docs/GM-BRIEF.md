@@ -19,12 +19,14 @@ Every roll, attack, card, heat cost and Limited use goes through **LANCER's own 
 | Conditions on actors | A player clicks a condition tile on their own mech or tokens they own | That player | — |
 | Lock On on an enemy | A player Locks On a target they don't own | The **active GM's** client, on request | World: *Players can Lock On tokens they don't own* |
 | HP, heat, Burn, Overshield | The panel's editors (owner), the NPC Deck's steppers (GM) | Owner / GM | — |
-| LANCER's action tracker | An action from a HUD menu goes through; right-click on an action light | Owner | World: *HUD menus spend actions* (in combat / always / never) |
+| LANCER's action tracker | An action from a HUD menu goes through; right-click on an action light; a mech's token dragged or arrow-keyed on the map (its movement; an undo gives it back) | Owner (the client of whoever moved the token) | World: *HUD menus spend actions* (in combat / always / never) |
+| Foundry's movement history of a mech's token | The MOVE menu's Reset clears it, with the movement count | Owner | — |
 | Reactor meltdown countdown (`system.meltdown_timer`) | Started from the Meltdown tile or Self-Destruct; ticks down at the end of that character's turn in combat | Owner starts it; the **active GM's** client ticks it | World: *Meltdown countdowns tick at turn end* |
 | Token movement mode | The Movement menu | Owner | — |
 | Deployable tokens (mines, drones, turrets) | **Deploy / Recall** from a HUD menu | Only users Foundry lets create and delete tokens (Assistant GM and up by default) | Foundry: User Permissions |
-| Token Magic filters on token art (ids `lfd-…`) | A token gains Exposed, Shredded, Jammed or Impaired | The **active GM's** client only | World: *Condition effects on token art* |
+| Token Magic filters on token art (ids `lfd-…`) | A token gains Exposed, Shredded, Jammed or Impaired | Exactly one client: the **active GM's**, or with no GM online, the token's first active owner | World: *Condition effects on token art* |
 | A note on actors: reactions used this round | A reaction is taken from a HUD menu | Owner | — |
+| A note on actors: the mech's cockpit theme | Picked from the panel's maker badge; everyone who has that mech in their panel sees it | Owner | Per player: *Show each mech's own theme* |
 
 Also, after a hit, LANCER's own damage prompt can open by itself. That's the per-player setting *Roll damage after a hit*. Nothing is rolled until the player clicks Roll in LANCER's prompt.
 
@@ -72,4 +74,4 @@ Tested in a world running these modules, and by reading their code:
 1. Try it first in a copy of the world. The README's *Before your first session* takes ten minutes.
 2. Let players opt in. Anyone unsure can leave it off; the panel is per player.
 3. If anything misbehaves at the table, the player hides the panel and keeps playing from the sheet. Nothing is lost.
-4. Afterwards, note anything that surprised you. Version 0.7 exists to make that list short.
+4. Afterwards, note anything that surprised you and pass it on: that list is what the next version fixes.

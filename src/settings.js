@@ -40,6 +40,15 @@ export function registerSettings(manager) {
     onChange: () => manager.relink(),
   });
 
+  client(SETTINGS.MECH_THEMES, {
+    name: "LFD.Settings.MechThemes.Name",
+    hint: "LFD.Settings.MechThemes.Hint",
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: () => manager.relink(),
+  });
+
   client(SETTINGS.SCALE, {
     name: "LFD.Settings.Scale.Name",
     hint: "LFD.Settings.Scale.Hint",
@@ -243,4 +252,13 @@ export function getSetting(key) {
 
 export function setSetting(key, value) {
   return game.settings.set(MODULE_ID, key, value);
+}
+
+/**
+ * This player's Reduce motion choice, resolved: On, Off, or under Auto the operating system's
+ * preference. Everything Flight Deck animates asks here (the panel, the NPC Deck, its map marker).
+ */
+export function reduceMotion() {
+  const mode = getSetting(SETTINGS.REDUCE_MOTION);
+  return mode === "on" || (mode === "auto" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 }

@@ -14,6 +14,14 @@ export function conditionKey(id) {
   return game.i18n.has(`LFD.Conditions.${key}.Text`) ? key : null;
 }
 
+/** A condition's rule as one line ("Prone: attacks against it gain..."), or null if we have none. */
+export function conditionLine(id) {
+  const key = conditionKey(id);
+  if (!key) return null;
+  const i18n = game.i18n;
+  return `<p><strong>${esc(i18n.localize(`LFD.Conditions.${key}.Name`))}:</strong> ${i18n.localize(`LFD.Conditions.${key}.Text`)}</p>`;
+}
+
 /** Plain-text description, for aria labels. */
 export function conditionText(id) {
   const key = conditionKey(id);
@@ -45,9 +53,7 @@ export function conditionCard(id, { title, detail = null, hint = null, also = []
     const ends = `LFD.Conditions.${key}.Ends`;
     if (i18n.has(ends)) parts.push(`<p class="lfd-tip-ends">${i18n.localize(ends)}</p>`);
   }
-  for (const other of also.map(conditionKey).filter(Boolean)) {
-    parts.push(`<p><strong>${esc(i18n.localize(`LFD.Conditions.${other}.Name`))}:</strong> ${i18n.localize(`LFD.Conditions.${other}.Text`)}</p>`);
-  }
+  for (const line of also.map(conditionLine).filter(Boolean)) parts.push(line);
   if (hint) parts.push(`<footer>${esc(hint)}</footer>`);
   return `<div class="lfd-tip lfd-tip-condition">${parts.join("")}</div>`;
 }

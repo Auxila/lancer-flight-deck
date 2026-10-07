@@ -404,6 +404,15 @@
   border-left: none;
 }
 
+/* Hover: a breath of gold over the dial, the label catching the leaf */
+#lancer-flight-deck.lfd-theme-ssc .lfd-stat:is(:hover, :focus-visible) {
+  background: color-mix(in srgb, var(--lfd-accent) 9%, transparent);
+}
+
+#lancer-flight-deck.lfd-theme-ssc .lfd-stat:is(:hover, :focus-visible) dt {
+  color: var(--lfd-accent);
+}
+
 #lancer-flight-deck.lfd-theme-ssc .lfd-stat dt {
   font: 600 11px/1.1 var(--lfd-font-display);
   letter-spacing: 0.1em;

@@ -38,14 +38,14 @@ Ten minutes in a copy of your world (or a test world) shows everything a cautiou
 5. Click the eye-slash button in the panel header to hide it, then bring it back with the gauge button in **Token Controls**. Every player can do this mid-session.
 6. Open the mech sheet: it's untouched. Flight Deck reads the actor and runs LANCER's flows; it doesn't replace anything.
 
-**Removing it cleanly.** Apart from ordinary game changes you make through it (HP, heat, conditions, the action tracker), Flight Deck saves only two things: Token Magic filters on tokens (ids starting `lfd-`) and a small flag recording which reactions were used this round. **Configure Settings → Flight Deck → Remove Flight Deck data** (GM) shows what it found on every scene and removes both, then turns off **Condition effects on token art** so the filters don't come back. Then untick Flight Deck in **Manage Modules**. Macros can call `game.modules.get("lancer-flight-deck").api.cleanup.run()`.
+**Removing it cleanly.** Apart from ordinary game changes you make through it (HP, heat, conditions, the action tracker), Flight Deck saves only three things: Token Magic filters on tokens (ids starting `lfd-`), a small flag recording which reactions were used this round, and each mech's cockpit theme if someone picked one. **Configure Settings → Flight Deck → Remove Flight Deck data** (GM) shows what it found on every scene and removes it all, then turns off **Condition effects on token art** so the filters don't come back. Then untick Flight Deck in **Manage Modules**. Macros can call `game.modules.get("lancer-flight-deck").api.cleanup.run()`.
 
 ## What it shows
 
 | Section | Contents |
 |---|---|
 | Header | Manufacturer badge, mech and frame, pilot callsign, comms link status, your activation |
-| Hull | HP with overshield, armor, burn, Evasion / E-Def / Speed / Sensors / Save / Tech, and HULL / AGI / SYS / ENG check buttons |
+| Hull | HP with overshield, armor, burn, Evasion / E-Def / Speed / Sensors / Save / Tech, and HULL / AGI / SYS / ENG check buttons. Hover (or Tab to) any stat for its card: what it does in play, how the number is made up (frame, the skill or Grit the rules add, and anything from gear and talents), the move left this turn on Speed, and any condition on the mech right now that changes it |
 | Reactor heat | One segment per point of heat, the Danger Zone boundary, the Overcharge ladder, and the odds that the next Overcharge pushes you over your Heat Cap |
 | Integrity | Structure and stress pips. Each track shows the next check's dice, the exact chance of every outcome, and the chance of losing the mech |
 | Master caution | 16 fixed annunciator tiles: warnings ▲, cautions ◆, advisories ●. Shape and border style repeat the colour's meaning |
@@ -150,7 +150,7 @@ to mark that slot spent, or available again; Shift+right-click REACT does the sa
 | Light | Menu |
 |---|---|
 | INVADE | Fragment Signal and every invade option from your systems, frame and talents, with Tech Attack, Sensors and your current target. The button itself is a live terminal: hex rain, a scan line and a short glitch every few seconds. It goes quiet when no quick action is left. |
-| MOVE | Movement modes your token can use (walk, climb, jump, teleport…), set on the token so the ruler measures them, plus Boost, Disengage and a movement reset. With Lancer Ruler Integration, **Auto** hands the mode back to it (it picks walk, fly, crawl or ignore-terrain from your conditions); picking a mode pins it |
+| MOVE | Movement modes your token can use (walk, climb, jump, teleport…), set on the token so the ruler measures them, plus Boost, Disengage and a movement reset (the count and the ruler's distance moved). With Lancer Ruler Integration, **Auto** hands the mode back to it (it picks walk, fly, crawl or ignore-terrain from your conditions); picking a mode pins it |
 | QUICK | Skirmish, Boost, Grapple, Ram, Hide, Search, Prepare, Eject, Shut Down, Self-Destruct; quick tech (Bolster, Lock On, Scan, Invade); then every quick and quick-tech action from your gear |
 | FULL | Barrage, Improvised Attack, Stabilize, Disengage, Boot Up, Mount, Jockey, Full Tech; then every full and full-tech action from your gear |
 | REACT | Protocols and reactions. On top, every protocol your frame, systems and talents give you, marked PROTOCOL READY or USED. Below, Brace and Overwatch, then every reaction your frame, systems, weapons, talents and core bonuses give you. The light's lamp is your reaction; its PROTO line lights while the protocol is still available this turn. |
@@ -202,6 +202,14 @@ Frame traits and the core passive post their actions too.
   is marked spent on LANCER's action tracker, using LANCER's own rules: a quick action uses the
   full action first, a full action uses both. The world setting **HUD menus spend actions**
   chooses: only in an active combat (default), always, or never.
+- **Movement is movement however you make it.** Dragging your mech's token on the map, or moving it
+  with the arrow keys, spends the MOVE count by what Foundry measured for the path, in spaces, with
+  difficult terrain costing what it costs. Undoing a move (Ctrl+Z) gives it back. Being pushed, pulled
+  or put somewhere (displacement, a GM's or a script's move, a paste) costs nothing. Moving further
+  than you had left says so, once, to you. **Boost** adds your Speed to what's left. The **Reset**
+  in the MOVE menu puts the count back to your Speed and clears Foundry's record of the turn's
+  movement too, so the ruler's distance moved starts over with it. The same world setting decides
+  when any of this counts.
 - **Reactions** follow both limits: LANCER's tracker (one reaction per turn), and each reaction
   once per round. A reaction taken from the HUD shows USED until the next round.
 - **Keyboard:** arrow keys move between entries, Enter runs one, Esc goes back or closes.
@@ -229,7 +237,7 @@ Skirmish, Barrage and Overwatch open a weapon picker that follows LANCER's mount
 
 ## Damage after a hit
 
-When an attack you make hits or crits at least one target, LANCER's damage roll prompt opens by itself, as if you'd pressed ROLL DAMAGE on the attack card (which stays there for re-rolls). It works for attacks from anywhere: the HUD, the sheet, macros.
+When an attack you make hits or crits at least one target, or misses with a **Reliable** weapon (whose Reliable damage still lands), LANCER's damage roll prompt opens by itself, as if you'd pressed ROLL DAMAGE on the attack card (which stays there for re-rolls). A miss with any other weapon opens nothing. It works for attacks from anywhere: the HUD, the sheet, macros.
 
 - Every target is in the one prompt with its result already chosen: **Crit**, **Hit** or **Miss** (a Reliable weapon's misses still take their Reliable damage).
 - An area attack (Blast, Burst, Line, Cone) is one attack, so it opens one prompt for all its targets.
@@ -369,15 +377,23 @@ Every condition has its own look on the token itself. Three techniques, each mat
 
 The cockpit wears the colours and hardware of your frame's manufacturer. Click the maker's badge at the
 top left of the panel to choose another: **Match frame** (the default), or any theme by name. Hovering an
-option previews it on the whole cockpit, layout included; Escape or clicking away puts yours back. The choice
-is yours alone (a client setting) and doesn't touch the mech. Frames from makers without a theme yet,
-including LCP manufacturers, use GMS.
+option previews it on the whole cockpit, layout included; Escape or clicking away puts yours back. Frames
+from makers without a theme yet, including LCP manufacturers, use GMS.
+
+**Each mech keeps its own theme.** The choice is saved on the mech (a Flight Deck flag on the actor), so
+everyone who has that mech in their panel sees the same cockpit: select your mech and it's Harrison Armory,
+select your friend's and it's HORUS. The picker's header says who it's for (*Kitbash: everyone sees it*).
+Anyone who owns the mech can change it, the GM included; the panel only shows mechs you own, so for players
+to look over each other's builds in the cockpit, give them Owner on each other's mechs (Observer only opens
+the sheet). Mechs nobody has picked a theme for use each player's **Default cockpit theme** setting. A player
+who'd rather see every mech their own way can turn off **Show each mech's own theme**; the badge then sets
+their default instead. **Remove Flight Deck data** (below) clears the picks along with the rest of the
+module's data.
 
 | Theme | Cockpit |
 |---|---|
 | **GMS** | Union standard issue: red on gunmetal, chamfered plates, hazard striping. The baseline layout. |
 | **IPS-N** | A ship's bridge. A nameboard with the Northstar rose (it turns when you reach for it), a hull number and the frame as a vessel class; riveted plating with rounded hatch corners and signal flags on the sections. HP is hull plating marked at every hit point. The Danger Zone threshold is a load line with its Plimsoll mark, the Overcharge ladder an engine order telegraph pointing at the next cost, and integrity a damage control board: structure as watertight compartments that flood, stress as valve wheels that blow. Cold boot: a sonar sweep, then BATTLE STATIONS. |
-
 | **HORUS** | A leaked readout. 1-bit black and bone, all monospace and lowercase except the alarms, plates printed a pixel out of register in HORUS green. The sigil (the signal slips when you reach for it), a hashed handle, the frame as the UIB's pattern group. Sections are prompts (`$ hull`); HP prints cell by cell over a dithered blank; heat is a memory dump numbered in hex; the Overcharge ladder a checklist, the next order in reverse video; integrity is watched, by eyes that follow your pointer and shut as structure is lost and sigil rings that break with stress, each with its next check as a tree branch. Buttons are executables (`./stabilize`). Cold boot: the sigil prints in dither behind *every door, open*, UNSEALED, RUN ANYWAY. |
 | **HA** | Imperial brutalism. Poured-concrete slabs with one corner sheared off and a violet insignia in the other, poster capitals, Roman numerals on the sections. The Armory's banner hangs from the header with its mark (it stirs when you reach for it), over the battlegroup the mech was raised with, named the Armory way. HP is a sheared slab; heat runs in hexagonal cells; the Overcharge ladder (HA's own discipline) climbs as a stair, the next step lit; integrity hangs as two banners of rank insignia, chevrons for structure and bars for stress, struck in red as they're lost. Lamps are the mark's triangle; HUD glyphs and NPC portraits are cut as shields. Cold boot: the Bruise spreads violet behind *Superior by design*, ASCENDANT, FOR THE PURVIEW. |
 | **SSC** | An atelier chronometer. Black lacquer engraved with guilloché, gold hairlines and serif small caps; a maker's label with the SSC seal (it blooms when you reach for it), the house and a commission number, the mech's name as its owner wrote it. HP is a wingspan, spreading from the body to both tips; heat a calibrated scale with a hand; the Overcharge ladder a row of set jewels, the next one lit; integrity two watch sub-dials whose indices go hollow red as boxes are lost. Cold boot: guilloché turning behind *You only need one*, FULL SYNC, BESPOKE. |
@@ -390,7 +406,7 @@ Heat colours never change between themes.
 - **Alt+C** turns the panel on, then collapses and expands it. You can rebind it in Configure Controls.
 - **Panel header:** the speaker button mutes audio, the eye-slash button hides the panel completely, and the chevrons collapse it to a slim tab that still shows heat and structure.
 - **Token Controls:** the **Flight Deck** toggle (gauge icon) turns the panel on and off for every player. It's the one-click way back after hiding it.
-- Client settings, which are per player: show panel, dock side, theme, panel size, opacity, reduce motion, cold boot, audio, volume, and Danger Zone afterglow.
+- Client settings, which are per player: show panel, dock side, default theme and whether to show each mech's own, panel size, opacity, reduce motion, cold boot, audio, volume, and Danger Zone afterglow.
 - World settings: offer the panel to each player once when they first log in with a mech (opt-in; nobody is forced), whether players can Lock On tokens they don't own, when HUD menus spend actions, and whether meltdown countdowns tick at turn end (the active GM's client ticks them, when LANCER runs its own end-of-turn automation). **Remove Flight Deck data** (GM) is here too.
 
 The panel follows the last mech token you control. If you aren't controlling one, it falls back to your assigned character (or your pilot's active mech).
@@ -512,7 +528,7 @@ npm test
 FD_URL=http://localhost:30000 FD_GM="Gamemaster" FD_PLAYER="Player" FD_MECH="Everest" npm run smoke
 ```
 
-It needs `playwright-core` (`PLAYWRIGHT_CORE` can point at an existing install) and a browser (`FD_EXECUTABLE`, `FD_BROWSER=firefox`). A step fails only on errors thrown from Flight Deck's own code: errors from other modules are counted but don't fail anything, and errors that name no package are listed for you to look at.
+It needs `playwright-core` (`PLAYWRIGHT_CORE` can point at an existing install) and a browser (`FD_EXECUTABLE`, `FD_BROWSER=firefox`). A step fails only on errors thrown from Flight Deck's own code: errors from other modules are counted but don't fail anything, and errors that name no package are listed for you to look at. A step with nothing to test in your world (no NPC token on the scene, no systems on the mech, Token Action HUD not installed) is reported as skipped, not passed, and the summary counts it apart.
 
 The tests cover the odds maths against brute-force enumeration, the action-economy rules, the fracture geometry and damage levels, NPC feature states and token portraits. The UI was verified in a real Foundry 13.351 server with LANCER 3.1.3, in Chromium and Firefox, with no other modules active.
 
@@ -522,7 +538,7 @@ The tests cover the odds maths against brute-force enumeration, the action-econo
 2. `npm run package` builds `dist/module.json` and `dist/lancer-flight-deck.zip` with only the files Foundry needs, and moves the `download` URL to the new version's tag.
 3. Commit, push, and publish both files as a GitHub release tagged `v<version>`:
    ```bash
-   gh release create v0.4.1 dist/module.json dist/lancer-flight-deck.zip --notes-file CHANGELOG.md
+   gh release create "v$(node -p "require('./module.json').version")" dist/module.json dist/lancer-flight-deck.zip --notes-file CHANGELOG.md
    ```
 
 The manifest URL always points at the latest release's `module.json`, so installed copies pick the update up.

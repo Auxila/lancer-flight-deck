@@ -3,6 +3,7 @@ import { setStatus, startMeltdown } from "../core/ConditionControl.js";
 import { ATTACK_TITLES, textId } from "./basic.js";
 import { deployableChatCard, systemChatCard, textWithActions } from "./chatCards.js";
 import { placeDeployable, recallOrRedeploy } from "./deployables.js";
+import { resetMovement } from "../core/MovementTracker.js";
 
 /**
  * Runs HUD entries through LANCER's own flows, so every card, roll, heat cost, Limited use and
@@ -213,7 +214,8 @@ export async function runEntry(entry, { actor, targets, token }) {
       return true;
 
     case "resetMove":
-      await actor.update({ "system.action_tracker.move": Number(actor.system?.speed) || 0 });
+      // LANCER's count and Foundry's record of the turn's movement (the ruler's distance moved) together
+      await resetMovement(actor);
       return true;
   }
   console.warn("Flight Deck | Unknown HUD entry", entry);

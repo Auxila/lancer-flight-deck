@@ -392,6 +392,17 @@
   border-top: 1px dashed var(--lfd-line);
 }
 
+/* Hover: the dashed rule prints solid and the label comes up in bone */
+#lancer-flight-deck.lfd-theme-horus .lfd-stat:is(:hover, :focus-visible) {
+  background: color-mix(in srgb, var(--lfd-ink) 7%, transparent);
+  border-top-style: solid;
+  border-top-color: var(--lfd-ink);
+}
+
+#lancer-flight-deck.lfd-theme-horus .lfd-stat:is(:hover, :focus-visible) dt {
+  color: var(--lfd-ink);
+}
+
 #lancer-flight-deck.lfd-theme-horus .lfd-stat dt {
   font-size: 9px;
   letter-spacing: 0.02em;

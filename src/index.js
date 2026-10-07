@@ -8,6 +8,7 @@
 import { MODULE_ID } from "./constants.js";
 import { registerConditionQuery } from "./core/ConditionControl.js";
 import { registerAutoDamage } from "./core/AutoDamage.js";
+import { registerMovementTracker } from "./core/MovementTracker.js";
 import { FlightDeckManager } from "./core/FlightDeckManager.js";
 import { TokenEffects } from "./fx/TokenEffects.js";
 import * as Odds from "./core/Odds.js";
@@ -22,6 +23,7 @@ Hooks.once("init", () => {
   FlightDeckManager.instance.init();
   registerConditionQuery();
   registerAutoDamage();
+  registerMovementTracker();
   registerMeltdownClock();
   TokenEffects.instance.init();
   NpcDeck.init();

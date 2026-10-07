@@ -70,12 +70,18 @@ export class HudMenu {
     return this.view?.menu ?? null;
   }
 
-  async toggle(menu) {
-    if (this.menu === menu && !this.view?.sub) return this.close();
-    return this.open(menu);
+  /**
+   * Open a menu, or close it if it's the one showing.
+   * @param {string} menu
+   * @param {{focus?: boolean}} [options]  focus: from the keyboard (a shortcut), so focus goes into the
+   *   menu on open, and back to its button on close if it was inside
+   */
+  async toggle(menu, { focus = false } = {}) {
+    if (this.menu === menu && !this.view?.sub) return this.close({ focusOpener: focus && !!this.element?.contains(document.activeElement) });
+    return this.open(menu, { focus });
   }
 
-  async open(menu) {
+  async open(menu, { focus = false } = {}) {
     if (!this.manager.panel?.element || !this.manager.actor) return;
     this.view = { menu };
     if (!this.element) this.#create();
@@ -83,12 +89,14 @@ export class HudMenu {
     this.element.dataset.menu = menu;
     this.sync();
     await this.render({ force: true, animate: true });
+    if (focus) this.element?.querySelector("[data-entry]")?.focus();
     this.manager.refresh(); // the opener shows its open state
   }
 
   close({ focusOpener = false } = {}) {
     if (!this.element) return;
-    const opener = this.#opener();
+    // The panel re-renders after this, so the button is found again by its menu once it has
+    const menu = this.view?.menu ?? null;
     this.#cards.detach();
     this.element.remove();
     this.element = null;
@@ -99,7 +107,7 @@ export class HudMenu {
     // Deferred: close can be called mid-render of the panel
     setTimeout(() => {
       this.manager.refresh().then(() => {
-        if (focusOpener) this.#openerFor(opener)?.focus();
+        if (focusOpener) this.#openerFor(menu)?.focus();
       });
     }, 0);
   }
@@ -137,7 +145,10 @@ export class HudMenu {
     this.#entries = entries;
     const html = await foundry.applications.handlebars.renderTemplate(`${TEMPLATE_ROOT}/hud/menu.hbs`, vm);
     if (this.element !== el) return; // closed while rendering
+    // Keep keyboard focus through the redraw: on the same entry if it's still there, else the first
+    const focused = el.contains(document.activeElement) ? (document.activeElement.closest("[data-entry]")?.dataset.entry ?? "") : null;
     el.innerHTML = html;
+    if (focused !== null) (el.querySelector(`[data-entry="${CSS.escape(focused)}"]`) ?? el.querySelector("[data-entry]"))?.focus({ preventScroll: true });
     el.setAttribute("aria-label", vm.title);
     el.classList.toggle("is-entering", animate);
     if (animate) setTimeout(() => el.classList.remove("is-entering"), 700);

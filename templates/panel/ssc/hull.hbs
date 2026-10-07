@@ -30,7 +30,8 @@
   </div>
   <dl class="lfd-stats">
     {{#each hull.stats}}
-    <div class="lfd-stat"><dt>{{localize key}}</dt><dd>{{value}}</dd></div>
+    <div class="lfd-stat lfd-stat-{{id}}" tabindex="0" role="group" aria-label="{{aria}}"
+         data-tooltip-html="{{tip}}" data-tooltip-class="{{@root.tipClass}}" {{#if @root.tipDirection}}data-tooltip-direction="{{@root.tipDirection}}"{{/if}}><dt>{{localize key}}</dt><dd>{{value}}</dd></div>
     {{/each}}
   </dl>
   <div class="lfd-checks" role="group" aria-label="{{localize 'LFD.Check.Group'}}">

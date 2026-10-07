@@ -1,6 +1,6 @@
-import { MODULE_ID, SETTINGS, TEMPLATE_ROOT } from "../constants.js";
+import { MODULE_ID, SETTINGS, TEMPLATE_ROOT, THEME_FLAG } from "../constants.js";
 import { getSetting, setSetting } from "../settings.js";
-import { getThemes, resolveTheme } from "../themes/registry.js";
+import { getThemes, mechThemeId, resolveTheme } from "../themes/registry.js";
 import { keyHints } from "./keyHints.js";
 
 const MENU_ID = `${MODULE_ID}-themes`;
@@ -13,9 +13,11 @@ const GAP = 4;
  * A popover beside the panel, like the HUD menus, so the scrolling panel can't clip it and the battle
  * damage layer can't draw over it. "Match frame" comes first (the theme the frame's manufacturer maps
  * to), then every registered theme, each option drawn in its own colours. Hovering or focusing one
- * previews it on the whole cockpit, its own layout included; choosing it sets the player's own Cockpit
- * theme setting and plays that theme's chime. Arrow keys move, Enter or Space chooses, Escape closes and
- * returns to the badge.
+ * previews it on the whole cockpit, its own layout included; choosing it plays that theme's chime and
+ * sets it on the mech itself (an actor flag), so every player who has the mech in their panel sees the
+ * same cockpit; with no mech linked, or with "Show each mech's own theme" off, it sets the player's own
+ * default instead (see #target). Arrow keys move, Enter or Space chooses, Escape closes and returns to
+ * the badge.
  */
 export class ThemeMenu {
   /** @param {import("../core/FlightDeckManager.js").FlightDeckManager} manager */
@@ -33,20 +35,32 @@ export class ThemeMenu {
 
   #onResize = () => this.position();
 
+  /** Counts opens and closes: an open still rendering when another open or a close comes in is dropped. */
+  #ticket = 0;
+  #opening = false;
+
   get isOpen() {
     return !!this.element;
   }
 
   toggle() {
-    if (this.isOpen) this.close({ focus: true });
+    // A second click while the first is still opening closes it, as it would once open
+    if (this.isOpen || this.#opening) this.close({ focus: true });
     else this.open();
   }
 
   async open() {
     if (!this.manager.panel?.element || this.manager.collapsed) return;
     this.close();
-    const html = await foundry.applications.handlebars.renderTemplate(`${TEMPLATE_ROOT}/panel/theme-menu.hbs`, this.#view());
-    if (!this.manager.panel?.element) return;
+    const ticket = ++this.#ticket;
+    this.#opening = true;
+    let html;
+    try {
+      html = await foundry.applications.handlebars.renderTemplate(`${TEMPLATE_ROOT}/panel/theme-menu.hbs`, this.#view());
+    } finally {
+      if (ticket === this.#ticket) this.#opening = false;
+    }
+    if (ticket !== this.#ticket || !this.manager.panel?.element) return;
     const el = document.createElement("section");
     el.id = MENU_ID;
     el.className = `lfd-theme-menu lfd-themed ${this.manager.shownTheme.cssClass}`;
@@ -79,6 +93,8 @@ export class ThemeMenu {
   }
 
   close({ focus = false } = {}) {
+    this.#ticket++;
+    this.#opening = false;
     if (!this.element) return;
     this.element.remove();
     this.element = null;
@@ -126,6 +142,20 @@ export class ThemeMenu {
     return this.manager.panel?.element?.querySelector(".lfd-badge") ?? null;
   }
 
+  /**
+   * Who a choice is for: the linked mech's own theme (the panel only links mechs the player owns), unless
+   * this player shows their own default everywhere; with no mech linked, the player's own default (the
+   * Default cockpit theme setting).
+   * @returns {{scope: "mech"|"default", actor: Actor|null, current: string}}
+   */
+  #target() {
+    const actor = this.manager.actor;
+    if (actor?.isOwner && getSetting(SETTINGS.MECH_THEMES)) {
+      return { scope: "mech", actor, current: this.manager.themeChoice(actor) };
+    }
+    return { scope: "default", actor: null, current: getSetting(SETTINGS.THEME) };
+  }
+
   #themeFor(id) {
     if (id === "auto") return resolveTheme(this.manager.telemetry?.manufacturer ?? null);
     return getThemes().find(theme => theme.id === id) ?? null;
@@ -136,8 +166,11 @@ export class ThemeMenu {
   }
 
   async #choose(id) {
+    const target = this.#target();
     const theme = this.#themeFor(id);
-    if (getSetting(SETTINGS.THEME) === id) {
+    // A mech without its own pick takes one even if it matches what's on screen: everyone else sees it too
+    const same = target.scope === "mech" ? mechThemeId(target.actor) === id : target.current === id;
+    if (same) {
       this.close({ focus: true });
     } else {
       // The new theme re-renders the panel (a new badge); focus that one once it's drawn
@@ -149,7 +182,11 @@ export class ThemeMenu {
         }, 1500);
       });
       // Save first, while the preview holds the new look, so the cockpit never flashes back
-      await setSetting(SETTINGS.THEME, id);
+      if (target.scope === "mech") {
+        await target.actor.setFlag(MODULE_ID, THEME_FLAG, id);
+        // Re-theme now, as the setting's onChange does, rather than on the debounced update signal
+        this.manager.relink();
+      } else await setSetting(SETTINGS.THEME, id);
       this.close();
       await rendered;
       this.#badge()?.focus();
@@ -184,10 +221,12 @@ export class ThemeMenu {
 
   #view() {
     const i18n = game.i18n;
-    const setting = getSetting(SETTINGS.THEME);
+    const target = this.#target();
+    const setting = target.current;
     const themes = getThemes();
     const known = setting === "auto" || themes.some(theme => theme.id === setting);
     const t = this.manager.telemetry;
+    const name = t?.name ?? target.actor?.name ?? "";
     const matched = resolveTheme(t?.manufacturer ?? null);
     const frame = t?.frame?.name;
     const option = (id, theme, label, detail) => ({
@@ -200,6 +239,7 @@ export class ThemeMenu {
     });
     return {
       title: i18n.localize("LFD.ThemeMenu.Title"),
+      scope: target.scope === "mech" ? i18n.format("LFD.ThemeMenu.ScopeMech", { name }) : i18n.localize("LFD.ThemeMenu.ScopeDefault"),
       options: [
         option(
           "auto",
