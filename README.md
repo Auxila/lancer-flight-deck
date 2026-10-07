@@ -254,13 +254,16 @@ When an attack you make hits or crits at least one target, or misses with a **Re
 The Flight Deck is a cockpit for one mech; a GM runs a whole enemy force. The NPC Deck is
 the GM's board for it: one slim row per NPC, docked on the side away from the Flight Deck
 (right by default), toggled from the token controls or with **Alt+N** (which then
-collapses and expands it). Players never see it.
+collapses and expands it). Players never see it. The header counts the NPCs still to act this
+round (out of combat, those still standing); the **?** beside it lists every click.
 
-- **Initiative strip:** across the top, everyone in the combat, players and NPCs, as
-  portraits in three groups: **acting** (lit and breathing), **still to act** (with their
-  LANCER activation pips), and **done** this round (greyed, ticked). The header sums it up
-  (`▶ Interceptor · 9 to act · 3 done`). Players come first in each group. Big fights switch
-  to smaller portraits. Portraits show each combatant's token art, as on the map: an image set
+- **Initiative strip:** across the top, everyone in the combat, players and NPCs, in one row
+  of portraits: **acting** (lit and breathing), **still to act** (with their LANCER activation
+  pips), then **done** this round (small, greyed, ticked). Its summary counts all sides
+  (`All sides · ▶ Interceptor · 9 to act · 3 done`). Players come first in each group. In a big
+  fight the row scrolls sideways (the mouse wheel scrolls it; its edge fades while there's more).
+  Names keep what tells them apart ("Gladi… A"), and tokens that share a name carry the same
+  number here and on their roster rows ("Test Hostile" 1 and 2). Portraits show each combatant's token art, as on the map: an image set
   on the combatant, else the token (its dynamic-ring art if any), else the actor's portrait,
   skipping LANCER's placeholder icons when real art exists. Animated tokens show a still
   frame; a combatant with no art at all shows a mech or NPC glyph in its side's colour.
@@ -270,8 +273,9 @@ collapses and expands it). Players never see it.
   - **Click** a portrait: selects the token, exactly as clicking it on the map would (Shift
     adds to the selection). **Double-click** looks at it. **Right-click** starts that
     combatant's turn (LANCER's popcorn initiative).
-- **The roster:** the started combat's NPCs in turn order (destroyed ones sink to the
-  bottom), or, with no combat, every NPC token on the scene. With more than one encounter on
+- **The roster,** in the order you choose who goes next: **Acting**, **To act**, **Done this
+  round**, then **Destroyed** folded into one line (click to show them). With no combat, every
+  NPC token on the scene in one list, the destroyed still folded at the end. With more than one encounter on
   the scene, the deck runs the scene's active one (the one Foundry's tracker opens on, and the
   one a new encounter becomes), else the one your tracker shows. Unlinked copies of the same NPC
   are separate rows with their own health and conditions.
@@ -282,26 +286,28 @@ collapses and expands it). Players never see it.
   at a screen edge to dock it again (or use the pin), and drag the corner grip to scale it
   (70–160%, double-click to reset, arrow keys when focused). Layout is saved per GM.
 - **Each row:** a disposition stripe (hostile, neutral, friendly, secret), name, tier and
-  template, HP and heat bars, structure and stress pips when it has more than one,
+  template, a **▶** that starts its turn (on the acting NPC, **End turn**), its HP bar at full
+  width, heat only once it has some, structure and stress pips when it has more than one,
   its conditions as lit badges in the panel's colours (red for Stunned, Exposed and Shredded;
   amber for Lock On, Jammed, Slowed and the like; green for Hidden), Burn and Overshield,
-  LANCER activations left this round, and a
+  activation pips for NPCs with more than one (Elites), a crosshair mark when it's selected on
+  the map (the batch bar acts on those), and a
   crosshair with a marker in each player's colour for **every player targeting it**.
   Hovering a row puts the same "look here" marker on its token as hovering its portrait.
   Whoever's turn it is glows; NPCs that have already acted this round dim. A row flashes
   red when its NPC takes damage, and kicks when it loses structure.
 - **One row opens at a time** (selecting an NPC's token opens its row), whoever's turn it is
-  unless you open another:
-  - its stats, and **HULL / AGI / SYS / ENG** keys in the panel's colours that roll the
-    check through LANCER, as from the sheet;
-  - HP / heat steppers;
-  - a grid of labelled condition tiles (Lock On, Jammed, Impaired, Slowed, Immobile, Stunned,
-    Exposed, Shredded, Prone, Hidden). They light like the panel's annunciator when on, and a
-    click toggles one. As on the panel, the Hidden tile stands for Invisible too: a right-click
-    toggles **Invisible**, and the tile reads Hidden, Invisible or Hid + Invis;
+  unless you open another, with what the NPC does first:
   - its features as buttons (Weapons, Tech, Systems, Reactions, Traits, with Recharge and
-    Limited state);
-  - **Activate** / **End turn** (LANCER's popcorn initiative), Recharge, and the sheet.
+    Limited state); attacks show their numbers on the button (`+1 · Thr 1 · 5 Kin`);
+  - its defenses on one line, and **HULL / AGI / SYS / ENG** keys in the panel's colours that
+    roll the check through LANCER, as from the sheet;
+  - HP / heat steppers, with its heat;
+  - a row of condition icons (Lock On, Jammed, Impaired, Slowed, Immobile, Stunned, Exposed,
+    Shredded, Prone, Hidden), lit like the panel's annunciator when on; a click toggles one,
+    and hovering says what it does. As on the panel, the Hidden icon stands for Invisible too:
+    a right-click toggles **Invisible**. What's on is also named in the row's badges;
+  - Recharge, and the sheet.
 - **Features:** hover for the full text with its numbers at the NPC's tier (attack,
   accuracy, range, damage). Click to use it through LANCER's own flows (attack, tech attack,
   or its card, with Limited, Recharge and heat handled by the system); right-click posts its

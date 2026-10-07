@@ -844,8 +844,19 @@
       "Round": "Round {n}",
       "Scene": "Scene",
       "CountLabel": "{alive} of {total} NPCs still up",
-      "ToAct": "{n} NPCs to act",
-      "ToActOne": "1 NPC to act",
+      "CountToAct": "NPCs to act",
+      "CountToActLabel": "{n} of {alive} NPCs still to act this round",
+      "CountStanding": "NPCs standing",
+      "HelpTitle": "Using the NPC Deck",
+      "Selected": "Selected on the map (the batch bar acts on these)",
+      "ActivateHint": "Activate: start this NPC's turn",
+      "EndTurnHint": "End this NPC's turn",
+      "Section": {
+        "acting": "Acting",
+        "ready": "To act · {n}",
+        "done": "Done this round · {n}",
+        "fallen": "Destroyed · {n}"
+      },
       "Expand": "Expand the NPC Deck (Alt+N)",
       "Collapse": "Collapse the NPC Deck (Alt+N)",
       "Empty": "No NPCs in the combat or on this scene.",
@@ -864,7 +875,7 @@
       "EndTurn": "End turn",
       "Recharge": "Recharge",
       "Sheet": "Sheet",
-      "Footer": "Click a row: details · Hover a feature: full text · Click: use · Right-click: post",
+      "Footer": "Click a row: open it · Click a name: select it on the map · ▶: start its turn · Hover a feature: full text · Click a feature: use it · Right-click a feature: post it to chat · Right-click Hidden: Invisible · Right-click a portrait: start its turn · Wheel over the portraits: scroll them",
       "Attack": "Attack",
       "Accuracy": "Accuracy",
       "Difficulty": "Difficulty",
@@ -913,7 +924,8 @@
             "done": "Hover: look here · Click: select · Double-click: look at it",
             "defeated": "Hover: look here · Click: select"
           }
-        }
+        },
+        "AllSides": "All sides"
       },
       "CondApply": "Click to apply",
       "CondRemove": "Click to remove",

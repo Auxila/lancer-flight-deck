@@ -7,7 +7,7 @@ import { HoverCards } from "../ui/HoverCards.js";
 import { LookHere } from "./LookHere.js";
 import { conditionCard } from "../core/ConditionInfo.js";
 import { keyHints } from "../ui/keyHints.js";
-import { QUICK_CONDITIONS, deckCombat, featureTip, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
+import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, rosterSections, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
 import { conditionLook } from "../ui/components/MasterCautionGrid.js";
 import { CHECKS } from "../ui/components/HullReadout.js";
 
@@ -66,6 +66,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       collapse: NpcDeck.#onCollapse,
       initSelect: { handler: NpcDeck.#onInitSelect, buttons: [0, 2] },
       dock: NpcDeck.#onDock,
+      toggleFallen: NpcDeck.#onToggleFallen,
     },
   };
 
@@ -256,9 +257,13 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
   /*  Rendering                                   */
   /* -------------------------------------------- */
 
+  /** Destroyed NPCs fold into one line until the GM opens it. */
+  #showFallen = false;
+
   /** @override */
   async _prepareContext() {
     const { tokens, combat } = rosterTokens();
+    const dups = duplicateNumbers(viewedScene()?.tokens.contents ?? []);
     // Open whoever's turn it is when the turn moves
     const turnKey = combat ? `${combat.id}:${combat.round}:${combat.combatant?.id}` : null;
     if (turnKey !== this.#turnKey) {
@@ -278,7 +283,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const now = Date.now();
     const rows = tokens.map(token => {
-      const row = readRow(token, { combat, expanded: this.#expanded });
+      const row = readRow(token, { combat, expanded: this.#expanded, dups });
       row.outside = token === outsider && !!combat;
       this.#noteDamage(token, now);
       const hit = this.#hits.get(token.id);
@@ -298,37 +303,38 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
           const hint = game.i18n.localize(on ? "LFD.Npc.CondRemove" : "LFD.Npc.CondApply");
           return { id, label, ...conditionLook(id, label), img: cfg.img, on, tip: conditionCard(id, { title: label, hint }) };
         }).filter(Boolean);
-        // The open row's tiles light its quick conditions (the Hidden tile stands for Invisible too); its chips keep only the rest
-        row.conditions = row.conditions.filter(c => !QUICK_CONDITIONS.includes(c.id) && c.id !== STATUS.INVISIBLE);
-        row.hasChips = row.conditions.length > 0 || row.burn > 0 || row.overshield > 0;
-        row.inCombat = !!combat && !!row.combatantId;
+        // The chips name what's on; the icon tiles below toggle it
       }
       return row;
     });
-    // The fallen sink to the bottom; everyone else keeps turn order (an outsider stays on top)
-    rows.sort((a, b) => Number(b.outside) - Number(a.outside) || Number(a.destroyed) - Number(b.destroyed));
+    // In turn order for choosing who goes next: acting, to act, done, then the destroyed (folded)
+    const entries = rosterSections(rows, { combat: !!combat?.started, showFallen: this.#showFallen });
+    for (const e of entries) {
+      if (e.section) e.section.label = game.i18n.format(`LFD.Npc.Section.${e.section.id}`, { n: e.section.count });
+    }
     const counted = rows.filter(r => !r.outside);
-    const initiative = readInitiative(combat);
+    const initiative = readInitiative(combat, { dups });
     if (initiative && initiative.firstDone >= 0) initiative.entries[initiative.firstDone].divider = true;
     if (initiative) await this.#stillFrames(initiative.entries);
-    // NPCs only; the initiative strip below counts every side
-    const toAct = combat ? counted.filter(r => r.canAct).length : 0;
+    // The header counts NPCs; the initiative strip below counts every side, and says so
+    const i18n = game.i18n;
+    const alive = counted.filter(r => !r.destroyed).length;
+    const toAct = combat ? counted.filter(r => r.canAct || r.isTurn).length : 0;
+    const hints = keyHints(i18n.localize("LFD.Npc.Footer"));
     return {
       batch: NpcDeck.#batchView(),
       tipClass: `lfd-hud-tip lfd-themed ${this.#theme().cssClass}`,
-      footer: keyHints(game.i18n.localize("LFD.Npc.Footer")),
+      help: `<div class="lfd-tip"><header><strong>${foundry.utils.escapeHTML(i18n.localize("LFD.Npc.HelpTitle"))}</strong></header>${hints
+        .map(h => `<p>${h.key ? `<b>${foundry.utils.escapeHTML(h.key)}:</b> ` : ""}${foundry.utils.escapeHTML(h.action)}</p>`)
+        .join("")}</div>`,
       collapsed: !!getSetting(SETTINGS.NPC_DECK_COLLAPSED),
       floating: this.frame.floating,
-      rows,
+      rows: entries,
       empty: !rows.length,
       initiative,
-      header: {
-        mode: combat ? "combat" : "scene",
-        round: combat?.round ?? null,
-        alive: counted.filter(r => !r.destroyed).length,
-        total: counted.length,
-        toAct: toAct ? game.i18n.format(toAct === 1 ? "LFD.Npc.ToActOne" : "LFD.Npc.ToAct", { n: toAct }) : null,
-      },
+      header: combat
+        ? { round: combat.round, big: toAct, of: alive, caption: i18n.localize("LFD.Npc.CountToAct"), aria: i18n.format("LFD.Npc.CountToActLabel", { n: toAct, alive }) }
+        : { round: null, big: alive, of: counted.length, caption: i18n.localize("LFD.Npc.CountStanding"), aria: i18n.format("LFD.Npc.CountLabel", { alive, total: counted.length }) },
     };
   }
 
@@ -413,6 +419,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     this.frame.apply();
     this.cards.restore();
     this.#restoreLook();
+    NpcDeck.#stripEdges(el.querySelector(".lfd-init-strip"));
     if (this.#reveal) {
       el.querySelector(`.lfd-npc-row[data-token="${this.#reveal}"]`)?.scrollIntoView({ block: "nearest" });
       this.#reveal = null;
@@ -437,6 +444,18 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     const root = this.element;
     root.dataset.wired = "1";
     this.cards.attach(root);
+    // The initiative strip is one row: the wheel scrolls it sideways, and its edge fades while there's more
+    root.addEventListener(
+      "wheel",
+      event => {
+        const strip = event.target.closest?.(".lfd-init-strip");
+        if (!strip || strip.scrollWidth <= strip.clientWidth || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+        event.preventDefault();
+        strip.scrollLeft += event.deltaY;
+      },
+      { passive: false }
+    );
+    root.addEventListener("scroll", event => event.target.matches?.(".lfd-init-strip") && NpcDeck.#stripEdges(event.target), { capture: true, passive: true });
     root.addEventListener(
       "pointerenter",
       event => {
@@ -792,6 +811,20 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       console.error("Flight Deck |", err);
       ui.notifications.error(game.i18n.localize("LFD.Error.Action"));
     }
+  }
+
+  /** The strip fades at the right while more of it is out of sight. */
+  static #stripEdges(strip) {
+    if (!strip) return;
+    const overflowing = strip.scrollWidth > strip.clientWidth + 1;
+    strip.classList.toggle("is-overflowing", overflowing);
+    strip.classList.toggle("is-at-end", overflowing && strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 2);
+  }
+
+  /** Show or fold the destroyed NPCs. */
+  static #onToggleFallen() {
+    this.#showFallen = !this.#showFallen;
+    this.render({ parts: ["deck"] });
   }
 
   /** LANCER's popcorn initiative: start this NPC's turn. */

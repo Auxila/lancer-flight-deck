@@ -483,6 +483,31 @@ await step(p, "Boost adds Speed, and the MOVE light reads what's left over the t
   return { ok, detail: { speed, boosted, reset } };
 }, turn);
 
+await step(g, "NPC Deck: ▶ on a row starts that NPC's turn, and End turn moves it to Done", async turn => {
+  if (turn.skip) return { skip: turn.skip };
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const combat = game.combats.get(turn.combat);
+  const npc = canvas.tokens.placeables.find(t => t.actor?.type === "npc" && t.visible && !t.document.hidden && !t.actor.system?.destroyed && (t.actor.system?.structure?.value ?? 1) > 0);
+  if (!npc) return { skip: "no NPC token standing on the scene" };
+  await combat.createEmbeddedDocuments("Combatant", [{ tokenId: npc.id, sceneId: canvas.scene.id, actorId: npc.document.actorId }]);
+  await wait(1500);
+  const row = () => document.querySelector(`#lancer-flight-deck-npc .lfd-npc-row[data-token="${npc.id}"]`);
+  const sectionOf = () => {
+    let e = row();
+    while (e && !e.classList.contains("lfd-npc-section")) e = e.previousElementSibling;
+    return ["acting", "ready", "done", "fallen"].find(id => e?.classList.contains(`is-${id}`)) ?? null;
+  };
+  const before = sectionOf();
+  row()?.querySelector('[data-action="activate"]')?.click();
+  await wait(1800);
+  const acting = sectionOf();
+  const endTurn = !!row()?.querySelector('[data-action="endTurn"]');
+  row()?.querySelector('[data-action="endTurn"]')?.click();
+  await wait(1800);
+  const after = sectionOf();
+  return { ok: before === "ready" && acting === "acting" && endTurn && after === "done", detail: { npc: npc.name, before, acting, endTurn, after } };
+}, turn);
+
 await g.evaluate(async ([uuid, turn]) => {
   if (turn.skip) return;
   const actor = await fromUuid(uuid);

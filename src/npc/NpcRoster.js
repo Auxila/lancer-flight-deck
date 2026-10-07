@@ -113,7 +113,7 @@ function conditions(actor) {
  * @param {TokenDocument} token
  * @param {{combat: Combat|null, expanded: string|null}} ctx
  */
-export function readRow(token, { combat, expanded }) {
+export function readRow(token, { combat, expanded, dups = null }) {
   const actor = token.actor;
   const s = actor.system ?? {};
   const combatant = combat?.combatants.find(c => c.tokenId === token.id) ?? null;
@@ -132,6 +132,8 @@ export function readRow(token, { combat, expanded }) {
   return {
     id: token.id,
     name: token.name,
+    // Two tokens with one name ("Test Hostile" twice): the same number here and in the initiative strip
+    dup: dups?.get(token.id) ?? null,
     img: token.texture?.src ?? actor.img,
     tier: num(s.tier) || 1,
     npcClass,
@@ -146,12 +148,14 @@ export function readRow(token, { combat, expanded }) {
     overshield: num(s.overshield?.value),
     hasChips: conds.length > 0 || num(s.burn) > 0 || num(s.overshield?.value) > 0,
     destroyed,
-    activations: act && num(act.max) > 0 ? Array.from({ length: num(act.max) }, (_, i) => ({ on: i < num(act.value) })) : null,
+    // Pips only for NPCs with more than one activation (Elites): for the rest, ▶ and the section say it
+    activations: act && num(act.max) > 1 ? Array.from({ length: num(act.max) }, (_, i) => ({ on: i < num(act.value) })) : null,
     canAct: !!combatant && num(act?.value) > 0 && !destroyed,
     // In a started combat, out of activations and not acting now: done for the round
     acted: !!combatant && !!combat?.started && num(act?.value) <= 0 && combat?.combatant?.id !== combatant.id,
     isTurn: !!combatant && combat?.combatant?.id === combatant.id,
     combatantId: combatant?.id ?? null,
+    inCombat: !!combatant && !!combat?.started,
     targetedBy,
     targetedNames: targetedBy.map(u => u.name).join(", "),
     controlled: !!placeable?.controlled,
@@ -208,7 +212,7 @@ export function portraitOf(c) {
  * group, players come before NPCs and otherwise the combat's turn order holds.
  * @param {Combat|null} combat  A started combat
  */
-export function readInitiative(combat) {
+export function readInitiative(combat, { dups = null } = {}) {
   if (!combat?.started) return null;
   const current = combat.combatant?.id ?? null;
   const entries = combat.turns.map((c, order) => {
@@ -222,6 +226,8 @@ export function readInitiative(combat) {
       id: c.id,
       tokenId: c.tokenId ?? null,
       name: c.name,
+      label: shortLabel(c.name),
+      dup: (c.tokenId && dups?.get(c.tokenId)) ?? null,
       img: portrait.src,
       video: portrait.video,
       generic: portrait.generic,
@@ -302,6 +308,9 @@ export function readFeatures(actor) {
       icon: FEATURE_ICONS[type],
       state: featureState(item),
       recharge: recharge ? `${recharge.val || "?"}+` : null,
+      // Attacks show their numbers on the button: the GM shouldn't need a hover per attack
+      line: featureLine(item, actor),
+      attack: s.type === "Weapon" || (s.type === "Tech" && !!s.tech_attack),
       uses: limited ? `${num(s.uses?.value)}/${num(s.uses?.max) || num(limited.val)}` : null,
       // Traits are passive: shown, but not "used"
       passive: type === "Trait" && !(s.tags ?? []).some(t => /^tg_(quick|full)_action$|^tg_protocol$|^tg_free_action$/.test(t?.lid ?? "")),
@@ -321,15 +330,14 @@ export function featureTip(item, actor) {
   const state = featureState(item);
   if (state !== "ready") out.push(`<p class="lfd-tip-state">${esc(i18n.localize(`LFD.Npc.State.${state}`))}</p>`);
 
+  const n = featureNumbers(item, actor);
   const numbers = [];
-  if (s.type === "Weapon" || (s.type === "Tech" && s.tech_attack)) {
-    const atk = num(s.attack_bonus?.[t]);
-    numbers.push(`${i18n.localize("LFD.Npc.Attack")} ${atk >= 0 ? "+" : ""}${atk}`);
-    const acc = num(s.accuracy?.[t]);
-    if (acc) numbers.push(`${acc > 0 ? i18n.localize("LFD.Npc.Accuracy") : i18n.localize("LFD.Npc.Difficulty")} ${Math.abs(acc)}`);
+  if (n.attack !== null) {
+    numbers.push(`${i18n.localize("LFD.Npc.Attack")} ${n.attack >= 0 ? "+" : ""}${n.attack}`);
+    if (n.accuracy) numbers.push(`${n.accuracy > 0 ? i18n.localize("LFD.Npc.Accuracy") : i18n.localize("LFD.Npc.Difficulty")} ${Math.abs(n.accuracy)}`);
   }
-  for (const r of s.range ?? []) numbers.push(`${r.type} ${r.val}`);
-  const dmg = (s.damage?.[t] ?? []).map(d => `${d.val} ${d.type}`).join(" + ");
+  for (const r of n.ranges) numbers.push(`${r.type} ${r.val}`);
+  const dmg = n.damage.map(d => `${d.val} ${d.type}`).join(" + ");
   if (dmg) numbers.push(dmg);
   if (numbers.length) out.push(`<p class="lfd-tip-tags"><b>${numbers.map(esc).join(" · ")}</b> <span>(T${tier})</span></p>`);
 
@@ -343,6 +351,115 @@ export function featureTip(item, actor) {
   const hint = s.type === "Weapon" ? "LFD.Npc.Hint.attack" : s.type === "Tech" && s.tech_attack ? "LFD.Npc.Hint.tech" : "LFD.Npc.Hint.use";
   out.push(`<footer>${esc(i18n.localize(hint))}</footer>`);
   return `<div class="lfd-tip">${out.join("")}</div>`;
+}
+
+/**
+ * A feature's numbers at the NPC's tier: attack bonus and accuracy (attacks only), ranges, damage.
+ * @returns {{tier: number, attack: number|null, accuracy: number, ranges: {type: string, val: *}[], damage: {type: string, val: *}[]}}
+ */
+export function featureNumbers(item, actor) {
+  const s = item.system ?? {};
+  const tier = featureTier(item, actor);
+  const t = tier - 1;
+  const attacks = s.type === "Weapon" || (s.type === "Tech" && !!s.tech_attack);
+  return {
+    tier,
+    attack: attacks ? num(s.attack_bonus?.[t]) : null,
+    accuracy: attacks ? num(s.accuracy?.[t]) : 0,
+    ranges: (s.range ?? []).filter(r => r?.type),
+    damage: (s.damage?.[t] ?? []).filter(d => d && d.val !== undefined && d.val !== ""),
+  };
+}
+
+/** Short names for the button line: LANCER's range and damage words, abbreviated the way the book's tables do. */
+const SHORT = {
+  Range: "Rng", Threat: "Thr", Thrown: "Thrown", Line: "Line", Cone: "Cone", Blast: "Blast", Burst: "Burst",
+  Kinetic: "Kin", Explosive: "Exp", Energy: "En", Burn: "Burn", Heat: "Heat", Variable: "Var",
+};
+
+/**
+ * An attack's numbers on one line ("+1 · Thr 1 · 5 Kin", "+2 tech · Rng 10"), or null for a feature that
+ * doesn't attack.
+ */
+export function featureLine(item, actor) {
+  const n = featureNumbers(item, actor);
+  if (n.attack === null) return null;
+  const tech = (item.system ?? {}).type === "Tech";
+  const parts = [`${n.attack >= 0 ? "+" : ""}${n.attack}${tech ? " tech" : ""}`];
+  if (n.accuracy) parts.push(`${n.accuracy > 0 ? "+" : "−"}${Math.abs(n.accuracy)} ${n.accuracy > 0 ? "acc" : "diff"}`);
+  for (const r of n.ranges) parts.push(`${SHORT[r.type] ?? r.type} ${r.val}`);
+  const dmg = n.damage.map(d => `${d.val} ${SHORT[d.type] ?? d.type}`).join(" + ");
+  if (dmg) parts.push(dmg);
+  return parts.join(" · ");
+}
+
+/**
+ * Numbers for tokens that share a name, in the order given (the scene's own): "Test Hostile" twice
+ * becomes 1 and 2. Tokens with a name of their own get none.
+ * @param {{id: string, name: string}[]} tokens
+ * @returns {Map<string, number>}
+ */
+export function duplicateNumbers(tokens) {
+  const byName = new Map();
+  for (const t of tokens) {
+    const key = String(t.name ?? "").trim().toLowerCase();
+    if (!byName.has(key)) byName.set(key, []);
+    byName.get(key).push(t.id);
+  }
+  const out = new Map();
+  for (const ids of byName.values()) if (ids.length > 1) ids.forEach((id, i) => out.set(id, i + 1));
+  return out;
+}
+
+/**
+ * A name short enough for the strip (at most `max` characters, the ellipsis included), keeping what tells
+ * it apart: a short last word ("Gladiator A" → "Gladi… A") survives the cut.
+ */
+export function shortLabel(name, max = 8) {
+  const full = String(name ?? "").trim();
+  if (full.length <= max) return full;
+  const words = full.split(/\s+/);
+  const last = words.length > 1 ? words.at(-1) : "";
+  if (last && last.length <= 3) {
+    const head = words.slice(0, -1).join(" ");
+    const room = Math.max(1, max - last.length - 2);
+    return `${head.slice(0, room)}${head.length > room ? "…" : ""} ${last}`;
+  }
+  return `${full.slice(0, max - 1)}…`;
+}
+
+/**
+ * The roster in turn order for a GM choosing who goes next: whoever is acting, then those still to act,
+ * then those done for the round, then the destroyed (folded unless shown, but an open row always shows).
+ * Out of combat, one list, the destroyed still last. Section entries carry {section} instead of a row.
+ * @param {object[]} rows   readRow results (an `outside` row stays on top, unlabelled)
+ * @param {{combat: boolean, showFallen: boolean}} options
+ */
+export function rosterSections(rows, { combat, showFallen }) {
+  const out = [];
+  const outside = rows.filter(r => r.outside);
+  const rest = rows.filter(r => !r.outside);
+  const fallen = rest.filter(r => r.destroyed);
+  const standing = rest.filter(r => !r.destroyed);
+  out.push(...outside);
+  if (combat) {
+    const groups = [
+      ["acting", standing.filter(r => r.isTurn)],
+      ["ready", standing.filter(r => !r.isTurn && r.canAct)],
+      ["done", standing.filter(r => !r.isTurn && !r.canAct)],
+    ];
+    for (const [id, list] of groups) {
+      if (!list.length) continue;
+      out.push({ section: { id, count: list.length } });
+      out.push(...list);
+    }
+  } else out.push(...standing);
+  if (fallen.length) {
+    const open = showFallen || fallen.some(r => r.expanded);
+    out.push({ section: { id: "fallen", count: fallen.length, foldable: true, open } });
+    if (open) out.push(...fallen);
+  }
+  return out;
 }
 
 /** The NPC's combat stats, for the expanded row. */

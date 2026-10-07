@@ -159,7 +159,8 @@
   flex-direction: column;
   gap: 2px;
   margin: 0;
-  padding: 4px;
+  /* The bottom clears the resize grip, which sits over the last corner when scrolled to the end */
+  padding: 4px 4px 16px;
   list-style: none;
 }
 
@@ -196,7 +197,13 @@
 }
 
 #lancer-flight-deck-npc .lfd-npc-row.is-selected {
-  border-color: color-mix(in srgb, var(--lfd-ink) 45%, transparent);
+  border-color: color-mix(in srgb, var(--lfd-accent) 70%, transparent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-sel {
+  flex: none;
+  font-size: 8px;
+  color: var(--lfd-accent);
 }
 
 /* Whose turn it is */
@@ -248,13 +255,6 @@
   gap: 5px;
   min-width: 0;
   cursor: pointer;
-}
-
-#lancer-flight-deck-npc .lfd-npc-turn {
-  flex: none;
-  width: 8px;
-  font-size: 8px;
-  color: var(--lfd-accent);
 }
 
 #lancer-flight-deck-npc .lfd-npc-name {
@@ -467,34 +467,6 @@
   cursor: default;
 }
 
-#lancer-flight-deck-npc .lfd-npc-stats {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 2px;
-  margin: 0;
-}
-
-#lancer-flight-deck-npc .lfd-npc-stats div {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2px 0;
-  background: var(--lfd-well-2);
-  border: 1px solid var(--lfd-edge);
-}
-
-#lancer-flight-deck-npc .lfd-npc-stats dt {
-  margin: 0;
-  font: 600 6.5px/1.2 var(--lfd-font-display);
-  letter-spacing: 0.1em;
-  color: var(--lfd-ink-dim);
-}
-
-#lancer-flight-deck-npc .lfd-npc-stats dd {
-  margin: 0;
-  font: 700 11px/1.2 var(--lfd-font-data);
-}
-
 #lancer-flight-deck-npc .lfd-npc-adjust {
   display: flex;
   flex-wrap: wrap;
@@ -613,8 +585,8 @@
 /* Condition tiles: the panel's annunciator in miniature. Off reads unlit; on lights in its kind's colour. */
 #lancer-flight-deck-npc .lfd-npc-conds {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 3px;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 2px;
 }
 
 #lancer-flight-deck-npc .lfd-npc-ctile {
@@ -622,10 +594,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
   gap: 2px;
   min-width: 0;
-  min-height: 36px;
-  padding: 3px 1px 2px;
+  min-height: 24px;
+  padding: 3px 0;
   font: 700 7px/1.1 var(--lfd-font-display);
   letter-spacing: 0;
   text-transform: uppercase;
@@ -637,17 +610,20 @@
 }
 
 #lancer-flight-deck-npc .lfd-npc-ctile img {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border: none;
   opacity: 0.45;
   filter: grayscale(0.7);
 }
 
+/* The legend stays for screen readers; on screen the icon and its card say it */
 #lancer-flight-deck-npc .lfd-npc-ctile span {
-  max-width: 100%;
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
-  text-overflow: ellipsis;
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
@@ -711,27 +687,6 @@
   font-size: 10px;
   color: var(--lfd-ink-dim);
   text-align: center;
-}
-
-#lancer-flight-deck-npc .lfd-npc-foot {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 9px;
-  padding: 4px 8px 5px;
-  font: 600 6.5px/1.3 var(--lfd-font-display);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--lfd-ink-dim);
-  border-top: 1px solid var(--lfd-line);
-}
-
-/* Clear the resize grip, which sits over this corner when scrolled to the end */
-#lancer-flight-deck-npc:not(.lfd-dock-right) .lfd-npc-foot {
-  padding-right: 20px;
-}
-
-#lancer-flight-deck-npc.lfd-dock-right .lfd-npc-foot {
-  padding-left: 20px;
 }
 
 /* Collapsed: just the header bar */
@@ -876,16 +831,30 @@
 
 #lancer-flight-deck-npc .lfd-init-strip {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: flex-start;
-  gap: 5px 4px;
+  gap: 4px;
   margin: 0;
-  padding: 0;
+  padding: 7px 2px 3px;
+  overflow-x: auto;
+  overflow-y: hidden;
   list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lfd-line) transparent;
+}
+
+/* More to the right: the edge fades */
+#lancer-flight-deck-npc .lfd-init-strip.is-overflowing {
+  mask-image: linear-gradient(90deg, #000 calc(100% - 18px), transparent);
+}
+
+#lancer-flight-deck-npc .lfd-init-strip.is-overflowing.is-at-end {
+  mask-image: none;
 }
 
 #lancer-flight-deck-npc .lfd-init-unit {
   --ring: var(--lfd-warning);
+  flex: none;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1199,4 +1168,206 @@
 #lancer-flight-deck-npc .lfd-npc-ctile.is-some img {
   opacity: 0.85;
   filter: none;
+}
+
+/* --------------------------------------------------------------------------
+   The roster in turn order (0.8.2): sections, a one-click turn, numbers that tell twins apart
+   -------------------------------------------------------------------------- */
+
+/* Acting · To act · Done · Destroyed */
+#lancer-flight-deck-npc .lfd-npc-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 2px 1px;
+  font: 600 7px/1 var(--lfd-font-display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck-npc .lfd-npc-section:first-child {
+  padding-top: 1px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-section::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(90deg, var(--lfd-line), transparent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-section.is-acting { color: var(--lfd-accent); }
+#lancer-flight-deck-npc .lfd-npc-section.is-ready { color: var(--lfd-ok); }
+
+#lancer-flight-deck-npc .lfd-npc-section button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+}
+
+#lancer-flight-deck-npc .lfd-npc-section button:hover {
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck-npc .lfd-npc-section button i {
+  font-size: 7px;
+}
+
+/* ▶ start this NPC's turn, from the list; END TURN on the one acting */
+#lancer-flight-deck-npc .lfd-npc-go {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 16px;
+  padding: 0 6px;
+  font: 700 7.5px/1 var(--lfd-font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lfd-ok);
+  background: color-mix(in srgb, var(--lfd-ok) 12%, var(--lfd-plate-2));
+  border: 1px solid color-mix(in srgb, var(--lfd-ok) 55%, transparent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-go i {
+  font-size: 7px;
+}
+
+#lancer-flight-deck-npc .lfd-npc-go:hover {
+  color: var(--lfd-bg);
+  background: var(--lfd-ok);
+  border-color: var(--lfd-ok);
+}
+
+#lancer-flight-deck-npc .lfd-npc-go.is-end {
+  color: var(--lfd-accent-ink);
+  background: var(--lfd-accent);
+  border-color: var(--lfd-accent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-go.is-end:hover {
+  filter: brightness(1.15);
+}
+
+/* Twins: "Test Hostile" 1 and 2, the same number on the row and the portrait */
+#lancer-flight-deck-npc .lfd-npc-dup {
+  display: inline-grid;
+  place-items: center;
+  min-width: 11px;
+  height: 11px;
+  margin-left: 4px;
+  padding: 0 2px;
+  font: 700 7.5px/1 var(--lfd-font-data);
+  letter-spacing: 0;
+  color: var(--lfd-bg);
+  background: var(--lfd-ink-dim);
+  border-radius: 2px;
+  vertical-align: 1px;
+}
+
+#lancer-flight-deck-npc .lfd-init-dup {
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  translate: -50% 0;
+  min-width: 10px;
+  padding: 0 2px;
+  font: 700 7px/10px var(--lfd-font-data);
+  text-align: center;
+  color: #fff;
+  background: rgb(0 0 0 / 0.8);
+  border-radius: 2px;
+}
+
+/* Done for the round: small, no name (the roster has them) */
+#lancer-flight-deck-npc .lfd-init-unit:is(.is-done, .is-defeated) {
+  width: 26px;
+}
+
+#lancer-flight-deck-npc .lfd-init-unit:is(.is-done, .is-defeated) .lfd-init-portrait {
+  width: 22px;
+  height: 22px;
+  margin-top: 7px;
+  padding: 1px;
+}
+
+#lancer-flight-deck-npc .lfd-init-unit:is(.is-done, .is-defeated) .lfd-init-name {
+  display: none;
+}
+
+#lancer-flight-deck-npc .lfd-init-unit:is(.is-done, .is-defeated) .lfd-init-badge {
+  right: 1px;
+  bottom: 1px;
+  width: 9px;
+  height: 9px;
+  font-size: 5.5px;
+}
+
+#lancer-flight-deck-npc .lfd-init-sum .is-scope {
+  color: var(--lfd-ink-dim);
+}
+
+/* The open row: what the NPC does first */
+#lancer-flight-deck-npc .lfd-npc-feature.has-line {
+  flex: 1 1 100%;
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature.has-line span {
+  flex: 0 1 auto;
+}
+
+#lancer-flight-deck-npc .lfd-npc-line {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-left: auto;
+  overflow: hidden;
+  font: 600 8px/1.2 var(--lfd-font-data);
+  color: var(--lfd-ink-dim);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#lancer-flight-deck-npc .lfd-npc-feature.has-line:hover .lfd-npc-line {
+  color: var(--lfd-ink);
+}
+
+/* Defenses on one line */
+#lancer-flight-deck-npc .lfd-npc-statline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 9px;
+  margin: 0;
+  font: 700 9px/1.3 var(--lfd-font-data);
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck-npc .lfd-npc-statline b {
+  margin-right: 3px;
+  font: 600 6.5px/1 var(--lfd-font-display);
+  letter-spacing: 0.1em;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck-npc .lfd-npc-adjust-label b {
+  margin-left: 3px;
+  font: 700 8px/1 var(--lfd-font-data);
+  letter-spacing: 0;
+  color: var(--lfd-ink);
+}
+
+#lancer-flight-deck-npc .lfd-npc-adjust-label b.is-danger {
+  color: var(--lfd-heat-danger);
+}
+
+/* The help card behind "?" (it was a footer, always there) */
+#lancer-flight-deck-npc .lfd-npc-ctl.is-help {
+  cursor: help;
 }

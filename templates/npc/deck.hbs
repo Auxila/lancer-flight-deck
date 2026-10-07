@@ -6,10 +6,12 @@
       <span class="lfd-npc-kicker">{{#if header.round}}{{localize "LFD.Npc.Round" n=header.round}}{{else}}{{localize "LFD.Npc.Scene"}}{{/if}}</span>
       <span class="lfd-npc-title">{{localize "LFD.Npc.Title"}}</span>
     </div>
-    <div class="lfd-npc-count" aria-label="{{localize 'LFD.Npc.CountLabel' alive=header.alive total=header.total}}">
-      <b>{{header.alive}}<small>/{{header.total}}</small></b>
-      {{#if header.toAct}}<span>{{header.toAct}}</span>{{/if}}
+    <div class="lfd-npc-count" aria-label="{{header.aria}}">
+      <b>{{header.big}}<small>/{{header.of}}</small></b>
+      <span>{{header.caption}}</span>
     </div>
+    <span class="lfd-npc-ctl is-help" tabindex="0" role="note" aria-label="{{localize 'LFD.Npc.HelpTitle'}}"
+          data-tooltip-html="{{help}}" data-tooltip-class="{{tipClass}}"><i class="fa-solid fa-question"></i></span>
     {{#if floating}}
     <button type="button" class="lfd-npc-ctl" data-action="dock" data-tooltip="LFD.Move.Dock" aria-label="{{localize 'LFD.Move.Dock'}}">
       <i class="fa-solid fa-thumbtack"></i>
@@ -28,6 +30,7 @@
     <div class="lfd-init-head">
       <span class="lfd-init-title">{{localize "LFD.Npc.Init.Title"}}</span>
       <span class="lfd-init-sum">
+        <span class="is-scope">{{localize "LFD.Npc.Init.AllSides"}}</span>
         {{#if initiative.acting}}<b><i class="fa-solid fa-play" aria-hidden="true"></i>{{initiative.acting}}</b>{{/if}}
         <em class="is-ready">{{localize "LFD.Npc.Init.Ready" n=initiative.ready}}</em>
         <em class="is-done">{{localize "LFD.Npc.Init.Done" n=initiative.done}}</em>
@@ -39,7 +42,7 @@
       <li class="lfd-init-unit side-{{side}} is-{{state}} {{#if hidden}}is-hidden{{/if}}" data-combatant="{{id}}" data-init-token="{{tokenId}}">
         <button type="button" class="lfd-init-portrait" data-action="initSelect"
                 data-tooltip-html="{{tip}}" data-tooltip-class="{{@root.tipClass}}"
-                aria-label="{{name}}: {{localize (concat 'LFD.Npc.Init.State.' state)}}">
+                aria-label="{{name}}{{#if dup}} {{dup}}{{/if}}: {{localize (concat 'LFD.Npc.Init.State.' state)}}">
           {{#if generic}}
           <span class="lfd-init-glyph" aria-hidden="true"><i class="cci {{#if isPlayer}}cci-frame{{else}}cci-npc-class{{/if}}"></i></span>
           {{else}}
@@ -48,9 +51,10 @@
           {{#if (eq state "done")}}<i class="lfd-init-badge fa-solid fa-check" aria-hidden="true"></i>{{/if}}
           {{#if (eq state "defeated")}}<i class="lfd-init-badge fa-solid fa-skull" aria-hidden="true"></i>{{/if}}
           {{#if (eq state "acting")}}<i class="lfd-init-badge fa-solid fa-play" aria-hidden="true"></i>{{/if}}
+          {{#if dup}}<span class="lfd-init-dup" aria-hidden="true">{{dup}}</span>{{/if}}
         </button>
         {{#if pips}}<span class="lfd-init-pips" aria-hidden="true">{{#each pips}}<i class="{{#if on}}is-on{{/if}}"></i>{{/each}}</span>{{/if}}
-        <span class="lfd-init-name">{{name}}</span>
+        <span class="lfd-init-name">{{label}}</span>
       </li>
       {{/each}}
     </ol>
@@ -90,11 +94,22 @@
   {{else}}
   <ol class="lfd-npc-list">
     {{#each rows}}
+    {{#if section}}
+    <li class="lfd-npc-section is-{{section.id}}">
+      {{#if section.foldable}}
+      <button type="button" data-action="toggleFallen" aria-expanded="{{#if section.open}}true{{else}}false{{/if}}">
+        <span>{{section.label}}</span><i class="fa-solid {{#if section.open}}fa-chevron-up{{else}}fa-chevron-down{{/if}}" aria-hidden="true"></i>
+      </button>
+      {{else}}
+      <span>{{section.label}}</span>
+      {{/if}}
+    </li>
+    {{else}}
     <li class="lfd-npc-row disp-{{disposition}} {{#if isTurn}}is-turn{{/if}} {{#if destroyed}}is-destroyed{{/if}} {{#if expanded}}is-open{{/if}} {{#if controlled}}is-selected{{/if}} {{#if acted}}is-acted{{/if}} {{hit}}"
         data-token="{{id}}">
       <div class="lfd-npc-top" data-action="toggleRow">
-        <span class="lfd-npc-turn" aria-hidden="true">{{#if isTurn}}<i class="fa-solid fa-play"></i>{{/if}}</span>
-        <button type="button" class="lfd-npc-name" data-action="select" data-tooltip="LFD.Npc.SelectHint">{{name}}</button>
+        {{#if controlled}}<i class="lfd-npc-sel fa-solid fa-crosshairs" aria-hidden="true" data-tooltip="LFD.Npc.Selected"></i>{{/if}}
+        <button type="button" class="lfd-npc-name" data-action="select" data-tooltip="LFD.Npc.SelectHint">{{name}}{{#if dup}}<span class="lfd-npc-dup">{{dup}}</span>{{/if}}</button>
         <span class="lfd-npc-tier">T{{tier}}</span>
         {{#each templates}}<span class="lfd-npc-tpl">{{this}}</span>{{/each}}
         {{#if outside}}<span class="lfd-npc-tpl is-outside" data-tooltip="LFD.Npc.OutsideHint">{{localize "LFD.Npc.Outside"}}</span>{{/if}}
@@ -107,6 +122,13 @@
         {{#if activations}}
         <span class="lfd-npc-acts" data-tooltip="LFD.Npc.Activations">{{#each activations}}<i class="{{#if on}}is-on{{/if}}"></i>{{/each}}</span>
         {{/if}}
+        {{#if inCombat}}
+        {{#if isTurn}}
+        <button type="button" class="lfd-npc-go is-end" data-action="endTurn" data-combatant="{{combatantId}}" data-tooltip="LFD.Npc.EndTurnHint"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i>{{localize "LFD.Npc.EndTurn"}}</button>
+        {{else if canAct}}
+        <button type="button" class="lfd-npc-go" data-action="activate" data-combatant="{{combatantId}}" data-tooltip="LFD.Npc.ActivateHint" aria-label="{{localize 'LFD.Npc.Activate'}}"><i class="fa-solid fa-play" aria-hidden="true"></i></button>
+        {{/if}}
+        {{/if}}
         <i class="fa-solid fa-chevron-down lfd-npc-chev" aria-hidden="true"></i>
       </div>
 
@@ -114,8 +136,8 @@
         <div class="lfd-npc-bar is-hp lvl-{{hp.level}}" aria-label="HP {{hp.value}}/{{hp.max}}">
           <span style="width: {{hp.pct}}%"></span><b>{{hp.value}}<small>/{{hp.max}}</small></b>
         </div>
-        {{#if heat}}
-        <div class="lfd-npc-bar is-heat {{#if heat.danger}}is-danger{{/if}}" aria-label="Heat {{heat.value}}/{{heat.max}}">
+        {{#if heat.value}}
+        <div class="lfd-npc-bar is-heat {{#if heat.danger}}is-danger{{/if}}" aria-label="Heat {{heat.value}}/{{heat.max}}" data-tooltip="LFD.Npc.Heat">
           <span style="width: {{heat.pct}}%"></span><b>{{heat.value}}<small>/{{heat.max}}</small></b>
         </div>
         {{/if}}
@@ -133,9 +155,23 @@
 
       {{#if expanded}}
       <div class="lfd-npc-detail">
-        <dl class="lfd-npc-stats">
-          {{#each stats}}<div><dt>{{label}}</dt><dd>{{value}}</dd></div>{{/each}}
-        </dl>
+        {{#each features}}
+        <section class="lfd-npc-feature-group is-{{type}}">
+          <h5><i class="{{icon}}" aria-hidden="true"></i>{{label}}</h5>
+          <div class="lfd-npc-features">
+            {{#each items}}
+            <button type="button" class="lfd-npc-feature is-{{state}} {{#if passive}}is-passive{{/if}} {{#if line}}has-line{{/if}}" data-action="feature" data-feature="{{id}}">
+              <i class="{{icon}}" aria-hidden="true"></i><span>{{name}}</span>
+              {{#if line}}<small class="lfd-npc-line">{{line}}</small>{{/if}}
+              {{#if recharge}}<em class="is-recharge">{{recharge}}</em>{{/if}}
+              {{#if uses}}<em>{{uses}}</em>{{/if}}
+            </button>
+            {{/each}}
+          </div>
+        </section>
+        {{/each}}
+
+        <p class="lfd-npc-statline">{{#each stats}}<span><b>{{label}}</b>{{value}}</span>{{/each}}</p>
 
         <div class="lfd-checks" role="group" aria-label="{{localize 'LFD.Check.Group'}}" data-tooltip-class="{{@root.tipClass}}">
           {{#each checks}}
@@ -155,7 +191,7 @@
           <button type="button" data-action="adjust" data-resource="hp" data-delta="1">+1</button>
           <button type="button" data-action="adjust" data-resource="hp" data-delta="5">+5</button>
           {{#if heat}}
-          <span class="lfd-npc-adjust-label">{{localize "LFD.Npc.Heat"}}</span>
+          <span class="lfd-npc-adjust-label">{{localize "LFD.Npc.Heat"}} <b class="{{#if heat.danger}}is-danger{{/if}}">{{heat.value}}/{{heat.max}}</b></span>
           <button type="button" data-action="adjust" data-resource="heat" data-delta="-1">−1</button>
           <button type="button" data-action="adjust" data-resource="heat" data-delta="1">+1</button>
           <button type="button" data-action="adjust" data-resource="heat" data-delta="2">+2</button>
@@ -170,29 +206,7 @@
           {{/each}}
         </div>
 
-        {{#each features}}
-        <section class="lfd-npc-feature-group">
-          <h5><i class="{{icon}}" aria-hidden="true"></i>{{label}}</h5>
-          <div class="lfd-npc-features">
-            {{#each items}}
-            <button type="button" class="lfd-npc-feature is-{{state}} {{#if passive}}is-passive{{/if}}" data-action="feature" data-feature="{{id}}">
-              <i class="{{icon}}" aria-hidden="true"></i><span>{{name}}</span>
-              {{#if recharge}}<em class="is-recharge">{{recharge}}</em>{{/if}}
-              {{#if uses}}<em>{{uses}}</em>{{/if}}
-            </button>
-            {{/each}}
-          </div>
-        </section>
-        {{/each}}
-
         <div class="lfd-npc-cmds">
-          {{#if inCombat}}
-          {{#if isTurn}}
-          <button type="button" class="is-primary" data-action="endTurn" data-combatant="{{combatantId}}"><i class="fa-solid fa-flag-checkered"></i>{{localize "LFD.Npc.EndTurn"}}</button>
-          {{else if canAct}}
-          <button type="button" class="is-primary" data-action="activate" data-combatant="{{combatantId}}"><i class="fa-solid fa-play"></i>{{localize "LFD.Npc.Activate"}}</button>
-          {{/if}}
-          {{/if}}
           {{#if anyUncharged}}
           <button type="button" data-action="recharge"><i class="fa-solid fa-dice-d6"></i>{{localize "LFD.Npc.Recharge"}}</button>
           {{/if}}
@@ -201,9 +215,9 @@
       </div>
       {{/if}}
     </li>
+    {{/if}}
     {{/each}}
   </ol>
   {{/if}}
-  <footer class="lfd-npc-foot">{{#each footer}}<span>{{#if key}}<b>{{key}}</b> {{/if}}{{action}}</span>{{/each}}</footer>
   {{/unless}}
 </div>
