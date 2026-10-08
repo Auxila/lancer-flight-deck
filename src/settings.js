@@ -195,8 +195,10 @@ export function registerSettings(manager) {
     scope: "world",
     config: true,
     type: String,
-    choices: { flightdeck: "LFD.Settings.JammedSource.FlightDeck", qol: "LFD.Settings.JammedSource.Qol" },
-    default: "flightdeck",
+    // Lancer QoL's own effect by default (Flight Deck draws Jammed only where QoL isn't drawing condition
+    // effects); choosing Flight Deck's replaces QoL's on tokens where both would stack
+    choices: { qol: "LFD.Settings.JammedSource.Qol", flightdeck: "LFD.Settings.JammedSource.FlightDeck" },
+    default: "qol",
     onChange: () => TokenEffects.instance.refreshAll(),
   });
 

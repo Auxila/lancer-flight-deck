@@ -58,7 +58,8 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   static PARTS = Object.fromEntries(PART_IDS.map(id => [id, { template: `${TEMPLATE_ROOT}/panel/${id}.hbs` }]));
 
   /** Foundry UI a docked panel must never cover: hotbar, players list, floating chat input. */
-  static OBSTACLES = ["hotbar", "players", "chat-message"];
+  // #players-active: Foundry's player list overflows its #players box, so that box alone misses it
+  static OBSTACLES = ["hotbar", "players", "players-active", "chat-message"];
 
   /** Set when a drag ends, so the click that follows it doesn't also fire. */
   #suppressClick = false;

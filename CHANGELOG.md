@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+**From a sweep of how Flight Deck works alongside other modules** (an A/B run with Flight Deck on and off: no errors caused in any module)
+- **Jammed defers to Lancer QoL by default:** the world setting *Jammed effect* now defaults to QoL's own effect whenever QoL draws its condition effects; Flight Deck draws its Jammed only where QoL isn't. Choosing Flight Deck's still replaces QoL's where both would stack. Worlds that picked Flight Deck's keep it.
+- **Docked panels stop above Foundry's player list:** on a laptop-height screen (1366x768) the cockpit ran over the player list in the bottom-left corner. Foundry's list overflows its own box, which the panel measured; both the cockpit and the NPC Deck now measure the list itself.
+
 ## 0.8.5
 
 **Reserves on the NPC Deck**

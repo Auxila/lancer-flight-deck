@@ -239,7 +239,10 @@ export class TokenEffects {
     }
   }
 
-  /** Jammed is drawn by QoL only when the world chose it; otherwise Flight Deck draws it. */
+  /**
+   * Jammed is Lancer QoL's whenever QoL is drawing its condition effects (the default: Flight Deck defers), unless
+   * the world chose Flight Deck's; with QoL's effects off, Flight Deck draws it.
+   */
   #qolDrawsJammed() {
     return this.#qolEffectsOn() && game.settings.get(MODULE_ID, SETTINGS.JAMMED_SOURCE) === "qol";
   }

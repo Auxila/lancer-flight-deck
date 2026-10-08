@@ -101,9 +101,9 @@
       },
       "JammedSource": {
         "Name": "Jammed effect",
-        "Hint": "Flight Deck's Jammed crawls with bright electricity and keeps the token art visible. Lancer QoL's version tints the token near-black blue. With Flight Deck chosen, Flight Deck removes QoL's Jammed filter where both would stack.",
-        "FlightDeck": "Flight Deck electricity (recommended)",
-        "Qol": "Lancer QoL"
+        "Hint": "Which effect a Jammed token shows when Lancer QoL is drawing its condition effects. By default it's QoL's own (it tints the token near-black blue); Flight Deck draws its Jammed only where QoL isn't. Choose Flight Deck's (bright electricity that keeps the token art visible) to replace QoL's: Flight Deck then removes QoL's Jammed filter where both would stack. A token that's already Jammed switches the next time it's Jammed.",
+        "FlightDeck": "Flight Deck's electricity (replaces QoL's)",
+        "Qol": "Lancer QoL's (default)"
       },
       "SpendActions": {
         "Name": "HUD menus spend actions",

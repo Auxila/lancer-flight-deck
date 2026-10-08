@@ -45,7 +45,7 @@ Also, after a hit, LANCER's own damage prompt can open by itself. That's the per
 
   Its Movement menu also offers *Auto*, which hands the movement mode back to Lancer Ruler Integration.
 
-  **One exception:** with the world setting *Jammed effect* on "Flight Deck", it removes Lancer QoL's darkening Jammed filter from tokens where both would stack.
+  Jammed is Lancer QoL's by default when QoL draws its condition effects. Only if you set the world setting *Jammed effect* to "Flight Deck's" does it replace QoL's darkening Jammed filter on tokens where both would stack.
 - **It never replaces sheets or rules.** Sheets open as you've configured them, including Lancer Alternative Sheets.
 - **It never removes anyone from a combat, and it never ends an encounter or changes the round without the GM confirming.** The NPC Deck adds NPCs and takes and ends turns. Next round goes straight through only once everyone has acted. Skipping ahead, going back a round and ending the encounter each ask first.
 - **It never calls outside services or loads outside assets.** All sound is synthesized in the browser.

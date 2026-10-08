@@ -5,7 +5,8 @@ const DRAG_THRESHOLD = 5;
 /** How close (px) to a screen edge a drop must be to dock there. */
 const SNAP_DISTANCE = 64;
 /** Foundry UI a docked deck must never cover. */
-const OBSTACLES = ["hotbar", "players", "chat-message"];
+// #players-active: Foundry's player list overflows its #players box, so that box alone misses it
+const OBSTACLES = ["hotbar", "players", "players-active", "chat-message"];
 
 const getSetting = key => game.settings.get(MODULE_ID, key);
 const setSetting = (key, value) => game.settings.set(MODULE_ID, key, value);

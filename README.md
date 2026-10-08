@@ -420,7 +420,7 @@ Every condition has its own look on the token itself. Three techniques, each mat
 
 - **Token Magic filters** follow the art's silhouette. They're saved on the token, so exactly **one** client writes them: the active GM, or the first active owner if no GM is online. That client reconciles the token's own `lfd-` filters against its conditions, so nothing doubles up, nothing hits a permission error, and a player's Lock On applied by the GM still updates correctly. It listens to document hooks, so it keeps working while the GM's Foundry is a background tab.
 - **Drawn overlays and Prone** are rendered on each client from the token's conditions. Nothing is saved, so they need no permissions and can't go stale. They sit above the art but under Foundry's bars and status icons.
-- **Lancer QoL** keeps its own visuals for Burn, Overshield, Danger Zone, Invisible, Intangible and Cascading. For Jammed, the world setting **Jammed effect** picks Flight Deck's electricity (default) or QoL's version; with Flight Deck chosen, QoL's darkening Jammed filter is removed where both would stack.
+- **Lancer QoL** keeps its own visuals for Burn, Overshield, Danger Zone, Invisible, Intangible and Cascading. Jammed is QoL's too by default, whenever QoL is drawing its condition effects (Flight Deck draws its own only where QoL isn't). The world setting **Jammed effect** can pick Flight Deck's electricity instead; then QoL's darkening Jammed filter is removed where both would stack.
 - **Settings:** "Condition effects on tokens" and "Condition effect strength" are per player. "Condition effects on token art" is per world and removes the saved filters when turned off. Reduced motion freezes the overlays on a still frame.
 
 ## Cockpit themes
