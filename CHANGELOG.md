@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.8.5
 
 **Reserves on the NPC Deck**
 - NPC tokens placed hidden on the scene, standing and not in the fight, fold into **Reserves · n** under the turn order (not counted in the header). Their rows are dashed, with an eye-slash.
