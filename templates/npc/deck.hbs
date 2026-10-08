@@ -73,7 +73,7 @@
       <button type="button" class="lfd-npc-batch-release" data-action="batchRelease" data-tooltip="LFD.Npc.Batch.Release" aria-label="{{localize 'LFD.Npc.Batch.Release'}}"><i class="fa-solid fa-xmark"></i></button>
     </div>
     {{#if batch.add}}
-    <button type="button" class="lfd-npc-batch-add" data-action="batchAddToCombat" data-tooltip="{{batch.add.tip}}"><i class="fa-solid fa-plus" aria-hidden="true"></i>{{batch.add.label}}</button>
+    <button type="button" class="lfd-npc-batch-add" data-action="{{batch.add.action}}" data-tooltip="{{batch.add.tip}}"><i class="fa-solid {{#if (eq batch.add.action 'batchDeploy')}}fa-eye{{else}}fa-plus{{/if}}" aria-hidden="true"></i>{{batch.add.label}}</button>
     {{/if}}
     <div class="lfd-npc-adjust">
       <span class="lfd-npc-adjust-label">HP</span>
@@ -106,7 +106,7 @@
     {{#if section}}
     <li class="lfd-npc-section is-{{section.id}}">
       {{#if section.foldable}}
-      <button type="button" data-action="toggleFallen" aria-expanded="{{#if section.open}}true{{else}}false{{/if}}">
+      <button type="button" data-action="toggleSection" data-section="{{section.id}}" aria-expanded="{{#if section.open}}true{{else}}false{{/if}}">
         <span>{{section.label}}</span><i class="fa-solid {{#if section.open}}fa-chevron-up{{else}}fa-chevron-down{{/if}}" aria-hidden="true"></i>
       </button>
       {{else}}
@@ -114,11 +114,13 @@
       {{/if}}
     </li>
     {{else}}
-    <li class="lfd-npc-row disp-{{disposition}} {{#if isTurn}}is-turn{{/if}} {{#if destroyed}}is-destroyed{{/if}} {{#if expanded}}is-open{{/if}} {{#if controlled}}is-selected{{/if}} {{#if acted}}is-acted{{/if}} {{hit}}"
+    <li class="lfd-npc-row disp-{{disposition}} {{#if reserve}}is-reserve{{/if}} {{#if isTurn}}is-turn{{/if}} {{#if destroyed}}is-destroyed{{/if}} {{#if expanded}}is-open{{/if}} {{#if controlled}}is-selected{{/if}} {{#if acted}}is-acted{{/if}} {{hit}}"
         data-token="{{id}}">
       <div class="lfd-npc-top" data-action="toggleRow">
         {{#if controlled}}<i class="lfd-npc-sel fa-solid fa-crosshairs" aria-hidden="true" data-tooltip="LFD.Npc.Selected"></i>{{/if}}
         <button type="button" class="lfd-npc-name" data-action="select" data-tooltip="LFD.Npc.SelectHint">{{name}}{{#if dup}}<span class="lfd-npc-dup">{{dup}}</span>{{/if}}</button>
+        {{#if revealable}}<button type="button" class="lfd-npc-unseen is-revealable" data-action="reveal" data-tooltip="LFD.Npc.RevealRowHint" aria-label="{{localize 'LFD.Npc.Reveal'}}"><i class="fa-solid fa-eye-slash" aria-hidden="true"></i></button>
+        {{else if hidden}}<i class="lfd-npc-unseen fa-solid fa-eye-slash" data-tooltip="LFD.Npc.Unseen" aria-label="{{localize 'LFD.Npc.Unseen'}}"></i>{{/if}}
         <span class="lfd-npc-tier">T{{tier}}</span>
         {{#each templates}}<span class="lfd-npc-tpl">{{this}}</span>{{/each}}
         {{#if outside}}<span class="lfd-npc-tpl is-outside" data-tooltip="LFD.Npc.OutsideHint">{{localize "LFD.Npc.Outside"}}</span>{{/if}}
@@ -220,7 +222,14 @@
           <button type="button" data-action="recharge"><i class="fa-solid fa-dice-d6"></i>{{localize "LFD.Npc.Recharge"}}</button>
           {{/if}}
           <button type="button" data-action="sheet"><i class="fa-solid fa-id-card"></i>{{localize "LFD.Npc.Sheet"}}</button>
-          {{#if turn.add}}
+          {{#if revealable}}<button type="button" class="is-reveal" data-action="reveal" data-tooltip="LFD.Npc.RevealHint"><i class="fa-solid fa-eye"></i>{{localize "LFD.Npc.Reveal"}}</button>{{/if}}
+          {{#if turn.deploy}}
+          <div class="lfd-npc-turn-cmds is-add">
+            <button type="button" class="lfd-npc-turn-btn is-deploy is-live" data-action="deploy" data-tooltip="{{turn.deploy.tip}}">
+              <i class="fa-solid fa-eye" aria-hidden="true"></i><span>{{localize "LFD.Npc.Turn.Deploy"}}</span>
+            </button>
+          </div>
+          {{else if turn.add}}
           <div class="lfd-npc-turn-cmds is-add">
             <button type="button" class="lfd-npc-turn-btn is-add is-live" data-action="addToCombat" data-tooltip="{{turn.add.tip}}">
               <i class="fa-solid fa-plus" aria-hidden="true"></i><span>{{localize "LFD.Npc.Turn.Add"}}</span>

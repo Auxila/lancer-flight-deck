@@ -612,6 +612,39 @@ await step(g, "NPC Deck: Add to combat from a row and from the batch bar; a clic
   return { ok: offered && added && batchOk && movedAway && reopened, detail: { npc: one.name, offered, added, batch, movedAway, reopened } };
 }, turn);
 
+await step(g, "NPC Deck: Reserves list a hidden NPC; Deploy reveals it and adds it; Reveal shows an unseen NPC in the fight", async turn => {
+  if (turn.skip) return { skip: turn.skip };
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const combat = game.combats.get(turn.combat);
+  const deck = () => document.getElementById("lancer-flight-deck-npc");
+  const npc = canvas.tokens.placeables.find(t => t.actor?.type === "npc" && !t.document.hidden && !combat.getCombatantsByToken(t.document).length && !t.actor.system?.destroyed && (t.actor.system?.structure?.value ?? 1) > 0);
+  if (!npc) return { skip: "no standing NPC outside the combat to hold in reserve" };
+  canvas.tokens.releaseAll();
+  await npc.document.update({ hidden: true });
+  await wait(1500);
+  const section = deck().querySelector(".lfd-npc-section.is-reserves")?.innerText.replace(/\s+/g, " ").trim() ?? null;
+  deck().querySelector('.lfd-npc-section.is-reserves [data-action="toggleSection"]')?.click();
+  await wait(800);
+  npc.control({ releaseOthers: true });
+  await wait(1200);
+  const openRow = () => deck().querySelector(".lfd-npc-row.is-open");
+  const reserveRow = openRow()?.dataset.token === npc.id && openRow()?.classList.contains("is-reserve");
+  openRow()?.querySelector('[data-action="deploy"]')?.click();
+  await wait(2000);
+  const deployed = !npc.document.hidden && combat.getCombatantsByToken(npc.document).some(c => !c.hidden);
+  // Now unseen mid-fight: token and tracker entry hidden; one click reveals both
+  await npc.document.update({ hidden: true });
+  await combat.getCombatantsByToken(npc.document)[0]?.update({ hidden: true });
+  await wait(1500);
+  const offered = !!openRow()?.querySelector("button.lfd-npc-unseen");
+  openRow()?.querySelector("button.lfd-npc-unseen")?.click();
+  await wait(2000);
+  const revealed = !npc.document.hidden && combat.getCombatantsByToken(npc.document).every(c => !c.hidden);
+  canvas.tokens.releaseAll();
+  if (npc.document.hidden) await npc.document.update({ hidden: false });
+  return { ok: /Reserves/i.test(section ?? "") && reserveRow && deployed && offered && revealed, detail: { npc: npc.name, section, reserveRow, deployed, offered, revealed } };
+}, turn);
+
 await step(g, "NPC Deck: once everyone has acted, Next round starts the next round", async turn => {
   if (turn.skip) return { skip: turn.skip };
   const wait = ms => new Promise(r => setTimeout(r, ms));

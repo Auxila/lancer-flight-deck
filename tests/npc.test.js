@@ -181,3 +181,27 @@ test("a destroyed NPC has no turns: it isn't still to act and doesn't hold up th
   assert.equal(roundComplete(combat([wreck, flagged, done])), true);
   assert.equal(roundComplete(combat([wreck, done, mech])), false, "the mech still has a turn");
 });
+
+test("reserves: hidden, standing NPC tokens not in the fight; a folded section after the turn order, before the destroyed", async () => {
+  const { reserveTokens, rosterSections, turnCommands } = await import("../src/npc/NpcRoster.js");
+  const npc = (structure = 1) => ({ type: "npc", system: { structure: { value: structure, max: 1 } } });
+  const tok = (id, over = {}) => ({ id, hidden: false, actor: npc(), ...over });
+  const inFight = new Set(["fighting"]);
+  const combat = { started: true, getCombatantsByToken: t => (inFight.has(t.id) ? [{}] : []) };
+  const tokens = [tok("visible"), tok("waiting", { hidden: true }), tok("fighting", { hidden: true }), tok("wreck", { hidden: true, actor: npc(0) }), tok("pc", { hidden: true, actor: { type: "mech", system: {} } })];
+  assert.deepEqual(reserveTokens(tokens, combat).map(t => t.id), ["waiting"], "hidden, standing, an NPC, not in the fight");
+  assert.deepEqual(reserveTokens(tokens, { started: false }), [], "no fight, no reserves");
+
+  const row = (id, over = {}) => ({ id, outside: false, destroyed: false, isTurn: false, canAct: true, expanded: false, ...over });
+  const rows = [row("ready"), row("res", { reserve: true }), row("dead", { destroyed: true })];
+  const ids = list => list.map(e => (e.section ? `[${e.section.id}${e.section.open === false ? "+" : ""}]` : e.id));
+  assert.deepEqual(ids(rosterSections(rows, { combat: true, showFallen: false })), ["[ready]", "ready", "[reserves+]", "[fallen+]"]);
+  assert.deepEqual(ids(rosterSections(rows, { combat: true, showFallen: false, showReserves: true })), ["[ready]", "ready", "[reserves]", "res", "[fallen+]"]);
+  const openRes = [row("ready"), row("res", { reserve: true, expanded: true })];
+  assert.deepEqual(ids(rosterSections(openRes, { combat: true, showFallen: false })).slice(-2), ["[reserves]", "res"], "an open reserve always shows");
+
+  const out = over => ({ inCombat: false, combatantId: null, isTurn: false, canAct: false, destroyed: false, hidden: false, activationsLeft: 0, ...over });
+  assert.deepEqual(turnCommands(out({ hidden: true }), { started: true }), { deploy: true }, "a hidden NPC outside: Deploy");
+  assert.deepEqual(turnCommands(out(), { started: true }), { add: true });
+  assert.equal(turnCommands(out({ hidden: true, destroyed: true }), { started: true }), null);
+});

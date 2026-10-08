@@ -1652,3 +1652,53 @@
 #lancer-flight-deck-npc .lfd-npc-ctrlbar button[aria-disabled="true"]:active {
   transform: none;
 }
+
+/* --------------------------------------------------------------------------
+   Reserves (hidden NPCs placed on the scene, off the fight) and Reveal
+   -------------------------------------------------------------------------- */
+
+#lancer-flight-deck-npc .lfd-npc-section.is-reserves {
+  color: var(--lfd-advisory);
+}
+
+/* A reserve waits off the fight: dashed, a little dim until opened */
+#lancer-flight-deck-npc .lfd-npc-row.is-reserve {
+  border-style: dashed;
+}
+
+#lancer-flight-deck-npc .lfd-npc-row.is-reserve:not(.is-open) .lfd-npc-top,
+#lancer-flight-deck-npc .lfd-npc-row.is-reserve:not(.is-open) .lfd-npc-bars {
+  opacity: 0.7;
+}
+
+/* Players can't see it: an eye-slash by the name; in the fight it's a button that reveals */
+#lancer-flight-deck-npc .lfd-npc-unseen {
+  flex: none;
+  font-size: 9px;
+  color: var(--lfd-ink-dim);
+}
+
+#lancer-flight-deck-npc button.lfd-npc-unseen {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 16px;
+  padding: 0;
+  color: var(--lfd-caution);
+  background: color-mix(in srgb, var(--lfd-caution) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lfd-caution) 50%, transparent);
+}
+
+#lancer-flight-deck-npc button.lfd-npc-unseen:hover {
+  color: var(--lfd-bg);
+  background: var(--lfd-caution);
+}
+
+#lancer-flight-deck-npc .lfd-npc-cmds button.is-reveal {
+  color: var(--lfd-caution);
+  border-color: color-mix(in srgb, var(--lfd-caution) 55%, transparent);
+}
+
+#lancer-flight-deck-npc .lfd-npc-turn-btn.is-deploy {
+  --t: var(--lfd-ok);
+}

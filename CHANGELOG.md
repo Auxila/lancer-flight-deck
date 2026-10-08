@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+**Reserves on the NPC Deck**
+- NPC tokens placed hidden on the scene, standing and not in the fight, fold into **Reserves · n** under the turn order (not counted in the header). Their rows are dashed, with an eye-slash.
+- **Deploy** on a reserve reveals its token, adds it to the combat and shows its place in the tracker in one click; it joins To act with this round's activations. The batch bar's button reads **Deploy N** when any of the selection is hidden.
+- **Reveal** for an NPC in the fight that players can't see (a hidden token or tracker entry): an eye-slash button by its name, and **Reveal** in its open row, unhide both together. Foundry keeps the two apart, so revealing only the token used to leave the NPC missing from the players' tracker.
+- GM brief: a row for what players can see of an NPC (Deploy and Reveal only ever reveal).
+- Smoke test, 44 steps: a hidden NPC in Reserves, Deploy, and Reveal.
+
 ## 0.8.4
 
 **Fixes, from a full scan of the module**

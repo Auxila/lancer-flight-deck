@@ -170,6 +170,9 @@ export function readRow(token, { combat, expanded, dups = null }) {
     isTurn: !!combatant && combat?.combatant?.id === combatant.id,
     combatantId: combatant?.id ?? null,
     inCombat: !!combatant && !!combat?.started,
+    // Players can't see it: a hidden token, or (in a fight) a hidden place in the tracker
+    hidden: !!token.hidden,
+    trackerHidden: !!combatant?.hidden,
     targetedBy,
     targetedNames: targetedBy.map(u => u.name).join(", "),
     controlled: !!placeable?.controlled,
@@ -188,8 +191,9 @@ export function readRow(token, { combat, expanded, dups = null }) {
  */
 export function turnCommands(row, { started, acting = null }) {
   if (!started) return null;
-  // A destroyed NPC outside the fight isn't offered back in (Lancer QoL may have just taken the wreck out)
-  if (!row.inCombat) return row.destroyed ? null : { add: true };
+  // A destroyed NPC outside the fight isn't offered back in (Lancer QoL may have just taken the wreck out);
+  // one the GM placed hidden is a reserve: Deploy reveals it as it joins
+  if (!row.inCombat) return row.destroyed ? null : row.hidden ? { deploy: true } : { add: true };
   let activate;
   if (row.isTurn) activate = { on: false, why: "acting" };
   else if (row.destroyed) activate = { on: false, why: "destroyed" };
@@ -514,16 +518,28 @@ export function shortLabel(name, max = 8) {
 }
 
 /**
+ * Reserves: NPC tokens the GM placed hidden on the scene, standing and not in the fight yet. Deploy brings one
+ * in (revealed, with this round's activations). Destroyed ones aren't reserves.
+ * @param {TokenDocument[]} tokens  the scene's tokens
+ * @param {Combat} combat           a started combat
+ */
+export function reserveTokens(tokens, combat) {
+  if (!combat?.started) return [];
+  return tokens.filter(t => t.hidden && isNpc(t.actor) && !npcDestroyed(t.actor) && !combat.getCombatantsByToken(t).length);
+}
+
+/**
  * The roster in turn order for a GM choosing who goes next: whoever is acting, then those still to act,
  * then those done for the round, then the destroyed (folded unless shown, but an open row always shows).
  * Out of combat, one list, the destroyed still last. Section entries carry {section} instead of a row.
  * @param {object[]} rows   readRow results (an `outside` row stays on top, unlabelled)
  * @param {{combat: boolean, showFallen: boolean}} options
  */
-export function rosterSections(rows, { combat, showFallen }) {
+export function rosterSections(rows, { combat, showFallen, showReserves = false }) {
   const out = [];
   const outside = rows.filter(r => r.outside);
-  const rest = rows.filter(r => !r.outside);
+  const reserves = rows.filter(r => r.reserve && !r.outside);
+  const rest = rows.filter(r => !r.outside && !r.reserve);
   const fallen = rest.filter(r => r.destroyed);
   const standing = rest.filter(r => !r.destroyed);
   out.push(...outside);
@@ -539,6 +555,12 @@ export function rosterSections(rows, { combat, showFallen }) {
       out.push(...list);
     }
   } else out.push(...standing);
+  // Reserves waiting off the fight (folded unless shown, or one of them is open)
+  if (reserves.length) {
+    const open = showReserves || reserves.some(r => r.expanded);
+    out.push({ section: { id: "reserves", count: reserves.length, foldable: true, open } });
+    if (open) out.push(...reserves);
+  }
   if (fallen.length) {
     const open = showFallen || fallen.some(r => r.expanded);
     out.push({ section: { id: "fallen", count: fallen.length, foldable: true, open } });

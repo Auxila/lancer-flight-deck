@@ -8,7 +8,7 @@ import { LookHere } from "./LookHere.js";
 import { conditionCard } from "../core/ConditionInfo.js";
 import { untickMeltdown } from "../core/MeltdownClock.js";
 import { keyHints } from "../ui/keyHints.js";
-import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, npcDestroyed, outOfFight, rosterSections, roundComplete, stillToAct, turnCommands, undoTarget, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
+import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, npcDestroyed, outOfFight, reserveTokens, rosterSections, roundComplete, stillToAct, turnCommands, undoTarget, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
 import { conditionLook } from "../ui/components/MasterCautionGrid.js";
 import { CHECKS } from "../ui/components/HullReadout.js";
 
@@ -76,7 +76,10 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       collapse: NpcDeck.#onCollapse,
       initSelect: { handler: NpcDeck.#onInitSelect, buttons: [0, 2] },
       dock: NpcDeck.#onDock,
-      toggleFallen: NpcDeck.#onToggleFallen,
+      toggleSection: NpcDeck.#onToggleSection,
+      deploy: NpcDeck.#onDeploy,
+      reveal: NpcDeck.#onReveal,
+      batchDeploy: NpcDeck.#onBatchDeploy,
     },
   };
 
@@ -291,8 +294,8 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     }, { capture: true });
   }
 
-  /** Destroyed NPCs fold into one line until the GM opens it. */
-  #showFallen = false;
+  /** Foldable sections the GM has opened: Destroyed and Reserves fold into one line until opened. */
+  #openSections = new Set();
 
   /** @override */
   async _prepareContext() {
@@ -305,9 +308,12 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       const current = combat?.combatant;
       if (current?.token && isNpc(current.actor)) this.#expanded = current.token.id;
     }
+    // Reserves: hidden NPCs placed on the scene, not in the fight yet (they get their own section)
+    const reserves = combat?.started ? reserveTokens(viewedScene()?.tokens.contents ?? [], combat) : [];
+    const reserveIds = new Set(reserves.map(t => t.id));
     // A selected NPC that isn't in the fight still gets its row, at the top
     let outsider = null;
-    if (this.#expanded && !tokens.some(t => t.id === this.#expanded)) {
+    if (this.#expanded && !tokens.some(t => t.id === this.#expanded) && !reserveIds.has(this.#expanded)) {
       const doc = viewedScene()?.tokens.get(this.#expanded);
       if (doc && isNpc(doc.actor)) {
         outsider = doc;
@@ -316,9 +322,12 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     const now = Date.now();
-    const rows = tokens.map(token => {
+    const rows = [...tokens, ...reserves].map(token => {
       const row = readRow(token, { combat, expanded: this.#expanded, dups });
       row.outside = token === outsider && !!combat;
+      row.reserve = reserveIds.has(token.id);
+      // In the fight but unseen by players: one click shows its token and its place in the tracker
+      row.revealable = row.inCombat && (row.hidden || row.trackerHidden);
       this.#noteDamage(token, now);
       const hit = this.#hits.get(token.id);
       row.hit = hit && hit.until > now ? hit.cls : null;
@@ -343,11 +352,11 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       return row;
     });
     // In turn order for choosing who goes next: acting, to act, done, then the destroyed (folded)
-    const entries = rosterSections(rows, { combat: !!combat?.started, showFallen: this.#showFallen });
+    const entries = rosterSections(rows, { combat: !!combat?.started, showFallen: this.#openSections.has("fallen"), showReserves: this.#openSections.has("reserves") });
     for (const e of entries) {
       if (e.section) e.section.label = game.i18n.format(`LFD.Npc.Section.${e.section.id}`, { n: e.section.count });
     }
-    const counted = rows.filter(r => !r.outside);
+    const counted = rows.filter(r => !r.outside && !r.reserve);
     const initiative = readInitiative(combat, { dups });
     if (initiative && initiative.firstDone >= 0) initiative.entries[initiative.firstDone].divider = true;
     if (initiative) await this.#stillFrames(initiative.entries);
@@ -730,13 +739,18 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     const names = list => list.map(t => (dups.has(t.id) ? `${t.name} ${dups.get(t.id)}` : t.name)).join(", ");
     // In a started combat: the selected NPCs that aren't in it yet, to add in one go
     const combat = deckCombat();
-    // ...standing ones: a destroyed NPC isn't offered back into the fight
-    const outside = combat ? picked.filter(t => !combat.getCombatantsByToken(t.document).length && !npcDestroyed(t.actor)) : [];
+    // ...standing ones: a destroyed NPC isn't offered back into the fight. Any unseen by players (a hidden token,
+    // or a hidden place in the tracker) makes it Deploy, which reveals them as they come in
+    const unseen = t => t.document.hidden || combat?.getCombatantsByToken(t.document).some(c => c.hidden);
+    const outside = combat ? picked.filter(t => !npcDestroyed(t.actor) && (!combat.getCombatantsByToken(t.document).length || unseen(t))) : [];
+    const deploying = outside.some(unseen);
     return {
       count: n,
       names: names(picked),
       add: outside.length
-        ? { label: i18n.format("LFD.Npc.Batch.Add", { n: outside.length }), tip: i18n.format("LFD.Npc.Batch.AddTip", { names: names(outside) }) }
+        ? deploying
+          ? { action: "batchDeploy", label: i18n.format("LFD.Npc.Batch.Deploy", { n: outside.length }), tip: i18n.format("LFD.Npc.Batch.DeployTip", { names: names(outside) }) }
+          : { action: "batchAddToCombat", label: i18n.format("LFD.Npc.Batch.Add", { n: outside.length }), tip: i18n.format("LFD.Npc.Batch.AddTip", { names: names(outside) }) }
         : null,
       heat: picked.some(t => Number(t.actor.system?.heat?.max) > 0),
       quick: QUICK_CONDITIONS.map(id => {
@@ -876,9 +890,12 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     strip.classList.toggle("is-at-end", overflowing && strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 2);
   }
 
-  /** Show or fold the destroyed NPCs. */
-  static #onToggleFallen() {
-    this.#showFallen = !this.#showFallen;
+  /** Show or fold a foldable section (Destroyed, Reserves). */
+  static #onToggleSection(event, target) {
+    const id = target.dataset.section;
+    if (!id) return;
+    if (this.#openSections.has(id)) this.#openSections.delete(id);
+    else this.#openSections.add(id);
     this.render({ parts: ["deck"] });
   }
 
@@ -892,6 +909,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     const cmds = turnCommands(row, { started: !!combat?.started, acting });
     if (!cmds) return null;
     const i18n = game.i18n;
+    if (cmds.deploy) return { deploy: { tip: i18n.localize("LFD.Npc.Turn.deploy") } };
     if (cmds.add) return { add: { tip: i18n.localize("LFD.Npc.Turn.add") } };
     const tip = (why, data) => i18n.format(`LFD.Npc.Turn.${why}`, data ?? {});
     return {
@@ -909,6 +927,40 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       .filter(d => d && !combat.getCombatantsByToken(d).length && !npcDestroyed(d.actor))
       .map(d => ({ tokenId: d.id, sceneId: d.parent.id, actorId: d.actorId, hidden: d.hidden }));
     if (data.length) await combat.createEmbeddedDocuments("Combatant", data);
+  }
+
+  /**
+   * Into the fight and into view: unhide the tokens, add the ones not in the combat yet (with this round's
+   * activations), and show their place in the tracker. Foundry keeps a token's and a combatant's visibility
+   * apart; Deploy and Reveal set both, so players see the NPC on the map and in the tracker at once.
+   * Destroyed NPCs stay out.
+   */
+  static async #bringIn(docs) {
+    const combat = deckCombat();
+    if (!combat) return;
+    const list = docs.filter(d => d && isNpc(d.actor) && !npcDestroyed(d.actor));
+    const byScene = new Map();
+    for (const d of list.filter(d => d.hidden)) {
+      if (!byScene.has(d.parent)) byScene.set(d.parent, []);
+      byScene.get(d.parent).push({ _id: d.id, hidden: false });
+    }
+    for (const [scene, updates] of byScene) await scene.updateEmbeddedDocuments("Token", updates);
+    const add = list.filter(d => !combat.getCombatantsByToken(d).length).map(d => ({ tokenId: d.id, sceneId: d.parent.id, actorId: d.actorId, hidden: false }));
+    if (add.length) await combat.createEmbeddedDocuments("Combatant", add);
+    const show = list.flatMap(d => combat.getCombatantsByToken(d)).filter(c => c.hidden).map(c => ({ _id: c.id, hidden: false }));
+    if (show.length) await combat.updateEmbeddedDocuments("Combatant", show);
+  }
+
+  static async #onDeploy(event, target) {
+    await NpcDeck.#bringIn([NpcDeck.#tokenDoc(target)]);
+  }
+
+  static async #onReveal(event, target) {
+    await NpcDeck.#bringIn([NpcDeck.#tokenDoc(target)]);
+  }
+
+  static async #onBatchDeploy() {
+    await NpcDeck.#bringIn(NpcDeck.#batchTokens().map(t => t.document));
   }
 
   static async #onAddToCombat(event, target) {

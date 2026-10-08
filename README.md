@@ -279,6 +279,16 @@ round (out of combat, those still standing); the **?** beside it lists every cli
   the scene, the deck runs the scene's active one (the one Foundry's tracker opens on, and the
   one a new encounter becomes), else the one your tracker shows. Unlinked copies of the same NPC
   are separate rows with their own health and conditions.
+- **Reserves:** NPC tokens you've placed hidden on the scene, standing and not in the fight yet,
+  fold into **Reserves · n** under the turn order (they don't count toward the header). Their
+  rows are dashed, with an eye-slash: players can't see them. **Deploy** on a reserve's row
+  reveals its token, adds it to the combat and shows its place in the tracker, all at once; it
+  joins To act with its activations for this round. With several selected, the batch bar's
+  button reads **Deploy N** when any of them is hidden. Foundry keeps a token's and a tracker
+  entry's visibility apart, so revealing only the token would leave it missing from the
+  players' tracker; Deploy sets both. An NPC in the fight that players can't see (you hid its
+  token or its tracker entry) gets an eye-slash button by its name and **Reveal** in its open
+  row: one click shows both.
 - **It follows you:** the open row follows the turn, and your selection. Select an NPC on
   the map and its row opens and scrolls into view (clicking one that's already selected opens
   its row again, after the turn moved the deck elsewhere); select one that isn't in the combat
