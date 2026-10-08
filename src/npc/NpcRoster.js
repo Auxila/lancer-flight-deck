@@ -41,6 +41,19 @@ const esc = s => foundry.utils.escapeHTML(String(s ?? ""));
 /** Is this an NPC the deck should list? (LANCER "npc" actors; deployables are left out.) */
 export const isNpc = actor => actor?.type === "npc";
 
+/** An NPC that's destroyed: flagged so, or out of structure. */
+export const npcDestroyed = actor => {
+  if (!isNpc(actor)) return false;
+  const s = actor.system ?? {};
+  return !!s.destroyed || (num(s.structure?.max) > 0 && num(s.structure?.value) <= 0);
+};
+
+/**
+ * Out of the fight for the deck: defeated in the tracker, or a destroyed NPC. Its activations don't show,
+ * don't count as still to act, and don't hold up the round, even before anyone marks it defeated.
+ */
+export const outOfFight = combatant => !!combatant?.isDefeated || npcDestroyed(combatant?.actor);
+
 /** The scene the GM is looking at; without a canvas ("Disable game canvas") it's still known. */
 export const viewedScene = () => canvas?.scene ?? game.scenes?.viewed ?? null;
 
@@ -119,8 +132,7 @@ export function readRow(token, { combat, expanded, dups = null }) {
   const combatant = combat?.combatants.find(c => c.tokenId === token.id) ?? null;
   const hp = track(s.hp);
   const heat = track(s.heat);
-  const structure = track(s.structure);
-  const destroyed = !!s.destroyed || (structure.max > 0 && structure.value <= 0) || !!combatant?.isDefeated;
+  const destroyed = npcDestroyed(actor) || !!combatant?.isDefeated;
   const placeable = token.object;
   const targetedBy = game.users
     .filter(u => u.active && placeable && u.targets.has(placeable))
@@ -149,9 +161,10 @@ export function readRow(token, { combat, expanded, dups = null }) {
     hasChips: conds.length > 0 || num(s.burn) > 0 || num(s.overshield?.value) > 0,
     destroyed,
     // Pips only for NPCs with more than one activation (Elites): for the rest, ▶ and the section say it
-    activations: act && num(act.max) > 1 ? Array.from({ length: num(act.max) }, (_, i) => ({ on: i < num(act.value) })) : null,
+    // ...and none once it's destroyed: it has no turns left to take
+    activations: act && num(act.max) > 1 && !destroyed ? Array.from({ length: num(act.max) }, (_, i) => ({ on: i < num(act.value) })) : null,
     canAct: !!combatant && num(act?.value) > 0 && !destroyed,
-    activationsLeft: num(act?.value),
+    activationsLeft: destroyed ? 0 : num(act?.value),
     // In a started combat, out of activations and not acting now: done for the round
     acted: !!combatant && !!combat?.started && num(act?.value) <= 0 && combat?.combatant?.id !== combatant.id,
     isTurn: !!combatant && combat?.combatant?.id === combatant.id,
@@ -194,24 +207,31 @@ export function turnCommands(row, { started, acting = null }) {
  * - "ended": nobody is acting and the turn that just ended was this round's. Its unit gets the activation
  *   back and returns to To act, without starting a turn.
  * Foundry keeps the turn before on every client (combat.previous); after a reload it's gone and Undo rests.
+ * Once per turn: `undone` is the last Undo this client made ({combat, round, combatantId, value}: the unit's
+ * activations right after it). Until that unit spends one again, the same turn can't be undone twice (an
+ * Elite with one left would otherwise get back a second it never spent).
  * @param {Combat|null} combat
+ * @param {{undone?: {combat: string, round: number, combatantId: string, value: number}|null}} [options]
  * @returns {null|{kind: "acting"|"ended", id: string, name: string}}
  */
-export function undoTarget(combat) {
+export function undoTarget(combat, { undone = null } = {}) {
   if (!combat?.started) return null;
   const acting = combat.combatant;
   if (acting) return { kind: "acting", id: acting.id, name: acting.name };
   const prev = combat.previous;
   if (!prev?.combatantId || prev.round !== combat.round || prev.turn === null || prev.turn === undefined) return null;
   const c = combat.combatants?.get?.(prev.combatantId);
-  if (!c || num(c.activations?.value) >= (num(c.activations?.max) || 1)) return null;
+  const value = num(c?.activations?.value);
+  if (!c || value >= (num(c.activations?.max) || 1)) return null;
+  const same = !!undone && undone.combat === combat.id && undone.round === combat.round && undone.combatantId === c.id;
+  if (same && value >= undone.value) return null;
   return { kind: "ended", id: c.id, name: c.name };
 }
 
 /** Who still has a turn this round (whoever is acting included); the defeated don't count. */
 export function stillToAct(combat) {
   if (!combat?.started) return [];
-  return [...(combat.combatants ?? [])].filter(c => !c.isDefeated && (num(c.activations?.value) > 0 || combat.combatant?.id === c.id));
+  return [...(combat.combatants ?? [])].filter(c => combat.combatant?.id === c.id || (!outOfFight(c) && num(c.activations?.value) > 0));
 }
 
 /**
@@ -221,7 +241,7 @@ export function stillToAct(combat) {
  */
 export function roundComplete(combat) {
   if (!combat?.started || combat.combatant) return false;
-  const standing = [...(combat.combatants ?? [])].filter(c => !c.isDefeated);
+  const standing = [...(combat.combatants ?? [])].filter(c => !outOfFight(c));
   return standing.length > 0 && standing.every(c => num(c.activations?.value) <= 0);
 }
 
@@ -279,10 +299,12 @@ export function readInitiative(combat, { dups = null } = {}) {
   const current = combat.combatant?.id ?? null;
   const entries = combat.turns.map((c, order) => {
     const act = c.activations ?? {};
+    const out = outOfFight(c);
     const max = Math.max(0, num(act.max));
-    const value = Math.max(0, Math.min(max || 99, num(act.value)));
+    // A destroyed NPC (or anyone defeated) has no activations left to show, even if LANCER still counts some
+    const value = out ? 0 : Math.max(0, Math.min(max || 99, num(act.value)));
     const isPlayer = !!c.hasPlayerOwner || c.actor?.type === "mech" || c.actor?.type === "pilot";
-    const state = c.id === current ? "acting" : c.isDefeated ? "defeated" : value > 0 ? "ready" : "done";
+    const state = c.id === current ? "acting" : out ? "defeated" : value > 0 ? "ready" : "done";
     const portrait = portraitOf(c);
     return {
       id: c.id,
@@ -296,7 +318,7 @@ export function readInitiative(combat, { dups = null } = {}) {
       side: isPlayer ? "player" : c.token?.disposition === 1 ? "friendly" : c.token?.disposition === 0 ? "neutral" : "hostile",
       isPlayer,
       state,
-      pips: max > 0 && max <= 6 ? Array.from({ length: max }, (_, i) => ({ on: i < value })) : null,
+      pips: max > 0 && max <= 6 && !out ? Array.from({ length: max }, (_, i) => ({ on: i < value })) : null,
       left: value,
       max,
       order,

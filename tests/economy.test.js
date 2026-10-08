@@ -39,3 +39,20 @@ test("the input tracker is never mutated", () => {
   trackerChange(t, "full", true);
   assert.deepEqual(t, fresh());
 });
+
+test("a mech's combat: the one it's acting in, else its scene's active one, else the tracker's, never just the first", async () => {
+  const { combatOf } = await import("../src/actions/runner.js");
+  const mech = { uuid: "Actor.kit", id: "kit", isToken: false };
+  const unit = { actor: mech, actorId: "kit" };
+  const here = { id: "scene" };
+  const fight = (id, over = {}) => ({ id, started: true, round: 1, combatant: null, active: false, scene: here, combatants: [unit], ...over });
+  // Last session's encounter, still running elsewhere, comes first in the list
+  const stale = fight("stale", { round: 7, scene: { id: "elsewhere" }, active: true });
+  const now = fight("now", { active: true });
+  assert.equal(combatOf(mech, { combats: [stale, now], viewed: null, scene: here }).id, "now", "the active encounter on its scene");
+  assert.equal(combatOf(mech, { combats: [stale, fight("now")], viewed: null, scene: here }).id, "now", "else the newest");
+  assert.equal(combatOf(mech, { combats: [stale, fight("now")], viewed: stale, scene: here }).id, "stale", "the tracker's, when nothing better says otherwise");
+  assert.equal(combatOf(mech, { combats: [stale, fight("now", { combatant: unit })], viewed: stale, scene: here }).id, "now", "where it's acting beats all");
+  assert.equal(combatOf(mech, { combats: [fight("unstarted", { started: false })], viewed: null, scene: here }), null);
+  assert.equal(combatOf(mech, { combats: [now], viewed: null, scene: here }).id, "now");
+});

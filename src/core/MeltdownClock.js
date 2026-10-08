@@ -11,15 +11,36 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
  * still works by hand. At T-0 a chat card tells the table. A world setting turns it off.
  */
 export function registerMeltdownClock() {
-  Hooks.on("updateCombat", (combat, changes) => {
+  Hooks.on("updateCombat", (combat, changes, options) => {
     if (!("turn" in changes) || !game.users.activeGM?.isSelf) return;
+    // A step back (LANCER's previous turn or round, the NPC Deck's Undo and Prev) ends no turn
+    if (Number(options?.direction) < 0) return;
     if (!game.settings.get(MODULE_ID, SETTINGS.MELTDOWN_TICK)) return;
     const ended = combat.previous?.combatantId ? combat.combatants.get(combat.previous.combatantId) : null;
     const actor = ended?.actor;
     const timer = actor?.system?.meltdown_timer;
     if (!Number.isInteger(timer) || timer <= 0) return;
+    ticks.set(tickKey(combat, ended.id, combat.previous.round), { actor: actor.uuid, from: timer });
     tick(actor, timer - 1).catch(err => console.error("Flight Deck | Meltdown countdown failed", err));
   });
+}
+
+/** Ticks made on this client, by combat, round and combatant: an undone turn gives its tick back. */
+const ticks = new Map();
+const tickKey = (combat, combatantId, round) => `${combat.id}:${round}:${combatantId}`;
+
+/**
+ * The turn that just ended is being undone (the NPC Deck's Undo): if its end ticked a meltdown countdown,
+ * put the countdown back, unless something has changed it since. Only the client that ticked knows (the
+ * active GM's); elsewhere this does nothing.
+ */
+export async function untickMeltdown(combat, combatantId) {
+  const key = tickKey(combat, combatantId, combat.round);
+  const record = ticks.get(key);
+  if (!record) return;
+  ticks.delete(key);
+  const actor = await fromUuid(record.actor);
+  if (actor?.system?.meltdown_timer === record.from - 1) await actor.update({ "system.meltdown_timer": record.from });
 }
 
 async function tick(actor, timer) {

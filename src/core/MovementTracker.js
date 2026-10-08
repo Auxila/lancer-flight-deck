@@ -1,5 +1,5 @@
 import { MODULE_ID, MOVE_FLAG, SETTINGS } from "../constants.js";
-import { inActiveCombat, isCombatantOf } from "../actions/runner.js";
+import { combatOf, inActiveCombat } from "../actions/runner.js";
 
 /** Movement methods that are the mech moving itself: a drag on the map, or the arrow keys. */
 const OWN_MOVES = new Set(["dragging", "keyboard"]);
@@ -99,8 +99,7 @@ async function applyMove(actor, delta, doc) {
  * acting, if any), or "free" out of combat. A Boost's allowance only counts for that turn.
  */
 export function moveTurnKey(actor) {
-  const combats = game.combats?.filter(c => c.started && c.combatants.some(cb => isCombatantOf(cb, actor))) ?? [];
-  const combat = combats.find(c => isCombatantOf(c.combatant, actor)) ?? combats[0];
+  const combat = combatOf(actor);
   return combat ? `${combat.id}:${combat.round}` : "free";
 }
 

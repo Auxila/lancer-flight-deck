@@ -54,6 +54,12 @@ async function seat(user) {
   page.on("pageerror", e => record(user, `${e.message}
 ${e.stack ?? ""}`));
   page.on("console", async m => {
+    // Foundry's deprecation warnings: ours fail the step (they turn into errors in a later Foundry); others' are noise
+    if (m.type() === "warning" && /Deprecated since|is now namespaced|deprecated/i.test(m.text())) {
+      const stack = (await m.args()[0]?.evaluate(e => e?.stack ?? "").catch(() => "")) ?? "";
+      if (attribute(`${m.text()}\n${stack}`) === "ours") errors.push(`[${user}] DEPRECATED ${m.text().split(/\r?\n/)[0].slice(0, 300)}`);
+      return;
+    }
     if (m.type() !== "error") return;
     // Foundry logs hook errors as Error objects: their stack says which package threw
     const stack = await m.args()[0]?.evaluate(e => e?.stack ?? "").catch(() => "") ?? "";

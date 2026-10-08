@@ -1,12 +1,27 @@
 # Changelog
 
-## Unreleased
+## 0.8.4
+
+**Fixes, from a full scan of the module**
+- **Raw key names on the panels:** since 0.8.1, the drag hint, the pin button and the "Dock here" label showed as `LFD.Move.Hint`, `LFD.Move.Dock` and `LFD.Move.DockHere` on the NPC Deck and the cockpit panel's header. The movement warning's strings had replaced them; both sets are back.
+- **Undo is once per turn, Elites included:** after an Elite ended its last turn, Undo could be pressed twice, handing back an activation it never spent. Now it can't undo the same turn twice; once the unit takes another turn, that one can be undone.
+- **The meltdown countdown doesn't tick on a step back:** LANCER's previous turn and previous round (the NPC Deck's Undo and Prev) no longer count as a turn ending. And when Undo takes back a turn that has already ended, a tick that turn's end made is put back, so taking the turn again doesn't tick it twice.
+- **Reactions and Boost follow the fight you're in:** with an earlier encounter still running (last session's, left started on another scene, with the same mechs in it), a reaction taken in the new fight was filed against the old one's round, so it stayed "used" for the rest of the new fight; a Boost's allowance had the same mix-up off your own turn. Both now go by the encounter the mech is acting in, else the active one on its scene, else the one the tracker shows.
+- **One part failing no longer stops the rest:** each part (the cockpit, the NPC Deck, token effects, Lock On requests, movement, auto-damage, the meltdown countdown) starts on its own. If one fails, the others still run, and GMs get one notice naming what's off.
+
+**Tests**
+- Unit tests, 97: every text key the code and templates use exists in `en.json`, every key prefix completed at runtime has keys under it, and `en.json` names no key twice in one object (the cause of the missing strings above). Undo for Elites; the meltdown countdown's step back and restored tick; which encounter a mech's reactions and Boost belong to.
+- Smoke test: Foundry deprecation warnings that come from Flight Deck's code now fail the step they happen in (there are none today), so a Foundry update can't creep up on it.
+- Checked across all 1,976 items in the world's compendiums (every weapon, system, frame and NPC feature, LCP content included) and every actor in the test world: the panel's and the deck's readers threw nothing.
 
 **The round's controls, along the bottom of the NPC Deck** (while a combat runs)
 - **Prev** · **Undo** · **Next round** · **End**, pinned to the bottom edge, clear of the resize grip; End in red, last.
 - **Undo** takes back the turn in progress (LANCER's previous turn: the activation comes back and nobody acts), or right after a turn ends, gives that unit its activation back so it returns to To act. Once per turn; the hover names whose.
 - **Next round** any time: with anyone still to act it asks first and names them. **Prev** asks first (everyone's activations come back and that round starts over). **End** is Foundry's own End Encounter, with its question. Off buttons stay put, dashed and dim, saying why.
 - GM brief: the table covers the strip, and "what it never does" now says the round and the encounter change only after the GM confirms.
+
+**NPC Deck**
+- **Destroyed NPCs have no turns:** once an NPC is destroyed (out of structure, or flagged), its activations disappear from its row and its initiative portrait, it no longer counts as still to act (header, Next round's question), it doesn't hold up the round's end, and a right-click on its portrait doesn't start a turn. LANCER's own count is left alone.
 - Smoke test, 43 steps: Undo both ways (and only once), Next and Prev ask, End asks and No keeps the encounter.
 
 ## 0.8.3

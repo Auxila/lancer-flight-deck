@@ -75,7 +75,7 @@ Synthesized sound follows the same timeline: data chatter, a thunk on the cut, a
 | Stress lost | Stress track flashes, the panel browns out; with cracks, steam blows out of them | 2.5 s of Geiger clicks; a soft hiss if the glass is cracked |
 | Structure lost | The glass fractures (see Battle damage), the panel kicks | Low impact thud and a crackle of breaking glass |
 | Lock On, Exposed, Stunned, Shredded | Tiles light and flash | Two-tone caution chime |
-| Reactor meltdown (`meltdown_timer` or the Reactor Meltdown status) | Tile shows `T-n`. In combat the countdown ticks down at the end of the mech's turn; at T-0 the panel flashes REACTOR CRITICAL and a chat card tells the table | One klaxon cycle, again at T-0 |
+| Reactor meltdown (`meltdown_timer` or the Reactor Meltdown status) | Tile shows `T-n`. In combat the countdown ticks down at the end of the mech's turn (not on a step back: LANCER's previous turn or round, the NPC Deck's Undo and Prev); at T-0 the panel flashes REACTOR CRITICAL and a chat card tells the table | One klaxon cycle, again at T-0 |
 | Jammed | Static and scanlines over the comms strip | — |
 | Shut Down / Boot Up | Instruments drop to emergency power / the cold boot | Data chatter, then the ENGAGED chime |
 | Core Power spent | CORE ONLINE banner | Rising sweep |
@@ -293,7 +293,9 @@ round (out of combat, those still standing); the **?** beside it lists every cli
     that round starts over; it asks first, and rests in round 1.
   - **Undo:** while someone is acting, takes back their activation (LANCER's previous turn: they
     get it back and nobody acts). Right after a turn ends, gives that unit the activation back,
-    so it returns to To act without starting a turn. Once per turn; its hover says whose.
+    so it returns to To act without starting a turn. Once per turn (an Elite can't get back an
+    activation it never spent); its hover says whose. If that turn's end ticked a meltdown
+    countdown, Undo puts the tick back.
   - **Next round:** any time. With anyone still to act it asks first and names them.
   - **End:** ends the encounter through Foundry's own End Encounter, which asks first.
 - **Move and resize it like the Flight Deck:** drag the header to float it anywhere, drop it
@@ -308,7 +310,9 @@ round (out of combat, those still standing); the **?** beside it lists every cli
   the map (the batch bar acts on those), and a
   crosshair with a marker in each player's colour for **every player targeting it**.
   Hovering a row puts the same "look here" marker on its token as hovering its portrait.
-  Whoever's turn it is glows; NPCs that have already acted this round dim. A row flashes
+  Whoever's turn it is glows; NPCs that have already acted this round dim. A destroyed NPC has no
+  turns left: its activations disappear from its row and its portrait, it isn't counted as still to
+  act, and it doesn't hold up the round's end, even before anyone marks it defeated. A row flashes
   red when its NPC takes damage, and kicks when it loses structure.
 - **One row opens at a time** (selecting an NPC's token opens its row), whoever's turn it is
   unless you open another, with what the NPC does first:

@@ -18,15 +18,43 @@ import { NpcDeck } from "./npc/NpcDeck.js";
 import { registerMeltdownClock } from "./core/MeltdownClock.js";
 import { removeFlightDeckData, runCleanup, scanWorld } from "./core/Cleanup.js";
 
+/** Parts that failed to start this session, to tell the GM once the game is ready. */
+const broken = [];
+/** After the ready notice, a late failure (a part's promise) is told on its own. */
+let announced = false;
+
+/**
+ * Start one part. If it throws (or its promise rejects), the console says which, and every other part
+ * still starts: a failing NPC Deck never takes the cockpit with it, and the other way round.
+ */
+function tellGM(parts) {
+  const names = [...new Set(parts)].map(p => game.i18n.localize(`LFD.Error.Part.${p}`)).join(", ");
+  ui.notifications.error(game.i18n.format("LFD.Error.Startup", { parts: names }), { permanent: true });
+}
+
+function start(part, fn) {
+  const fail = err => {
+    broken.push(part);
+    console.error(`Flight Deck | ${part} failed to start`, err);
+    if (announced && game.user?.isGM) tellGM([part]);
+  };
+  try {
+    const result = fn();
+    if (result instanceof Promise) result.catch(fail);
+  } catch (err) {
+    fail(err);
+  }
+}
+
 Hooks.once("init", () => {
   if (game.system.id !== "lancer") return;
-  FlightDeckManager.instance.init();
-  registerConditionQuery();
-  registerAutoDamage();
-  registerMovementTracker();
-  registerMeltdownClock();
-  TokenEffects.instance.init();
-  NpcDeck.init();
+  start("panel", () => FlightDeckManager.instance.init());
+  start("lockOn", registerConditionQuery);
+  start("autoDamage", registerAutoDamage);
+  start("movement", registerMovementTracker);
+  start("meltdown", registerMeltdownClock);
+  start("tokenEffects", () => TokenEffects.instance.init());
+  start("npcDeck", () => NpcDeck.init());
   const module = game.modules.get(MODULE_ID);
   module.api = {
     manager: FlightDeckManager.instance,
@@ -46,6 +74,9 @@ Hooks.once("ready", () => {
     console.warn(`Flight Deck | Requires the LANCER system; "${game.system.id}" is active, so the panel stays off.`);
     return;
   }
-  FlightDeckManager.instance.ready();
-  NpcDeck.ready();
+  start("panel", () => FlightDeckManager.instance.ready());
+  start("npcDeck", () => NpcDeck.ready());
+  // Say so once, to GMs: a part that's off shouldn't look like a bug in the rest
+  if (broken.length && game.user.isGM) tellGM(broken);
+  announced = true;
 });

@@ -6,8 +6,9 @@ import { DeckFrame } from "../ui/DeckFrame.js";
 import { HoverCards } from "../ui/HoverCards.js";
 import { LookHere } from "./LookHere.js";
 import { conditionCard } from "../core/ConditionInfo.js";
+import { untickMeltdown } from "../core/MeltdownClock.js";
 import { keyHints } from "../ui/keyHints.js";
-import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, rosterSections, roundComplete, stillToAct, turnCommands, undoTarget, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
+import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, outOfFight, rosterSections, roundComplete, stillToAct, turnCommands, undoTarget, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
 import { conditionLook } from "../ui/components/MasterCautionGrid.js";
 import { CHECKS } from "../ui/components/HullReadout.js";
 
@@ -601,6 +602,10 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
       const combatant = combat?.combatants.get(unit?.dataset.combatant);
       if (!combatant) return;
       if (combat.combatant?.id === combatant.id) return;
+      if (outOfFight(combatant)) {
+        ui.notifications.info(game.i18n.format("LFD.Npc.Init.OutOfFight", { name: combatant.name }));
+        return;
+      }
       if ((combatant.activations?.value ?? 0) <= 0) {
         ui.notifications.info(game.i18n.format("LFD.Npc.Init.NoActivations", { name: combatant.name }));
         return;
@@ -917,7 +922,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
   /** The bottom strip: Previous round, Undo, Next round, End, each with its hover (and why when off). */
   static #controlsView(combat) {
     const i18n = game.i18n;
-    const undo = undoTarget(combat);
+    const undo = undoTarget(combat, { undone: NpcDeck.#undone });
     const left = stillToAct(combat);
     const next = combat.round + 1;
     return {
@@ -982,13 +987,22 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /** Take back the turn in progress (LANCER's previous turn), or give back the activation that just ended. */
+  /** The last Undo made here: once per turn (see undoTarget). */
+  static #undone = null;
+
   static async #onUndoTurn(event, target) {
     if (target.getAttribute("aria-disabled") === "true") return;
     const combat = deckCombat();
-    const undo = undoTarget(combat);
+    const undo = undoTarget(combat, { undone: NpcDeck.#undone });
     if (!undo) return;
-    if (undo.kind === "acting") await combat.previousTurn();
-    else await combat.combatants.get(undo.id)?.modifyCurrentActivations(1);
+    const combatant = combat.combatants.get(undo.id);
+    if (undo.kind === "acting") await combat.previousTurn(); // a backward step: the meltdown countdown doesn't tick
+    else {
+      await combatant?.modifyCurrentActivations(1);
+      // That turn's end ticked a meltdown countdown: it comes back, or the turn taken again would tick it twice
+      await untickMeltdown(combat, undo.id);
+    }
+    NpcDeck.#undone = { combat: combat.id, round: combat.round, combatantId: undo.id, value: Number(combatant?.activations?.value) || 0 };
   }
 
   /** Foundry's own end of the encounter: it asks first. */

@@ -232,6 +232,9 @@
       "Now": "On it now"
     },
     "Move": {
+      "Hint": "Drag to move. Drop at a screen edge to dock.",
+      "Dock": "Dock the panel",
+      "DockHere": "Dock here",
       "Over": "{name} moved {n} more spaces than it had left this turn.",
       "OverOne": "{name} moved 1 more space than it had left this turn."
     },
@@ -426,7 +429,17 @@
       "Overcharge": "Flight Deck: the Overcharge flow failed. See the console (F12).",
       "Stabilize": "Flight Deck: the Stabilize flow failed. See the console (F12).",
       "Core": "Flight Deck: the Core Power flow failed. See the console (F12).",
-      "Action": "Flight Deck: that action failed. See the console (F12)."
+      "Action": "Flight Deck: that action failed. See the console (F12).",
+      "Startup": "Flight Deck: these parts failed to start and won't work this session: {parts}. The console (F12) says why.",
+      "Part": {
+        "panel": "the cockpit panel",
+        "lockOn": "Lock On requests",
+        "autoDamage": "damage after a hit",
+        "movement": "movement tracking",
+        "meltdown": "the meltdown countdown",
+        "tokenEffects": "token effects",
+        "npcDeck": "the NPC Deck"
+      }
     },
     "Resize": {
       "Label": "Panel size",
@@ -944,6 +957,7 @@
         "Done": "{n} done",
         "DoneLabel": "Done",
         "NoActivations": "{name} has no activations left this round.",
+        "OutOfFight": "{name} is out of the fight: no turns to take.",
         "State": {
           "acting": "acting now",
           "ready": "still to act",

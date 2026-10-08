@@ -134,6 +134,27 @@ test("Undo takes back the turn in progress, or gives back the activation that ju
   assert.deepEqual(undoTarget(combat([unit("e", 1, 2)], { previous: { round: 2, turn: 0, combatantId: "e" } }))?.kind, "ended", "an Elite with one of two left");
 });
 
+test("Undo can't give an Elite back an activation it never spent", async () => {
+  const { undoTarget } = await import("../src/npc/NpcRoster.js");
+  const elite = { id: "e", name: "Elite", activations: { value: 0, max: 2 } };
+  const combat = { id: "fight", started: true, round: 3, combatant: undefined, previous: { round: 3, turn: 0, combatantId: "e" }, combatants: { get: id => (id === "e" ? elite : null) } };
+  // Its second turn just ended: Undo gives that one back
+  assert.equal(undoTarget(combat)?.kind, "ended");
+  elite.activations.value = 1;
+  const undone = { combat: "fight", round: 3, combatantId: "e", value: 1 };
+  assert.equal(undoTarget(combat, { undone }), null, "not a second time");
+  // It acts again and ends that turn: that one can be undone
+  elite.activations.value = 0;
+  assert.equal(undoTarget(combat, { undone })?.kind, "ended");
+  // Undo while acting (LANCER's previous turn) leaves it with one: no "ended" Undo on top of it
+  elite.activations.value = 1;
+  assert.equal(undoTarget(combat, { undone: { combat: "fight", round: 3, combatantId: "e", value: 1 } }), null);
+  // Another unit's record, or last round's, doesn't block this one
+  elite.activations.value = 0;
+  assert.equal(undoTarget(combat, { undone: { combat: "fight", round: 3, combatantId: "other", value: 1 } })?.kind, "ended");
+  assert.equal(undoTarget(combat, { undone: { combat: "fight", round: 2, combatantId: "e", value: 1 } })?.kind, "ended");
+});
+
 test("still to act: anyone with an activation left, or acting; never the defeated", async () => {
   const { stillToAct } = await import("../src/npc/NpcRoster.js");
   const c = (id, value, isDefeated = false) => ({ id, activations: { value }, isDefeated });
@@ -141,4 +162,21 @@ test("still to act: anyone with an activation left, or acting; never the defeate
   const list = [c("a", 1), acting, c("x", 0), c("d", 1, true)];
   assert.deepEqual(stillToAct({ started: true, combatant: acting, combatants: list }).map(u => u.id), ["a", "b"]);
   assert.deepEqual(stillToAct({ started: false, combatants: list }), []);
+});
+
+test("a destroyed NPC has no turns: it isn't still to act and doesn't hold up the round, defeated or not", async () => {
+  const { outOfFight, roundComplete, stillToAct } = await import("../src/npc/NpcRoster.js");
+  const npc = (structure, extra = {}) => ({ type: "npc", system: { structure: { value: structure, max: 2 }, ...extra } });
+  const wreck = { id: "w", activations: { value: 1, max: 1 }, isDefeated: false, actor: npc(0) };
+  const flagged = { id: "f", activations: { value: 2, max: 2 }, isDefeated: false, actor: npc(2, { destroyed: true }) };
+  const done = { id: "d", activations: { value: 0, max: 1 }, isDefeated: false, actor: npc(2) };
+  const mech = { id: "m", activations: { value: 1, max: 1 }, isDefeated: false, actor: { type: "mech", system: { structure: { value: 0, max: 4 } } } };
+  assert.equal(outOfFight(wreck), true, "out of structure");
+  assert.equal(outOfFight(flagged), true, "flagged destroyed");
+  assert.equal(outOfFight(done), false);
+  assert.equal(outOfFight(mech), false, "a mech isn't an NPC: its pilot may still act");
+  const combat = list => ({ started: true, combatant: undefined, combatants: list });
+  assert.deepEqual(stillToAct(combat([wreck, flagged, done])), []);
+  assert.equal(roundComplete(combat([wreck, flagged, done])), true);
+  assert.equal(roundComplete(combat([wreck, done, mech])), false, "the mech still has a turn");
 });

@@ -237,10 +237,31 @@ function warn(key) {
 
 const REACTIONS_FLAG = "usedReactions";
 
-/** The started combat this actor is fighting in, if any. */
-function activeCombatOf(actor) {
-  return game.combats.find(c => c.started && c.combatants.some(cb => cb.actor?.uuid === actor.uuid || cb.actorId === actor.id)) ?? null;
+/**
+ * The started combat this actor is fighting in, if any. A mech can be in more than one (two encounters on a
+ * scene, or last session's left running elsewhere), so: the one where it's acting, else the active encounter
+ * on its scene, else the one this client's tracker shows, else the newest. Reactions taken this round and a
+ * Boost's allowance belong to that one, so they lapse with its rounds, not an old encounter's.
+ * @param {Actor} actor
+ * @param {{combats?: Combat[], viewed?: Combat|null, scene?: Scene|null}} [world]  for tests: defaults to the game's
+ * @returns {Combat|null}
+ */
+export function combatOf(actor, world = {}) {
+  if (!actor) return null;
+  const combats = world.combats ?? game.combats?.contents ?? [];
+  const mine = combats.filter(c => c.started && c.combatants.some(cb => isCombatantOf(cb, actor)));
+  if (mine.length <= 1) return mine[0] ?? null;
+  const viewed = "viewed" in world ? world.viewed : (game.combat ?? null);
+  const scene = "scene" in world ? world.scene : (actor.token?.parent ?? actor.getActiveTokens?.(false, true)?.[0]?.parent ?? canvas?.scene ?? null);
+  return (
+    mine.find(c => isCombatantOf(c.combatant, actor)) ??
+    mine.find(c => c.active && (!c.scene || c.scene === scene)) ??
+    mine.find(c => c === viewed) ??
+    mine.at(-1)
+  );
 }
+
+const activeCombatOf = actor => combatOf(actor);
 
 /**
  * HUD entry keys of the reactions this actor already took this round. LANCER's tracker only
