@@ -99,6 +99,7 @@ test("the open row's turn buttons: Activate takes its turn, End activation finis
   assert.deepEqual(why(turnCommands(row({ canAct: false, activationsLeft: 0 }), { started: true })), [false, "spent", false, "notActing"]);
   assert.deepEqual(why(turnCommands(row({ canAct: false, destroyed: true }), { started: true })), [false, "destroyed", false, "notActing"]);
   assert.deepEqual(turnCommands(row({ inCombat: false, canAct: false, combatantId: null }), { started: true }), { add: true }, "outside the combat: Add to combat instead");
+  assert.equal(turnCommands(row({ inCombat: false, canAct: false, combatantId: null, destroyed: true }), { started: true }), null, "a destroyed NPC outside isn't offered back in");
 });
 
 test("the round is complete once nobody is acting and nobody standing has an activation left", async () => {

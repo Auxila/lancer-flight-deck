@@ -564,7 +564,8 @@ await step(g, "NPC Deck: Add to combat from a row and from the batch bar; a clic
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const combat = game.combats.get(turn.combat);
   const deck = () => document.getElementById("lancer-flight-deck-npc");
-  const outside = () => canvas.tokens.placeables.filter(t => t.actor?.type === "npc" && t.visible && !t.document.hidden && !combat.getCombatantsByToken(t.document).length);
+  // Standing NPCs only: a destroyed one isn't offered back into the fight
+  const outside = () => canvas.tokens.placeables.filter(t => t.actor?.type === "npc" && t.visible && !t.document.hidden && !combat.getCombatantsByToken(t.document).length && !t.actor.system?.destroyed && (t.actor.system?.structure?.value ?? 1) > 0);
   const one = outside()[0];
   if (!one) return { skip: "every NPC on the scene is already in the combat" };
   one.control({ releaseOthers: true });

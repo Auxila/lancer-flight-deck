@@ -8,7 +8,7 @@ import { LookHere } from "./LookHere.js";
 import { conditionCard } from "../core/ConditionInfo.js";
 import { untickMeltdown } from "../core/MeltdownClock.js";
 import { keyHints } from "../ui/keyHints.js";
-import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, outOfFight, rosterSections, roundComplete, stillToAct, turnCommands, undoTarget, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
+import { QUICK_CONDITIONS, deckCombat, duplicateNumbers, featureTip, npcDestroyed, outOfFight, rosterSections, roundComplete, stillToAct, turnCommands, undoTarget, isGenericArt, isNpc, isVideoArt, readChecks, readFeatures, readInitiative, readRow, readStats, rosterTokens, viewedScene } from "./NpcRoster.js";
 import { conditionLook } from "../ui/components/MasterCautionGrid.js";
 import { CHECKS } from "../ui/components/HullReadout.js";
 
@@ -730,7 +730,8 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     const names = list => list.map(t => (dups.has(t.id) ? `${t.name} ${dups.get(t.id)}` : t.name)).join(", ");
     // In a started combat: the selected NPCs that aren't in it yet, to add in one go
     const combat = deckCombat();
-    const outside = combat ? picked.filter(t => !combat.getCombatantsByToken(t.document).length) : [];
+    // ...standing ones: a destroyed NPC isn't offered back into the fight
+    const outside = combat ? picked.filter(t => !combat.getCombatantsByToken(t.document).length && !npcDestroyed(t.actor)) : [];
     return {
       count: n,
       names: names(picked),
@@ -887,7 +888,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
    * stay on screen when off (aria-disabled, so their hover text still explains) and clicks on them do nothing.
    */
   static #turnView(row, combat) {
-    const acting = combat?.started && combat.combatant ? { id: combat.combatant.id, name: combat.combatant.name } : null;
+    const acting = combat?.started && combat.combatant ? { id: combat.combatant.id, name: NpcDeck.#unitName(combat.combatant) } : null;
     const cmds = turnCommands(row, { started: !!combat?.started, acting });
     if (!cmds) return null;
     const i18n = game.i18n;
@@ -905,7 +906,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     const combat = deckCombat();
     if (!combat) return;
     const data = docs
-      .filter(d => d && !combat.getCombatantsByToken(d).length)
+      .filter(d => d && !combat.getCombatantsByToken(d).length && !npcDestroyed(d.actor))
       .map(d => ({ tokenId: d.id, sceneId: d.parent.id, actorId: d.actorId, hidden: d.hidden }));
     if (data.length) await combat.createEmbeddedDocuments("Combatant", data);
   }
@@ -930,7 +931,7 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
         ? { on: true, tip: i18n.format("LFD.Npc.Ctrl.PrevTip", { n: combat.round - 1 }) }
         : { on: false, tip: i18n.localize("LFD.Npc.Ctrl.PrevFirst") },
       undo: undo
-        ? { on: true, tip: i18n.format(undo.kind === "acting" ? "LFD.Npc.Ctrl.UndoActing" : "LFD.Npc.Ctrl.UndoEnded", { name: undo.name }) }
+        ? { on: true, tip: i18n.format(undo.kind === "acting" ? "LFD.Npc.Ctrl.UndoActing" : "LFD.Npc.Ctrl.UndoEnded", { name: NpcDeck.#unitName(combat.combatants.get(undo.id)) ?? undo.name }) }
         : { on: false, tip: i18n.localize("LFD.Npc.Ctrl.UndoNone") },
       next: {
         on: true,
@@ -941,8 +942,18 @@ export class NpcDeck extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /** A short roll call for a confirmation: "Kitbash, Virtue, Squad 3 and 2 more". */
+  /**
+   * A combatant's name as the deck shows it: twins by their numbers ("Conscript 1"), the same as on their rows
+   * and portraits, so a hover or a question never leaves the GM guessing which one.
+   */
+  static #unitName(combatant) {
+    if (!combatant) return null;
+    const n = combatant.tokenId ? duplicateNumbers(viewedScene()?.tokens.contents ?? []).get(combatant.tokenId) : null;
+    return n ? `${combatant.name} ${n}` : combatant.name;
+  }
+
   static #names(list) {
-    const shown = list.slice(0, 3).map(c => c.name);
+    const shown = list.slice(0, 3).map(c => NpcDeck.#unitName(c));
     const rest = list.length - shown.length;
     const names = shown.join(", ");
     return rest > 0 ? game.i18n.format("LFD.Npc.Ctrl.NamesMore", { names, n: rest }) : names;

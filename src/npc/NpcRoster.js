@@ -188,7 +188,8 @@ export function readRow(token, { combat, expanded, dups = null }) {
  */
 export function turnCommands(row, { started, acting = null }) {
   if (!started) return null;
-  if (!row.inCombat) return { add: true };
+  // A destroyed NPC outside the fight isn't offered back in (Lancer QoL may have just taken the wreck out)
+  if (!row.inCombat) return row.destroyed ? null : { add: true };
   let activate;
   if (row.isTurn) activate = { on: false, why: "acting" };
   else if (row.destroyed) activate = { on: false, why: "destroyed" };

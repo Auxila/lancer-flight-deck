@@ -7,6 +7,8 @@
 - **Undo is once per turn, Elites included:** after an Elite ended its last turn, Undo could be pressed twice, handing back an activation it never spent. Now it can't undo the same turn twice; once the unit takes another turn, that one can be undone.
 - **The meltdown countdown doesn't tick on a step back:** LANCER's previous turn and previous round (the NPC Deck's Undo and Prev) no longer count as a turn ending. And when Undo takes back a turn that has already ended, a tick that turn's end made is put back, so taking the turn again doesn't tick it twice.
 - **Reactions and Boost follow the fight you're in:** with an earlier encounter still running (last session's, left started on another scene, with the same mechs in it), a reaction taken in the new fight was filed against the old one's round, so it stayed "used" for the rest of the new fight; a Boost's allowance had the same mix-up off your own turn. Both now go by the encounter the mech is acting in, else the active one on its scene, else the one the tracker shows.
+- **A destroyed NPC isn't offered back into the fight:** once Lancer QoL takes a wreck out of the combat (its own setting), the deck no longer shows it **Add to combat**, on its row or through the batch bar.
+- **Twins by number everywhere on the deck:** Undo's and Activate's hover text and Next round's question name a unit the way its row and portrait do ("Undo Conscript 1's activation", "Gilt, Conscript 1, Conscript 2 still to act"), not just "Conscript".
 - **One part failing no longer stops the rest:** each part (the cockpit, the NPC Deck, token effects, Lock On requests, movement, auto-damage, the meltdown countdown) starts on its own. If one fails, the others still run, and GMs get one notice naming what's off.
 
 **Tests**
