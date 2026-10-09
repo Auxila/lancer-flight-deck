@@ -195,6 +195,33 @@ export function nextOverchargeCost(sequence, level) {
   return { rungs, index, cost: rungs[index] };
 }
 
+/**
+ * The attack bonus most NPC weapons and tech attacks carry at Tier 1, 2 and 3. Of the core NPCs' attacks about
+ * two in three follow it; the rest hit harder (+2 / +4 / +6).
+ */
+export const NPC_TIER_ATTACK = [1, 2, 3];
+
+/**
+ * The chance an attack misses: 1d20 + the attack bonus, plus the highest of the net Accuracy d6s (or minus the
+ * highest of the net Difficulty d6s), hits on a total at or above the defense (Evasion; E-Defense for a tech
+ * attack). Invisible's flat 50% miss comes first.
+ * @param {number} defense
+ * @param {number} bonus  The attack bonus
+ * @param {{accuracy?: number, invisible?: boolean}} [mods]  accuracy: net Accuracy, negative for Difficulty
+ */
+export function missChance(defense, bonus, { accuracy = 0, invisible = false } = {}) {
+  const d20AtLeast = need => Math.min(1, Math.max(0, (21 - need) / 20));
+  const dice = Math.abs(Math.trunc(accuracy));
+  let hit = 0;
+  if (!dice) hit = d20AtLeast(defense - bonus);
+  else {
+    // The highest of n d6 is m with chance (m/6)^n - ((m-1)/6)^n
+    const sign = Math.sign(accuracy);
+    for (let m = 1; m <= 6; m++) hit += ((m / 6) ** dice - ((m - 1) / 6) ** dice) * d20AtLeast(defense - bonus - sign * m);
+  }
+  return 1 - (invisible ? hit / 2 : hit);
+}
+
 /** Format a probability for a gauge label: "<0.1%", "7.4%", "42.1%", "100%". */
 export function formatPct(p) {
   if (!(p > 0)) return "0%";

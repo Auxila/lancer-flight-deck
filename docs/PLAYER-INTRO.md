@@ -9,7 +9,7 @@ Flight Deck is a cockpit panel for your mech in Foundry. It docks at the edge of
 - Drag the header to move it, the bottom corner to resize it. It follows the mech token you last selected.
 
 ## Reading it
-- **Hull:** HP, armor, burn and your stats. Hover any stat for what it does and where the number comes from.
+- **Hull:** HP, armor, burn and your stats. Hover any stat for what it does and where the number comes from; Evasion and E-Defense also show how often a typical NPC attack misses you.
 - **Reactor heat:** your heat against the Danger Zone, and the odds the next Overcharge takes you past your cap.
 - **Integrity:** structure and stress, the next check's dice, and your exact chance of losing the mech.
 - **Warning lights:** your conditions at a glance.

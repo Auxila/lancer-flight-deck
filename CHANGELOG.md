@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Evasion and E-Defense say how often they turn an attack away.** Their hover cards gain a small table: the chance a typical NPC attack misses, at Tier 1, 2 and 3 (the +1, +2 and +3 most NPC weapons and tech attacks carry; some hit harder). Evasion's also shows soft and hard cover against ranged attacks. A **Now** row appears when something on the mech changes the odds: Prone and Lock On (+1 Accuracy), Invisible (half of all attacks miss outright), Stunned or Shut Down (Evasion capped at 5), Hidden (can't be targeted) and, for E-Defense, Shut Down (immune to tech attacks). Exact odds, not an estimate of the dice; each point of the stat is another 5%. It goes by tier, never by the NPCs on the map, so it gives away nothing a Scan would.
+- E-Defense's card now lists Prone, Invisible and Hidden among the conditions that change it: they affect tech attacks too.
+- Unit tests, 103: the miss chance against brute force for every defense, bonus and up to three Accuracy or Difficulty dice; the cards' rows and the now row. Smoke test: Evasion and E-Defense carry the table.
+
 ## 0.8.7
 
 - **A gear in the panel header** opens Foundry's settings straight on Flight Deck's tab: every setting a player has (size, opacity, sound, motion, battle damage, the boot sequence and the rest), each with its explanation. Before, they were three clicks and a scroll away. It sits with the header's other buttons, beside mute, in every cockpit theme.

@@ -230,7 +230,26 @@
       },
       "MoveLeft": "{n} of {allowance} spaces of its standard move left this turn.",
       "MoveLeftBoost": "{n} of {allowance} spaces left this turn, Boost included.",
-      "Now": "On it now"
+      "Now": "On it now",
+      "Odds": {
+        "Title": "Avoids typical NPC attacks",
+        "Tier": "Tier {n}",
+        "open": "In the open",
+        "tech": "Tech attacks",
+        "soft": "Soft cover",
+        "hard": "Hard cover",
+        "now": "Now",
+        "blocked": {
+          "hidden": "Can't be targeted while Hidden",
+          "shutdown": "Immune to tech attacks while Shut Down"
+        },
+        "Note": {
+          "evasion": "Typical NPC attacks are {bonuses} by tier; some hit harder. Cover only counts against ranged attacks.",
+          "edef": "Typical NPC tech attacks are {bonuses} by tier; some hit harder."
+        },
+        "PerPoint": "Each point of {stat} adds 5%.",
+        "Aria": "Avoids typical NPC attacks: {odds}."
+      }
     },
     "Move": {
       "Hint": "Drag to move. Drop at a screen edge to dock.",

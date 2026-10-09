@@ -792,16 +792,20 @@ await step(p, "keyboard: a HUD menu opened from its shortcut takes focus; Escape
   return { ok: inMenu && back, detail: { inMenu, back } };
 });
 
-await step(p, "stat cards: every stat in the strip explains itself", async () => {
+await step(p, "stat cards: every stat in the strip explains itself; Evasion and E-Defense show their odds by tier", async () => {
   const stats = [...document.querySelectorAll("#lancer-flight-deck .lfd-stat")];
   const cards = stats.map(el => el.dataset.tooltipHtml ?? "");
   const withMakeUp = cards.filter(c => c.includes("lfd-tip-calc")).length;
   const described = stats.length === 6 && cards.every(c => c.includes("lfd-tip-stat")) && stats.every(el => el.getAttribute("aria-label") && el.tabIndex === 0);
+  // Only the two defences carry the table
+  const withOdds = stats.filter(el => el.dataset.tooltipHtml?.includes("lfd-tip-odds")).map(el => [...el.classList].find(c => c.startsWith("lfd-stat-"))?.slice(9));
   game.tooltip.activate(stats[0]);
   await new Promise(r => setTimeout(r, 300));
   const shown = !!document.querySelector("#tooltip .lfd-tip-stat");
+  const tiers = [...document.querySelectorAll("#tooltip .lfd-tip-odds tbody tr:first-child td")].map(td => td.textContent);
   game.tooltip.deactivate();
-  return { ok: described && shown, detail: { stats: stats.length, withMakeUp, shown } };
+  const odds = withOdds.join() === "evasion,edef" && tiers.length === 3 && tiers.every(s => /^\d+%$/.test(s));
+  return { ok: described && shown && odds, detail: { stats: stats.length, withMakeUp, shown, withOdds, tiers } };
 });
 
 await step(g, "NPC Deck: a right-click on the Hidden tile toggles Invisible", async () => {

@@ -45,7 +45,7 @@ Ten minutes in a copy of your world (or a test world) shows everything a cautiou
 | Section | Contents |
 |---|---|
 | Header | Manufacturer badge, mech and frame, pilot callsign, comms link status, your activation (lit while it's the mech's turn in any started encounter, whichever one your combat tracker shows) |
-| Hull | HP with overshield, armor, burn, Evasion / E-Def / Speed / Sensors / Save / Tech, and HULL / AGI / SYS / ENG check buttons. Hover (or Tab to) any stat for its card: what it does in play, how the number is made up (frame, the skill or Grit the rules add, and anything from gear and talents), the move left this turn on Speed, and any condition on the mech right now that changes it |
+| Hull | HP with overshield, armor, burn, Evasion / E-Def / Speed / Sensors / Save / Tech, and HULL / AGI / SYS / ENG check buttons. Hover (or Tab to) any stat for its card: what it does in play, how the number is made up (frame, the skill or Grit the rules add, and anything from gear and talents), the move left this turn on Speed, and any condition on the mech right now that changes it. Evasion and E-Defense also show how often a typical NPC attack misses at each tier (+1, +2, +3), in the open and behind cover, and what the conditions on the mech make of that now |
 | Reactor heat | One segment per point of heat, the Danger Zone boundary, the Overcharge ladder, and the odds that the next Overcharge pushes you over your Heat Cap |
 | Integrity | Structure and stress pips. Each track shows the next check's dice, the exact chance of every outcome, and the chance of losing the mech |
 | Master caution | 16 fixed annunciator tiles: warnings ▲, cautions ◆, advisories ●. Shape and border style repeat the colour's meaning |

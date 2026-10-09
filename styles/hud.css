@@ -1112,6 +1112,58 @@
   color: var(--lfd-caution);
 }
 
+/* Evasion / E-Defense: how often it turns away a typical NPC attack, tiers across */
+#tooltip.lfd-hud-tip .lfd-tip-odds {
+  width: calc(100% - 18px);
+  margin: 6px 9px 2px;
+  border: none;
+  border-collapse: collapse;
+  background: none;
+  font: 10px/1.35 var(--lfd-font-data);
+  font-variant-numeric: tabular-nums;
+}
+
+#tooltip.lfd-hud-tip .lfd-tip-odds caption {
+  padding: 0 0 3px;
+  text-align: left;
+  font: 700 8px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lfd-accent);
+}
+
+/* Foundry dresses tables (stripes, borders): none of it here */
+#tooltip.lfd-hud-tip .lfd-tip-odds :is(thead, tbody, tr, th, td) {
+  padding: 1px 0 1px 6px;
+  text-align: right;
+  font-weight: 400;
+  color: var(--lfd-ink);
+  background: none;
+  border: none;
+}
+
+#tooltip.lfd-hud-tip .lfd-tip-odds thead th {
+  font: 600 7.5px/1.2 var(--lfd-font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lfd-ink-dim);
+}
+
+#tooltip.lfd-hud-tip .lfd-tip-odds tbody th {
+  padding-left: 0;
+  text-align: left;
+  color: var(--lfd-ink-dim);
+}
+
+#tooltip.lfd-hud-tip .lfd-tip-odds tr.is-now :is(th, td) {
+  color: var(--lfd-caution);
+  border-top: 1px dashed color-mix(in srgb, var(--lfd-caution) 45%, transparent);
+}
+
+#tooltip.lfd-hud-tip .lfd-tip-odds tr.is-now td[colspan] {
+  text-align: left;
+}
+
 #tooltip.lfd-hud-tip .lfd-tip em {
   font: 700 8px/1.2 var(--lfd-font-display);
   font-style: normal;

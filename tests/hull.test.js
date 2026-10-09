@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { reliableValue } from "../src/core/AutoDamage.js";
-import { STATS, statBreakdown } from "../src/ui/components/HullReadout.js";
+import { STATS, defenseOdds, pct, statBreakdown } from "../src/ui/components/HullReadout.js";
 
 /* Reliable on a miss: read the way LANCER's damage flow reads it (setDamageTags) */
 
@@ -92,4 +92,41 @@ test("the MOVE light reads left over the turn's allowance: Speed, or more after 
   assert.equal(moveAllowance({ speed: 5, move: 4, boost: { key: "c1:1", value: 10 }, key: "c1:2" }), 5, "last round's Boost doesn't count");
   assert.equal(moveAllowance({ speed: 5, move: 7, key: "free" }), 7, "a hand-edited count never reads more than its allowance");
   assert.equal(moveAllowance({ speed: 5, move: 2, boost: { key: "free", value: "x" }, key: "free" }), 5, "a broken flag is ignored");
+});
+
+/* Evasion and E-Defense: how often they turn away a typical NPC attack */
+
+const kitbash = (flags = {}) => ({ stats: { evasion: 10, edef: 12, speed: 5, sensors: 10, save: 11, tech: 1 }, flags });
+const shown = odds => odds.map(pct);
+
+test("Evasion's card: tiers 1-3 in the open and behind cover, exact halves rounding up", () => {
+  const { rows, now, perPoint } = defenseOdds(kitbash(), stat("evasion"));
+  assert.deepEqual(rows.map(r => r.id), ["open", "soft", "hard"]);
+  assert.deepEqual(shown(rows[0].odds), ["40%", "35%", "30%"]);
+  assert.deepEqual(shown(rows[1].odds), ["58%", "53%", "48%"], "57.5%, 52.5% and 47.5% exactly");
+  assert.deepEqual(shown(rows[2].odds), ["62%", "57%", "52%"]);
+  assert.equal(now, null, "nothing on it changes them");
+  assert.equal(perPoint, true);
+});
+
+test("E-Defense's card: tech attacks, no cover rows (cover only counts against ranged attacks)", () => {
+  const { rows } = defenseOdds(kitbash(), stat("edef"));
+  assert.deepEqual(rows.map(r => r.id), ["tech"]);
+  assert.deepEqual(shown(rows[0].odds), ["50%", "45%", "40%"]);
+  for (const s of ["speed", "sensors", "save", "tech"]) assert.equal(defenseOdds(kitbash(), stat(s)), null, s);
+});
+
+test("the now row: Prone and Lock On add Accuracy, Invisible halves the hits, Stunned caps Evasion at 5", () => {
+  const evasion = flags => defenseOdds(kitbash(flags), stat("evasion")).now;
+  assert.deepEqual(shown(evasion({ prone: true }).odds), ["23%", "18%", "13%"], "+1 Accuracy: 22.5%, 17.5%, 12.5%");
+  assert.ok(evasion({ prone: true, lockon: true }).odds[0] < evasion({ prone: true }).odds[0], "two Accuracy dice beat one");
+  assert.deepEqual(shown(evasion({ invisible: true }).odds), ["70%", "68%", "65%"]);
+  assert.deepEqual(shown(evasion({ stunned: true }).odds), ["15%", "10%", "5%"], "Evasion 5: a +1 attack hits on 4 or more");
+  assert.deepEqual(evasion({ shutdown: true }), evasion({ stunned: true }), "Shut Down stuns");
+  assert.deepEqual(evasion({ hidden: true }), { blocked: "hidden" });
+  assert.equal(evasion({ exposed: true }), null, "Exposed changes damage, not the odds");
+  const edef = flags => defenseOdds(kitbash(flags), stat("edef")).now;
+  assert.deepEqual(edef({ shutdown: true }), { blocked: "shutdown" }, "immune to tech attacks");
+  assert.deepEqual(shown(edef({ prone: true }).odds), ["33%", "28%", "23%"], "Prone's Accuracy counts for tech attacks too");
+  assert.equal(edef({ stunned: true }), null, "Stunned caps Evasion, not E-Defense");
 });

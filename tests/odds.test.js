@@ -4,9 +4,11 @@ import {
   checkBands,
   diceDistribution,
   formatPct,
+  missChance,
   nextOverchargeCost,
   nextOverheatCheck,
   nextStructureCheck,
+  NPC_TIER_ATTACK,
   overchargeOdds,
 } from "../src/core/Odds.js";
 
@@ -131,4 +133,42 @@ test("alt stress: meltdowns hinge on ENGINEERING checks; the last point still en
   const early = nextOverheatCheck({ value: 4, max: 4 }, { rules: "alt" }); // 3 remain: a 1 can't melt down
   assert.ok(Math.abs(early.destroyOnFailedCheck - checkBands(early.dice).multi) < 1e-12);
   assert.equal(nextOverheatCheck({ value: 1, max: 4 }, { rules: "alt" }).state, "lethal");
+});
+
+/* Evasion and E-Defense: the chance an attack misses */
+
+/** Brute force: every d20 face and every Accuracy (or Difficulty) die. */
+function bruteMiss(defense, bonus, accuracy) {
+  const dice = Math.abs(accuracy);
+  let hits = 0;
+  let total = 0;
+  for (let d20 = 1; d20 <= 20; d20++) {
+    for (let i = 0; i < 6 ** dice; i++) {
+      let high = 0;
+      for (let k = 0, v = i; k < dice; k++, v = Math.floor(v / 6)) high = Math.max(high, (v % 6) + 1);
+      total++;
+      if (d20 + bonus + Math.sign(accuracy) * high >= defense) hits++;
+    }
+  }
+  return 1 - hits / total;
+}
+
+test("missChance matches brute force for every defense, bonus and up to 3 Accuracy or Difficulty", () => {
+  for (let defense = 0; defense <= 26; defense++) {
+    for (let bonus = 0; bonus <= 6; bonus++) {
+      for (let accuracy = -3; accuracy <= 3; accuracy++) {
+        const got = missChance(defense, bonus, { accuracy });
+        assert.ok(Math.abs(got - bruteMiss(defense, bonus, accuracy)) < 1e-12, `defense ${defense}, +${bonus}, accuracy ${accuracy}: ${got}`);
+      }
+    }
+  }
+});
+
+test("missChance: a hit needs the defense or more; Invisible's 50% comes first; the typical tiers are +1/+2/+3", () => {
+  assert.deepEqual(NPC_TIER_ATTACK, [1, 2, 3]);
+  assert.ok(Math.abs(missChance(10, 1) - 0.4) < 1e-12, "Evasion 10 against +1: 9 or less on the d20 misses");
+  assert.ok(Math.abs(missChance(10, 1, { invisible: true }) - 0.7) < 1e-12, "half of the 60% that would hit");
+  assert.equal(missChance(1, 0), 0, "nothing misses a defense the lowest roll reaches");
+  assert.equal(missChance(30, 3), 1, "nothing reaches it");
+  assert.equal(missChance(10, 1, { accuracy: 1.7 }), missChance(10, 1, { accuracy: 1 }), "whole dice only");
 });
