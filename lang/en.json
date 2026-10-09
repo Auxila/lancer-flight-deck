@@ -232,7 +232,10 @@
       "MoveLeftBoost": "{n} of {allowance} spaces left this turn, Boost included.",
       "Now": "On it now",
       "Odds": {
-        "Title": "Avoids typical NPC attacks",
+        "Title": {
+          "evasion": "Chance a typical NPC attack misses",
+          "edef": "Chance a typical NPC tech attack misses"
+        },
         "Tier": "Tier {n}",
         "open": "In the open",
         "tech": "Tech attacks",
@@ -248,7 +251,14 @@
           "edef": "Typical NPC tech attacks are {bonuses} by tier; some hit harder."
         },
         "PerPoint": "Each point of {stat} adds 5%.",
-        "Aria": "Avoids typical NPC attacks: {odds}."
+        "Example": {
+          "evasion": "Tier 1, in the open",
+          "edef": "Tier 1 tech attack",
+          "roll": "{attack}: hits on {need}+ on the d20 ({hit}), misses {miss}.",
+          "always": "{attack}: hits on any roll.",
+          "never": "{attack}: can't hit, whatever it rolls."
+        },
+        "Aria": "{title}: {odds}."
       }
     },
     "Move": {

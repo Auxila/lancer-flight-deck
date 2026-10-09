@@ -1123,13 +1123,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* What the numbers are, in plain words at the card's own size: misread as the chance to hit otherwise */
 #tooltip.lfd-hud-tip .lfd-tip-odds caption {
   padding: 0 0 3px;
   text-align: left;
-  font: 700 8px/1.2 var(--lfd-font-display);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--lfd-accent);
+  font: 600 11px/1.3 var(--lfd-font-body);
+  color: var(--lfd-ink);
 }
 
 /* Foundry dresses tables (stripes, borders): none of it here */
@@ -1162,6 +1161,13 @@
 
 #tooltip.lfd-hud-tip .lfd-tip-odds tr.is-now td[colspan] {
   text-align: left;
+}
+
+/* The worked example under it: a Tier 1 attack's roll, hit and miss */
+#tooltip.lfd-hud-tip .lfd-tip-odds-example {
+  font: 10px/1.35 var(--lfd-font-data);
+  font-variant-numeric: tabular-nums;
+  color: var(--lfd-ink);
 }
 
 #tooltip.lfd-hud-tip .lfd-tip em {

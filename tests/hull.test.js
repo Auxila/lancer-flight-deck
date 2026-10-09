@@ -107,12 +107,14 @@ test("Evasion's card: tiers 1-3 in the open and behind cover, exact halves round
   assert.deepEqual(shown(rows[2].odds), ["62%", "57%", "52%"]);
   assert.equal(now, null, "nothing on it changes them");
   assert.equal(perPoint, true);
+  assert.equal(defenseOdds(kitbash(), stat("evasion")).need, 9, "the worked example: a +1 attack needs 9+ on the d20 against Evasion 10");
 });
 
 test("E-Defense's card: tech attacks, no cover rows (cover only counts against ranged attacks)", () => {
   const { rows } = defenseOdds(kitbash(), stat("edef"));
   assert.deepEqual(rows.map(r => r.id), ["tech"]);
   assert.deepEqual(shown(rows[0].odds), ["50%", "45%", "40%"]);
+  assert.equal(defenseOdds(kitbash(), stat("edef")).need, 11);
   for (const s of ["speed", "sensors", "save", "tech"]) assert.equal(defenseOdds(kitbash(), stat(s)), null, s);
 });
 

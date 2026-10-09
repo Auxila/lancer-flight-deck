@@ -40,9 +40,9 @@ export function statBreakdown(t, stat) {
  * How often Evasion (or E-Defense, against tech attacks) turns away a typical NPC's attack at each tier (see
  * NPC_TIER_ATTACK): in the open, and for Evasion behind soft and hard cover (ranged attacks only). `now` is
  * what the conditions on the mech make of the open row: odds, a reason it can't be attacked at all, or null
- * when nothing on it changes them. `perPoint`: one more point turns away 5% more at every tier. Null for the
- * other stats.
- * @returns {{rows: {id: string, odds: number[]}[], now: {odds?: number[], blocked?: string}|null, perPoint: boolean}|null}
+ * when nothing on it changes them. `perPoint`: one more point turns away 5% more at every tier. `need`: what a
+ * Tier 1 attack in the open must roll on the d20, the card's worked example. Null for the other stats.
+ * @returns {{rows: {id: string, odds: number[]}[], now: {odds?: number[], blocked?: string}|null, perPoint: boolean, need: number}|null}
  */
 export function defenseOdds(t, stat) {
   const evasion = stat.id === "evasion";
@@ -64,7 +64,7 @@ export function defenseOdds(t, stat) {
     if (accuracy || invisible || stunned) now = { odds: tiers(stunned ? STUNNED_EVASION : defense, { accuracy, invisible }) };
   }
   const perPoint = NPC_TIER_ATTACK.every(bonus => Math.abs(missChance(defense + 1, bonus) - missChance(defense, bonus) - 0.05) < 1e-9);
-  return { rows, now, perPoint };
+  return { rows, now, perPoint, need: defense - NPC_TIER_ATTACK[0] };
 }
 
 /** HP, overshield, armor and the defensive stat strip. */
@@ -133,7 +133,7 @@ function statCard(t, stat, value) {
 }
 
 /** The odds as a table: tiers across, open ground (or tech attacks), cover and now down. */
-function oddsTable(stat, { rows, now, perPoint }) {
+function oddsTable(stat, { rows, now, perPoint, need }) {
   const i18n = game.i18n;
   const esc = s => foundry.utils.escapeHTML(String(s ?? ""));
   const label = key => esc(i18n.localize(`LFD.StatInfo.Odds.${key}`));
@@ -142,11 +142,20 @@ function oddsTable(stat, { rows, now, perPoint }) {
   const body = rows.map(row => `<tr><th scope="row">${label(row.id)}</th>${cells(row.odds)}</tr>`);
   if (now?.odds) body.push(`<tr class="is-now"><th scope="row">${label("now")}</th>${cells(now.odds)}</tr>`);
   else if (now?.blocked) body.push(`<tr class="is-now"><th scope="row">${label("now")}</th><td colspan="${NPC_TIER_ATTACK.length}">${label(`blocked.${now.blocked}`)}</td></tr>`);
+  // The worked example, in the dice players know: what a Tier 1 attack needs, and both sides of it
+  const miss = rows[0].odds[0];
+  const example = need <= 1 ? "always" : need > 20 ? "never" : "roll";
+  const anchor = i18n.format(`LFD.StatInfo.Odds.Example.${example}`, {
+    attack: i18n.localize(`LFD.StatInfo.Odds.Example.${stat.id}`),
+    need,
+    hit: pct(1 - miss),
+    miss: pct(miss),
+  });
   const notes = [i18n.format(`LFD.StatInfo.Odds.Note.${stat.id}`, { bonuses: NPC_TIER_ATTACK.map(b => `+${b}`).join(", ") })];
   if (perPoint) notes.push(i18n.format("LFD.StatInfo.Odds.PerPoint", { stat: i18n.localize(`LFD.StatInfo.${stat.id}.Name`) }));
   return (
-    `<table class="lfd-tip-odds"><caption>${label("Title")}</caption><thead><tr><td></td>${head}</tr></thead>` +
-    `<tbody>${body.join("")}</tbody></table><p class="lfd-tip-aside">${esc(notes.join(" "))}</p>`
+    `<table class="lfd-tip-odds"><caption>${label(`Title.${stat.id}`)}</caption><thead><tr><td></td>${head}</tr></thead>` +
+    `<tbody>${body.join("")}</tbody></table><p class="lfd-tip-odds-example">${esc(anchor)}</p><p class="lfd-tip-aside">${esc(notes.join(" "))}</p>`
   );
 }
 
@@ -156,7 +165,7 @@ function statAria(t, stat, value) {
   const text = new DOMParser().parseFromString(i18n.localize(`LFD.StatInfo.${stat.id}.Text`), "text/html").body.textContent;
   const odds = defenseOdds(t, stat);
   const avoids = odds
-    ? ` ${i18n.format("LFD.StatInfo.Odds.Aria", { odds: odds.rows[0].odds.map((p, i) => `${i18n.format("LFD.StatInfo.Odds.Tier", { n: i + 1 })} ${pct(p)}`).join(", ") })}`
+    ? ` ${i18n.format("LFD.StatInfo.Odds.Aria", { title: i18n.localize(`LFD.StatInfo.Odds.Title.${stat.id}`), odds: odds.rows[0].odds.map((p, i) => `${i18n.format("LFD.StatInfo.Odds.Tier", { n: i + 1 })} ${pct(p)}`).join(", ") })}`
     : "";
   return `${i18n.localize(`LFD.StatInfo.${stat.id}.Name`)} ${value}. ${text}${avoids}`;
 }
