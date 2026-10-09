@@ -1,6 +1,6 @@
 {
   "name": "lancer-flight-deck",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "private": true,
   "type": "module",
   "description": "Development metadata for the Flight Deck Foundry module. Foundry itself only reads module.json.",
