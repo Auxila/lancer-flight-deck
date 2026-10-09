@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.8.6
+
+**For players**
+- **A one-page intro** (`docs/PLAYER-INTRO.md`, in the package next to the GM brief): turning the panel on and off, reading it, acting from it, and what to do if it misbehaves.
 
 **From a sweep of how Flight Deck works alongside other modules** (an A/B run with Flight Deck on and off: no errors caused in any module)
 - **Jammed defers to Lancer QoL by default:** the world setting *Jammed effect* now defaults to QoL's own effect whenever QoL draws its condition effects; Flight Deck draws its Jammed only where QoL isn't. Choosing Flight Deck's still replaces QoL's where both would stack. Worlds that picked Flight Deck's keep it.

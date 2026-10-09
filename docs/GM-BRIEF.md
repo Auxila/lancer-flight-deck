@@ -79,6 +79,6 @@ Tested in a world running these modules, and by reading their code:
 ## A first session
 
 1. Try it first in a copy of the world. The README's *Before your first session* takes ten minutes.
-2. Let players opt in. Anyone unsure can leave it off; the panel is per player.
+2. Let players opt in. Anyone unsure can leave it off; the panel is per player. [PLAYER-INTRO.md](PLAYER-INTRO.md) is a one-page intro to hand them.
 3. If anything misbehaves at the table, the player hides the panel and keeps playing from the sheet. Nothing is lost.
 4. Afterwards, note anything that surprised you and pass it on: that list is what the next version fixes.

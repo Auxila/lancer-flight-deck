@@ -27,7 +27,7 @@ The panel is opt-in for each player: the first time a player logs in with a mech
 
 ## Before your first session
 
-For the GM deciding whether to allow it, **[docs/GM-BRIEF.md](docs/GM-BRIEF.md)** is one page: everything Flight Deck can change in a world, what it never does, and how to remove it.
+For the GM deciding whether to allow it, **[docs/GM-BRIEF.md](docs/GM-BRIEF.md)** is one page: everything Flight Deck can change in a world, what it never does, and how to remove it. For the players, **[docs/PLAYER-INTRO.md](docs/PLAYER-INTRO.md)** is one page on turning it on, reading it and acting from it.
 
 Ten minutes in a copy of your world (or a test world) shows everything a cautious GM wants to see:
 

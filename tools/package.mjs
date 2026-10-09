@@ -7,7 +7,7 @@ import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const INCLUDE = ["module.json", "README.md", "CHANGELOG.md", "LICENSE", "docs/GM-BRIEF.md", "lang", "src", "styles", "templates"];
+const INCLUDE = ["module.json", "README.md", "CHANGELOG.md", "LICENSE", "docs/GM-BRIEF.md", "docs/PLAYER-INTRO.md", "lang", "src", "styles", "templates"];
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
   let c = n;
