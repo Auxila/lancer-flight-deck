@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **A gear in the panel header** opens Foundry's settings straight on Flight Deck's tab: every setting a player has (size, opacity, sound, motion, battle damage, the boot sequence and the rest), each with its explanation. Before, they were three clicks and a scroll away. It sits with the header's other buttons, beside mute, in every cockpit theme.
+- Smoke test, 45 steps: the gear opens the settings on Flight Deck's tab.
+
 ## 0.8.6
 
 **For players**

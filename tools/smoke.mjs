@@ -334,6 +334,18 @@ await step(p, "hide button, then the toolbar toggle brings it back", async () =>
   return { ok: hidden && back, detail: { hidden, back } };
 });
 
+await step(p, "the gear opens Foundry's settings on Flight Deck's tab", async () => {
+  const gear = document.querySelector('#lancer-flight-deck [data-action="openSettings"]');
+  gear?.click();
+  const sheet = game.settings.sheet;
+  for (let i = 0; i < 40 && !(sheet.rendered && sheet.tabGroups.categories === "lancer-flight-deck"); i++) await new Promise(r => setTimeout(r, 100));
+  const tab = sheet.element?.querySelector('.tab[data-tab="lancer-flight-deck"]');
+  const shown = !!tab?.classList.contains("active");
+  const settings = tab?.querySelectorAll(".form-group").length ?? 0;
+  await sheet.close();
+  return { ok: !!gear && shown && settings > 0, detail: { gear: !!gear, shown, settings } };
+});
+
 await step(p, "Token Action HUD steps aside while the panel is open", async () => {
   if (!game.modules.get("token-action-hud-core")?.active) return { skip: "Token Action HUD not active" };
   const hiddenOpen = document.body.classList.contains("lfd-hide-tah");

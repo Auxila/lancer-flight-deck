@@ -166,6 +166,7 @@
       "NoPilot": "No pilot linked",
       "Pilot": "Pilot",
       "OpenSheet": "Open mech sheet",
+      "Settings": "Flight Deck settings: size, opacity, sound, motion and more",
       "Mute": "Mute cockpit audio",
       "Unmute": "Unmute cockpit audio",
       "Collapse": "Collapse (Alt+C)",

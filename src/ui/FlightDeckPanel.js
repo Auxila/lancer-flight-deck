@@ -1,4 +1,4 @@
-import { PANEL_ID, TEMPLATE_ROOT } from "../constants.js";
+import { MODULE_ID, PANEL_ID, TEMPLATE_ROOT } from "../constants.js";
 import { DamageLayer } from "./damage/DamageLayer.js";
 import { damageClock as clock } from "./damage/clock.js";
 import { bootStream } from "./boot/bootScript.js";
@@ -36,6 +36,7 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     window: { frame: false, positioned: false },
     actions: {
       toggleCollapse: FlightDeckPanel.#onToggleCollapse,
+      openSettings: FlightDeckPanel.#onOpenSettings,
       toggleMute: FlightDeckPanel.#onToggleMute,
       themeMenu: FlightDeckPanel.#onThemeMenu,
       hidePanel: FlightDeckPanel.#onHidePanel,
@@ -536,6 +537,13 @@ export class FlightDeckPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static #onToggleCollapse() {
     this.manager.toggleCollapsed();
+  }
+
+  /** Foundry's settings window, on Flight Deck's tab: everything a player can set, with its explanation */
+  static async #onOpenSettings() {
+    const sheet = game.settings.sheet;
+    await sheet.render({ force: true });
+    sheet.changeTab(MODULE_ID, "categories");
   }
 
   static #onToggleMute() {

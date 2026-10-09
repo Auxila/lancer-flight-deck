@@ -26,7 +26,7 @@ Flight Deck is a cockpit panel for your mech in Foundry. It docks at the edge of
 - The cockpit wears your frame's maker: GMS, IPS-N, SSC, HORUS or Harrison Armory. Click the badge at the top left to pick another; the choice is saved on your mech.
 - It takes damage with you. Lose structure and the panel cracks, breaches or corrupts in its maker's style, until you're repaired.
 - Short sounds play on events, for you alone. The speaker button mutes them; Foundry's **Interface** volume sets the level.
-- Too much going on? Configure Settings has reduce motion, still or no battle damage, and the boot sequence off.
+- The **gear** in the header opens your settings: size, opacity, sound, reduce motion, still or no battle damage, the boot sequence.
 
 ## If something goes wrong
 Hide the panel and keep playing from your sheet; nothing is lost. This is a trial build, so after the session, pass on anything that surprised you: that list is what the next version fixes.

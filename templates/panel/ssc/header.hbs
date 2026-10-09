@@ -59,6 +59,9 @@
         <i class="fa-solid fa-thumbtack"></i>
       </button>
       {{/if}}
+      <button type="button" class="lfd-icon-btn" data-action="openSettings" data-tooltip="LFD.Header.Settings" aria-label="{{localize 'LFD.Header.Settings'}}">
+        <i class="fa-solid fa-gear"></i>
+      </button>
       <button type="button" class="lfd-icon-btn" data-action="toggleMute"
               data-tooltip="{{#if header.muted}}LFD.Header.Unmute{{else}}LFD.Header.Mute{{/if}}"
               aria-label="{{#if header.muted}}{{localize 'LFD.Header.Unmute'}}{{else}}{{localize 'LFD.Header.Mute'}}{{/if}}"

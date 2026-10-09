@@ -454,7 +454,7 @@ Heat colours never change between themes.
 ## Controls and settings
 
 - **Alt+C** turns the panel on, then collapses and expands it. You can rebind it in Configure Controls.
-- **Panel header:** the speaker button mutes audio, the eye-slash button hides the panel completely, and the chevrons collapse it to a slim tab that still shows heat and structure.
+- **Panel header:** the gear opens Foundry's settings straight on Flight Deck's tab, the speaker button mutes audio, the eye-slash button hides the panel completely, and the chevrons collapse it to a slim tab that still shows heat and structure.
 - **Token Controls:** the **Flight Deck** toggle (gauge icon) turns the panel on and off for every player. It's the one-click way back after hiding it.
 - Client settings, which are per player: show panel, dock side, default theme and whether to show each mech's own, panel size, opacity, reduce motion, battle damage (animated, still or off), cold boot, audio, volume, and Danger Zone afterglow.
 - World settings: offer the panel to each player once when they first log in with a mech (opt-in; nobody is forced), whether players can Lock On tokens they don't own, when HUD menus spend actions, and whether meltdown countdowns tick at turn end (the active GM's client ticks them, when LANCER runs its own end-of-turn automation). **Remove Flight Deck data** (GM) is here too.
